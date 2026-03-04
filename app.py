@@ -618,7 +618,18 @@ def calculate():
         if dest_country == "US" and origin_country == "CN" and not fta_applied and cn_301 > 0:
             china_surcharge = cn_301
 
-        effective_duty_rate = base_rate + china_surcharge
+        # Section 232 (US steel/aluminum only — chapters 72, 73, 76)
+        section_232 = 0.0
+        chapter = int(str(hts_code).replace(".", "")[:2]) if hts_code and str(hts_code).replace(".", "")[:2].isdigit() else 0
+        if dest_country == "US" and not fta_applied and chapter in (72, 73, 76):
+            section_232 = 25.0
+
+        # Section 122 temporary surcharge (15%, effective Feb 20 2026, 150-day limit → ~July 20 2026)
+        section_122 = 0.0
+        if dest_country == "US" and not fta_applied:
+            section_122 = 15.0
+
+        effective_duty_rate = base_rate + china_surcharge + section_232 + section_122
         duty_amount = taxable_base * (effective_duty_rate / 100)
 
         # MPF (US only)
@@ -652,6 +663,8 @@ def calculate():
             "taxable_base_usd":    round(taxable_base, 2),
             "base_duty_rate":      round(base_rate, 2),
             "china_301_surcharge": round(china_surcharge, 2),
+            "section_232":         round(section_232, 2),
+            "section_122":         round(section_122, 2),
             "effective_duty_rate": round(effective_duty_rate, 2),
             "duty_amount":         round(duty_amount, 2),
             "mpf":                 round(mpf, 2),
