@@ -1,237 +1,975 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>XCLSV — Your Exclusive Assistant</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iDuties — Global Duty Assessment</title>
+<meta name="description" content="Instant global import duty calculator. Enter a product, origin country, and destination — get an accurate landed cost breakdown including tariffs, MPF, and Section 301 surcharges.">
+<meta name="keywords" content="import duty calculator, landed cost, HTS code, tariff calculator, customs duty, Section 301, global trade">
+<meta property="og:title" content="iDuties — Global Duty Assessment">
+<meta property="og:description" content="Instant import duty and landed cost calculator for global trade. Powered by USITC HTS data.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iduties.ai">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iDuties — Global Duty Assessment">
+<meta name="twitter:description" content="Instant import duty and landed cost calculator for global trade.">`
 <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #fafaf9;
-  --ink: #111;
-  --ink3: #888;
-  --ink4: #999;
-  --ink5: #bbb;
-  --border: #eee;
-  --card: #fff;
-  --serif: 'Instrument Serif', Georgia, serif;
-  --sans: 'DM Sans', -apple-system, sans-serif;
-  --gold: #d4af37;
+  --bg:        #f4f4f6;
+  --surface:   #ffffff;
+  --surface2:  #f4f4f6;
+  --border:    rgba(0,0,0,0.07);
+  --border2:   rgba(0,0,0,0.11);
+  --ink:       #111112;
+  --muted:     #6b7280;
+  --blue:      #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: rgba(37,99,235,0.08);
+  --green:     #15803d;
+  --green-bg:  rgba(21,128,61,0.07);
+  --green-dot: #22c55e;
+  --red:       #b91c1c;
+  --red-bg:    rgba(185,28,28,0.07);
+  --amber:     #92400e;
+  --amber-bg:  rgba(146,64,14,0.07);
+  --radius:    12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+  --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  --font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--sans); background: var(--bg); color: var(--ink); }
-::placeholder { color: var(--ink5); }
-input:focus::placeholder { color: transparent; }
-input:focus { border-color: var(--ink) !important; outline: none; }
-@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
-@keyframes slideFromLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-.slide-left { animation: slideFromLeft 0.7s ease-out forwards; opacity: 0; }
-.slide-left-d1 { animation: slideFromLeft 0.7s ease-out 0.3s forwards; opacity: 0; }
-.slide-left-d2 { animation: slideFromLeft 0.7s ease-out 0.6s forwards; opacity: 0; }
-.fade-in { animation: fadeInUp 0.8s ease-out forwards; }
-.fade-in-d2 { animation: fadeInUp 0.8s ease-out 0.2s forwards; opacity: 0; }
-.fade-in-d3 { animation: fadeInUp 0.8s ease-out 0.3s forwards; opacity: 0; }
-.plan-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
-.plan-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
-.reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s cubic-bezier(0.22,0.61,0.36,1), transform 0.7s cubic-bezier(0.22,0.61,0.36,1); }
-.reveal.visible { opacity: 1; transform: translateY(0); }
-@media (max-width: 768px) {
-  .nav-links { gap: 20px !important; }
-  .nav-btn-wl { display: none !important; }
-  .features-grid { grid-template-columns: 1fr !important; }
-  .hero-wrap { flex-direction: column !important; padding-top: 100px !important; }
-  .showcase { padding: 60px 20px 80px !important; }
-  .showcase-title { font-size: 32px !important; }
-  .persona-tabs { flex-direction: column !important; align-items: center !important; }
-  .float-cards { flex-direction: column !important; gap: 8px !important; bottom: -48px !important; }
-  .showcase-cta { margin-top: 88px !important; }
+body { font-family: var(--font); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── NAV ──────────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  height: 54px; display: flex; align-items: center; padding: 0 20px; gap: 0;
 }
-/* Nav */
-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
-nav.scrolled { background: rgba(250,250,249,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.06); }
-/* Chat Demo */
-.chat-demo { width: 100%; max-width: 380px; height: 520px; border-radius: 24px; background: #f8f8f8; border: 1px solid #e5e5e5; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
-.chat-header { padding: 16px 20px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-.chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1a1a2e, #16213e); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 14px; font-weight: 700; }
-.chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-.msg { max-width: 85%; padding: 10px 14px; font-size: 13px; line-height: 1.5; white-space: pre-line; animation: fadeSlideIn 0.3s ease-out; }
-.msg-user { align-self: flex-end; border-radius: 16px 16px 4px 16px; background: var(--ink); color: #fff; }
-.msg-bot { align-self: flex-start; border-radius: 16px 16px 16px 4px; background: var(--card); color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-.typing { align-self: flex-start; padding: 10px 16px; border-radius: 16px 16px 16px 4px; background: var(--card); box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; gap: 4px; animation: fadeSlideIn 0.3s ease-out; }
-.typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink5); }
-.typing-dot:nth-child(1) { animation: typingBounce 1.2s ease-in-out 0s infinite; }
-.typing-dot:nth-child(2) { animation: typingBounce 1.2s ease-in-out 0.15s infinite; }
-.typing-dot:nth-child(3) { animation: typingBounce 1.2s ease-in-out 0.3s infinite; }
-/* Showcase */
-.showcase { padding: 100px 40px 120px; max-width: 1280px; margin: 0 auto; }
-.showcase-title { font-family: var(--serif); font-size: 48px; font-weight: 400; line-height: 1.15; margin-bottom: 16px; }
-.showcase-title em { font-style: italic; color: var(--ink4); }
-.persona-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 48px; }
-.persona-tab { display: flex; align-items: center; gap: 12px; padding: 14px 28px 14px 16px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--card); cursor: pointer; transition: all 0.3s cubic-bezier(0.22,0.61,0.36,1); }
-.persona-tab:hover { border-color: #ccc; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
-.persona-tab.active { border-color: var(--ink); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-.browser-frame { background: var(--card); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06), 0 32px 80px rgba(0,0,0,0.06); overflow: hidden; }
-.browser-chrome { display: flex; align-items: center; gap: 8px; padding: 14px 18px; background: var(--bg); border-bottom: 1px solid var(--border); }
-.browser-dots { display: flex; gap: 6px; }
-.browser-dots span { width: 10px; height: 10px; border-radius: 50%; }
-.browser-dots span:nth-child(1) { background: #ff5f56; }
-.browser-dots span:nth-child(2) { background: #ffbd2e; }
-.browser-dots span:nth-child(3) { background: #27c93f; }
-.browser-url { flex: 1; margin-left: 12px; height: 30px; background: var(--card); border-radius: 6px; border: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; font-size: 12px; color: var(--ink4); }
-.browser-url .lock { margin-right: 6px; opacity: 0.4; }
-.browser-body { position: relative; overflow: hidden; aspect-ratio: 1440 / 900; }
-.browser-body img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; position: absolute; top: 0; left: 0; transition: opacity 0.6s cubic-bezier(0.22,0.61,0.36,1); }
-.browser-body img.hidden { opacity: 0; }
-.browser-body img.visible { opacity: 1; }
-.float-cards { position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%); display: flex; gap: 16px; z-index: 10; }
-.float-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); white-space: nowrap; transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1); }
-.float-card.swap-out { opacity: 0; transform: translateY(8px); }
-.fc-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink5); font-weight: 600; margin-bottom: 4px; }
-.fc-value { font-size: 15px; font-weight: 600; }
+.nav-brand { font-size: 1.05rem; font-weight: 700; color: var(--ink); letter-spacing: -0.03em; margin-right: 20px; flex-shrink: 0; }
+.nav-sep { width: 1px; height: 20px; background: var(--border2); margin-right: 12px; flex-shrink: 0; }
+.nav-links { display: flex; align-items: center; gap: 2px; flex: 1; }
+.nav-link { font-size: 0.78rem; font-weight: 500; color: var(--muted); padding: 5px 10px; border-radius: var(--radius-xs); border: 1px solid transparent; cursor: pointer; transition: all 0.12s; text-decoration: none; white-space: nowrap; }
+.nav-link:hover { color: var(--ink); background: var(--surface2); border-color: var(--border); }
+.nav-link.active { color: var(--ink); background: var(--surface2); border-color: var(--border2); }
+.nav-ticker { display: flex; align-items: center; margin-left: auto; border: 1px solid var(--border); border-radius: var(--radius-xs); background: var(--surface2); flex-shrink: 0; overflow: hidden; }
+.ticker-item { display: flex; align-items: center; gap: 5px; padding: 4px 10px; font-size: 0.72rem; font-weight: 500; border-right: 1px solid var(--border); white-space: nowrap; }
+.ticker-item:last-child { border-right: none; }
+.ticker-label { color: var(--muted); }
+.ticker-value { color: var(--ink); font-variant-numeric: tabular-nums; }
+.ticker-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green-dot); flex-shrink: 0; }
+.s301-active { color: #92400e; }
+
+/* ── DEMO BAR ─────────────────────────────────────────── */
+.demo-bar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 9px 18px; background: #fefce8; border: 1px solid rgba(202,138,4,0.22); border-radius: var(--radius); margin-bottom: 14px; font-size: 0.75rem; color: #92400e; }
+.demo-btn { padding: 4px 13px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer; border: none; font-family: var(--font); transition: all 0.12s; }
+.demo-btn-fill  { background: var(--blue); color: white; }
+.demo-btn-fill:hover { background: var(--blue-dark); }
+.demo-btn-clear { background: white; color: var(--ink); border: 1px solid var(--border2); }
+.demo-btn-clear:hover { background: var(--surface2); }
+
+/* ── HERO ─────────────────────────────────────────────── */
+.hero { text-align: center; padding: 52px 24px 36px; max-width: 560px; margin: 0 auto; }
+.hero h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1.08; color: var(--ink); margin-bottom: 12px; }
+.hero p { font-size: 0.97rem; color: var(--muted); line-height: 1.65; }
+
+/* ── LAYOUT ───────────────────────────────────────────── */
+.main { max-width: 980px; margin: 0 auto; padding: 0 18px 80px; }
+.layout { display: grid; grid-template-columns: 1fr 360px; gap: 14px; align-items: start; }
+.sticky-col { position: sticky; top: 68px; }
+@media (max-width: 780px) { .layout { grid-template-columns: 1fr; } .sticky-col { position: static; } }
+
+/* ── CARD ─────────────────────────────────────────────── */
+.card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px; }
+.card-header { padding: 15px 20px 13px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.card-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
+.icon-blue  { background: var(--blue-soft); }
+.icon-green { background: var(--green-bg); }
+.icon-amber { background: var(--amber-bg); }
+.card-title { font-size: 0.88rem; font-weight: 600; letter-spacing: -0.01em; }
+.card-sub   { font-size: 0.73rem; color: var(--muted); margin-top: 1px; }
+.card-body  { padding: 20px; }
+
+/* ── SPLIT PANEL ──────────────────────────────────────── */
+.split-panel { display: grid; grid-template-columns: 1fr 32px 1fr; align-items: stretch; min-height: 260px; }
+.split-left, .split-right { padding: 20px; }
+.split-divider { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px 0; }
+.split-divider-line { flex: 1; width: 1px; background: var(--border); }
+.split-divider-or { font-size: 0.65rem; font-weight: 700; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 3px 6px; letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0; }
+
+/* ── MOBILE ───────────────────────────────────────────── */
+@media (max-width: 680px) {
+  /* Nav */
+  .nav { padding: 0 14px; height: 48px; }
+  .nav-ticker { display: none; }
+  .nav-links { gap: 0; }
+  .nav-link { padding: 4px 8px; font-size: 0.75rem; }
+  /* Hero */
+  .hero { padding: 24px 16px 18px; }
+  .hero h1 { font-size: 1.65rem; }
+  /* Main */
+  .main { padding: 0 10px 60px; }
+  /* Demo bar */
+  .demo-bar { flex-wrap: wrap; gap: 8px; padding: 9px 12px; text-align: center; }
+  /* Cards */
+  .card-header { padding: 12px 14px 10px; }
+  .card-body { padding: 14px; }
+  /* Split panel — stack vertically */
+  .split-panel { grid-template-columns: 1fr; min-height: auto; }
+  .split-left { padding: 14px 14px 0; }
+  .split-right { padding: 0 14px 14px; }
+  .split-divider { flex-direction: row; padding: 8px 14px; height: auto; }
+  .split-divider-line { flex: 1; height: 1px; width: auto; }
+  /* Upload zone — shorter on mobile */
+  .upload-zone { padding: 10px 12px; }
+  .upload-icon { font-size: 1.4rem; }
+  /* Rate preview — scrollable */
+  .rate-preview { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .rp-desc { display: none; }
+  /* Fields */
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 400px) {
+  .nav-brand { font-size: 0.92rem; }
+  .hero h1 { font-size: 1.4rem; }
+}
+.split-left { display: flex; flex-direction: column; }
+#uploadCollapse { display: flex; flex-direction: column; flex: 1; }
+.upload-zone {
+  border: 1.5px dashed var(--border2); border-radius: var(--radius-sm);
+  padding: 12px 14px; cursor: pointer; transition: all 0.18s;
+  position: relative; display: flex; align-items: center; gap: 12px;
+  flex: 1; min-height: 120px;
+}
+.upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-soft); }
+.upload-zone.has-file { border-style: solid; border-color: var(--green); background: var(--green-bg); }
+.upload-zone.upload-hidden { display: none; }
+.upload-icon  { font-size: 1.25rem; line-height: 1; flex-shrink: 0; }
+.upload-text  { flex: 1; min-width: 0; }
+.upload-title { font-size: 0.82rem; font-weight: 500; color: var(--ink); }
+.upload-hint  { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+.file-pill { display: none; align-items: center; gap: 5px; background: white; border: 1px solid rgba(21,128,61,0.2); border-radius: 20px; padding: 3px 10px; font-size: 0.75rem; font-weight: 500; color: var(--green); }
+.file-pill.show { display: flex; }
+.file-pill-x { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 0.75rem; padding: 0 2px; line-height: 1; }
+.extract-btn { width: 100%; margin-top: 10px; padding: 9px; border-radius: var(--radius-sm); background: var(--blue); color: white; border: none; font-size: 0.82rem; font-weight: 500; font-family: var(--font); cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.extract-btn:hover:not(:disabled) { background: var(--blue-dark); }
+.extract-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── EXTRACTED ────────────────────────────────────────── */
+.extracted-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--green-bg); color: var(--green); border: 1px solid rgba(21,128,61,0.18); border-radius: 20px; padding: 3px 10px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
+
+/* ── FORM ─────────────────────────────────────────────── */
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 0.68rem; font-weight: 700; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+.field input, .field select, .field textarea { width: 100%; padding: 8px 10px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); font-size: 0.86rem; font-family: var(--font); color: var(--ink); outline: none; transition: border-color 0.12s, box-shadow 0.12s; appearance: none; -webkit-appearance: none; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+.field textarea { min-height: 62px; resize: none; line-height: 1.5; font-size: 0.82rem; }
+.field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+.field-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; }
+
+/* ── HTS SEARCH ───────────────────────────────────────── */
+.hts-wrap { position: relative; }
+.hts-dropdown { position: absolute; top: calc(100% + 3px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); z-index: 50; display: none; overflow: hidden; }
+.hts-dropdown.show { display: block; }
+.hts-opt { padding: 8px 11px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.hts-opt:last-child { border: none; }
+.hts-opt:hover { background: var(--surface2); }
+.hts-opt-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.71rem; color: var(--blue); font-weight: 700; }
+.hts-opt-desc { font-size: 0.77rem; color: var(--ink); margin-top: 1px; }
+.hts-opt-rate { font-size: 0.66rem; color: var(--muted); margin-top: 2px; }
+
+/* ── CLASSIFY BOX ─────────────────────────────────────── */
+.classify-box { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 0.77rem; margin-top: 6px; margin-bottom: 8px; }
+.classify-box-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.classify-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.83rem; font-weight: 700; color: var(--blue); }
+.confidence { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 20px; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.conf-high   { background: var(--green-bg); color: var(--green); }
+.conf-medium { background: var(--amber-bg); color: var(--amber); }
+.conf-low    { background: var(--red-bg);   color: var(--red); }
+
+/* ── BUTTONS ──────────────────────────────────────────── */
+.btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 0.86rem; font-weight: 500; font-family: var(--font); cursor: pointer; border: none; transition: all 0.13s; width: 100%; letter-spacing: -0.01em; }
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+.btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--border2); margin-top: 8px; }
+.btn-secondary:hover { background: var(--surface2); }
+.btn-ghost { background: none; border: none; color: var(--blue); font-size: 0.77rem; padding: 5px 0; margin-bottom: 6px; justify-content: flex-start; width: auto; cursor: pointer; font-family: var(--font); font-weight: 500; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-loading { pointer-events: none; }
+.spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.55s linear infinite; display: none; }
+.btn-loading .spinner { display: block; }
+.btn-loading .btn-text { opacity: 0.65; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── FLAGS ────────────────────────────────────────────── */
+.flag { display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; line-height: 1.5; margin-bottom: 7px; }
+.flag-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(21,128,61,0.12); }
+.flag-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(146,64,14,0.12); }
+.flag-red   { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(185,28,28,0.12); }
+.flag-icon  { flex-shrink: 0; font-size: 0.88rem; margin-top: 1px; }
+
+/* ── HTS CHIP ─────────────────────────────────────────── */
+.hts-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; gap: 10px; margin-bottom: 11px; }
+.hts-chip-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.83rem; color: var(--blue); font-weight: 700; flex-shrink: 0; padding-top: 1px; }
+.hts-chip-desc { font-size: 0.77rem; color: var(--ink); line-height: 1.4; }
+.hts-chip-rate { font-size: 0.66rem; color: var(--muted); margin-top: 3px; }
+
+/* ── RATE PREVIEW ─────────────────────────────────────── */
+.rate-preview { display: none; align-items: center; gap: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 6px; font-size: 0.72rem; }
+.rate-preview.show { display: flex; }
+.rp-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.7rem; font-weight: 700; color: var(--blue); padding: 6px 10px; border-right: 1px solid var(--border); white-space: nowrap; background: var(--blue-soft); }
+.rp-desc { color: var(--muted); padding: 6px 10px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); }
+.rp-rates { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
+.rp-rate { padding: 6px 9px; border-right: 1px solid var(--border); white-space: nowrap; }
+.rp-rate:last-child { border: none; }
+.rp-rate .rl { color: var(--muted); font-size: 0.65rem; display: block; }
+.rp-rate .rv { font-weight: 700; color: var(--ink); font-size: 0.75rem; }
+.rp-rate.eff .rv { color: var(--blue); }
+.rp-rate.s301 .rv { color: #92400e; }
+
+/* ── BREAKDOWN ────────────────────────────────────────── */
+.breakdown { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 10px; }
+.br-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; border-bottom: 1px solid var(--border); font-size: 0.81rem; transition: background 0.09s; }
+.br-row:last-child { border: none; }
+.br-row:hover { background: var(--surface2); }
+.br-row .lbl { color: var(--muted); }
+.br-row .val { font-family: "Menlo","SF Mono",monospace; font-size: 0.77rem; color: var(--ink); }
+.br-row.sub .lbl { color: var(--ink); font-weight: 600; }
+.br-row.sub .val { color: var(--blue); font-weight: 600; }
+.br-total { display: flex; justify-content: space-between; align-items: center; padding: 13px 12px; background: var(--ink); color: white; }
+.br-total .lbl { font-size: 0.86rem; font-weight: 500; }
+.br-total .val { font-family: "Menlo","SF Mono",monospace; font-size: 0.9rem; font-weight: 700; }
+
+/* ── RESULT PLACEHOLDER ───────────────────────────────── */
+.result-placeholder { padding: 46px 20px; text-align: center; color: var(--muted); }
+.result-placeholder-icon { font-size: 2.2rem; margin-bottom: 10px; opacity: 0.28; }
+.result-placeholder p { font-size: 0.82rem; line-height: 1.6; max-width: 200px; margin: 0 auto; }
+
+/* ── MISC ─────────────────────────────────────────────── */
+#deMinWarning { display: none; margin-top: 10px; }
+.divider { height: 1px; background: var(--border); margin: 13px 0; }
+.text-muted { color: var(--muted); font-size: 0.71rem; line-height: 1.5; }
+.mt-10 { margin-top: 10px; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+.result-anim { animation: fadeUp 0.26s ease; }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav id="mainNav">
-  <div style="font-size:18px;font-weight:700;letter-spacing:4px;text-transform:uppercase">XCLSV</div>
-  <div class="nav-links" style="display:flex;gap:32px;align-items:center">
-    <a href="#features" style="font-size:14px;color:#666;text-decoration:none;font-weight:500">Features</a>
-    <a href="#pricing" style="font-size:14px;color:#666;text-decoration:none;font-weight:500">Pricing</a>
-    <a href="#waitlist" class="nav-btn-wl" style="font-size:14px;font-weight:600;color:#fff;background:#111;padding:8px 20px;border-radius:8px;text-decoration:none">Join Waitlist</a>
+<nav class="nav">
+  <div class="nav-brand">iDuties</div>
+  <div class="nav-sep"></div>
+  <div class="nav-links">
+    <a class="nav-link active" href="#">Calculator</a>
+    <a class="nav-link" href="#">HTS Lookup</a>
+    <a class="nav-link" href="#">History</a>
+  </div>
+  <div class="nav-ticker">
+    <div class="ticker-item">
+      <div class="ticker-dot"></div>
+      <span class="ticker-label">S.301</span>
+      <span class="ticker-value s301-active">Active</span>
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-label">De Min</span>
+      <span class="ticker-value">$800</span>
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-label">EUR</span>
+      <span class="ticker-value" id="rate-EUR">—</span>
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-label">CNY</span>
+      <span class="ticker-value" id="rate-CNY">—</span>
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-label">PHP</span>
+      <span class="ticker-value" id="rate-PHP">—</span>
+    </div>
+
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero-wrap" style="display:flex;align-items:center;justify-content:center;padding:140px 32px 40px;max-width:1200px;margin:0 auto;gap:60px;flex-wrap:wrap">
-  <div style="flex:1;min-width:340px;max-width:520px">
-    <div class="fade-in" style="font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#999;margin-bottom:16px">Your Exclusive Assistant</div>
-    <h1 style="font-family:var(--serif);font-size:clamp(40px,5vw,62px);font-weight:400;line-height:1.1;margin-bottom:24px"><span class="slide-left" style="display:block;font-weight:500">Every CEO has one.</span><span class="slide-left-d1" style="display:block"><span style="font-style:italic;color:#888">Now you do too.</span></span></h1>
-    <p class="slide-left-d2" style="font-size:18px;line-height:1.65;color:#666;margin-bottom:36px;max-width:440px">Book restaurants, search your email, track expenses, and manage your day&mdash;all from a single text thread. No apps. No hold music. Just results.</p>
-    <div class="fade-in-d3"><form id="heroForm" style="display:flex;gap:10px;max-width:420px"><input type="email" id="heroEmail" placeholder="Enter your email" style="flex:1;padding:14px 18px;border-radius:10px;border:1px solid #ddd;font-size:15px;background:#fff;color:#111;font-family:var(--sans)"/><button type="submit" style="padding:14px 28px;border-radius:10px;border:none;background:#111;color:#fff;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--sans)">Join Waitlist</button></form></div>
-    <p style="font-size:13px;color:#bbb;margin-top:12px">SMS &middot; WhatsApp</p>
-  </div>
-  <div class="fade-in-d2" style="flex:1;min-width:340px;display:flex;justify-content:center">
-    <div class="chat-demo"><div class="chat-header"><div class="chat-avatar">X</div><div><div style="font-size:14px;font-weight:600">XCLSV</div><div style="font-size:11px;color:#999">Online</div></div></div><div class="chat-messages" id="chatMessages"></div></div>
-  </div>
-</section>
+<div class="hero">
+  <h1>Know your landed cost<br>before you order.</h1>
+  <p>The definitive tool for import duty intelligence. Upload an invoice or describe your product — get an exact landed cost breakdown across any trade lane, in seconds.</p>
+</div>
 
-<!-- FEATURES -->
-<section id="features" class="reveal" style="padding:60px 32px;max-width:1100px;margin:0 auto">
-  <div style="text-align:center;margin-bottom:40px">
-    <h2 style="font-family:var(--serif);font-size:clamp(32px,4vw,46px);font-weight:400;line-height:1.1;margin-bottom:12px">One text thread.<br><span style="font-style:italic;color:#888">Endless capabilities.</span></h2>
-    <p style="font-size:17px;color:#888;max-width:520px;margin:0 auto">Explore some of our popular features.</p>
-  </div>
-  <div class="features-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
-    <div style="padding:32px;border-radius:16px;background:#fff;border:1px solid #eee"><div style="font-size:28px;margin-bottom:16px">🔍</div><h3 style="font-size:18px;font-weight:600;margin-bottom:8px">Discover</h3><p style="font-size:14px;line-height:1.6;color:#888">Restaurants, hotels, bars, and experiences — real results with ratings, reviews, and hours.</p></div>
-    <div style="padding:32px;border-radius:16px;background:#fff;border:1px solid #eee"><div style="font-size:28px;margin-bottom:16px">📞</div><h3 style="font-size:18px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px">Book<span style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#999;border:1px solid #ddd;border-radius:4px;padding:2px 6px">Beta</span></h3><p style="font-size:14px;line-height:1.6;color:#888">Your assistant calls ahead, makes the reservation, and confirms back to you by text.</p></div>
-    <div style="padding:32px;border-radius:16px;background:#fff;border:1px solid #eee"><div style="font-size:28px;margin-bottom:16px">📰</div><h3 style="font-size:18px;font-weight:600;margin-bottom:8px">Stay Informed</h3><p style="font-size:14px;line-height:1.6;color:#888">Personalized daily news briefings on the topics you care about, with links to every story.</p></div>
-    <div style="padding:32px;border-radius:16px;background:#fff;border:1px solid #eee"><div style="font-size:28px;margin-bottom:16px">📄</div><h3 style="font-size:18px;font-weight:600;margin-bottom:8px">Manage</h3><p style="font-size:14px;line-height:1.6;color:#888">Search Google Drive, read Sheets, pull up docs — your files accessible from one thread.</p></div>
-    <div style="padding:32px;border-radius:16px;background:#fff;border:1px solid #eee"><div style="font-size:28px;margin-bottom:16px">📷</div><h3 style="font-size:18px;font-weight:600;margin-bottom:8px">Scan</h3><p style="font-size:14px;line-height:1.6;color:#888">Snap a photo of a business card, receipt, or menu — we extract and save the data instantly.</p></div>
-    <div style="padding:32px;border-radius:16px;background:#fff;border:1px solid #eee"><div style="font-size:28px;margin-bottom:16px">📊</div><h3 style="font-size:18px;font-weight:600;margin-bottom:8px">Track</h3><p style="font-size:14px;line-height:1.6;color:#888">Expenses, contacts, past bookings — everything searchable, organized, and at your fingertips.</p></div>
-  </div>
-</section>
+<div class="main">
 
-<!-- ★ SHOWCASE — NEW SECTION ★ -->
-<section class="showcase reveal">
-  <div style="text-align:center;max-width:720px;margin:0 auto 64px">
-    <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ink5);font-weight:600;margin-bottom:16px">One product, every life</div>
-    <h2 class="showcase-title">Same assistant.<br><em>Completely different day.</em></h2>
-    <p style="font-size:17px;color:var(--ink4);line-height:1.6;max-width:560px;margin:0 auto">XCLSV molds to your world — whether you're closing a Series A or choosing calligraphy for a wedding suite. Your bookings, notes, reminders, news, and receipts, all in one glance.</p>
+  <div class="demo-bar">
+    ✦ Try a demo shipment —
+    <button class="demo-btn demo-btn-fill" onclick="loadDemo()">Load Demo</button>
+    <button class="demo-btn demo-btn-clear" onclick="resetAll()">Clear</button>
   </div>
-  <div class="persona-tabs">
-    <div class="persona-tab active" onclick="switchPersona('ross')"><div style="width:38px;height:38px;border-radius:50%;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">R</div><div><div style="font-size:14px;font-weight:600">Ross</div><div style="font-size:12px;color:var(--ink4)">Tech founder &middot; San Francisco</div></div></div>
-    <div class="persona-tab" onclick="switchPersona('rachel')"><div style="width:38px;height:38px;border-radius:50%;background:#d4a574;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">R</div><div><div style="font-size:14px;font-weight:600">Rachel</div><div style="font-size:12px;color:var(--ink4)">Wedding planner &middot; Brooklyn</div></div></div>
-  </div>
-  <div style="position:relative">
-    <div class="browser-frame">
-      <div class="browser-chrome"><div class="browser-dots"><span></span><span></span><span></span></div><div class="browser-url"><svg class="lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>xclsv.com/dashboard</div></div>
-      <div class="browser-body"><img id="imgRoss" class="visible" src="ross-dashboard.png" alt="Ross's Dashboard"/><img id="imgRachel" class="hidden" src="rachel-dashboard.png" alt="Rachel's Dashboard"/></div>
-    </div>
-    <div class="float-cards">
-      <div class="float-card"><div class="fc-label" id="fc1L">Next booking</div><div class="fc-value" id="fc1V">Lazy Bear, 7:30 PM</div></div>
-      <div class="float-card"><div class="fc-label" id="fc2L">Open reminders</div><div class="fc-value" id="fc2V">5 pending</div></div>
-      <div class="float-card"><div class="fc-label" id="fc3L">This month</div><div class="fc-value" id="fc3V">$4,287 tracked</div></div>
-    </div>
-  </div>
-</section>
 
-<!-- HOW IT WORKS -->
-<section class="reveal" style="padding:80px 32px;background:#fff">
-  <div style="max-width:960px;margin:0 auto;text-align:center">
-    <h2 style="font-family:var(--serif);font-size:clamp(32px,4vw,46px);font-weight:400;line-height:1.1;margin-bottom:48px">One text. <span style="font-style:italic;color:#888">Zero headaches.</span></h2>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px">
-      <div style="padding:32px 24px;border-radius:16px;background:#fafaf9;border:1px solid #f0f0f0">
-        <div style="font-size:36px;margin-bottom:16px">💬</div>
-        <h3 style="font-size:17px;font-weight:600;margin-bottom:8px">Text it. Type it. Either works.</h3>
-        <p style="font-size:14px;line-height:1.65;color:#888">Message your assistant from WhatsApp, SMS, or your dashboard. Start on your phone, finish on your laptop — your conversation follows you.</p>
+<div class="layout">
+
+  <div>
+
+    <!-- STEP 1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-blue">📦</div>
+        <div>
+          <div class="card-title">Step 1 — Product Details</div>
+          <div class="card-sub">Upload an invoice for AI extraction, or enter product info manually</div>
+        </div>
       </div>
-      <div style="padding:32px 24px;border-radius:16px;background:#fafaf9;border:1px solid #f0f0f0">
-        <div style="font-size:36px;margin-bottom:16px">⚡</div>
-        <h3 style="font-size:17px;font-weight:600;margin-bottom:8px">It thinks. It acts. You don't.</h3>
-        <p style="font-size:14px;line-height:1.65;color:#888">Your assistant finds restaurants, books tables, fetches files, tracks receipts, and delivers your news — without you lifting a finger twice.</p>
-      </div>
-      <div style="padding:32px 24px;border-radius:16px;background:#fafaf9;border:1px solid #f0f0f0">
-        <div style="font-size:36px;margin-bottom:16px">🖥️</div>
-        <h3 style="font-size:17px;font-weight:600;margin-bottom:8px">Everything lands in one place.</h3>
-        <p style="font-size:14px;line-height:1.65;color:#888">Bookings, notes, reminders, receipts, and news — all organized in your dashboard. No app switching. No copy-pasting. Just open and go.</p>
+
+      <div class="split-panel">
+
+        <div class="split-left">
+          <div id="uploadCollapse">
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFile(this)">
+              <div class="upload-icon">📄</div>
+              <div class="upload-text">
+                <div class="upload-title">Drop invoice here or click to browse</div>
+                <div class="upload-hint">JPG · PNG · PDF · WEBP · Phone photos work great</div>
+              </div>
+              <div class="file-pill" id="filePill">
+                <span id="filePillName"></span>
+                <button class="file-pill-x" onclick="clearFile(event)">✕</button>
+              </div>
+            </div>
+
+            <div id="extractedSection" style="display:none;margin-top:10px">
+              <div class="extracted-badge">✦ AI Extracted</div>
+              <div id="extractedContent"></div>
+            </div>
+
+            <button class="extract-btn" id="extractBtn" onclick="extractInvoice()" disabled>
+              <div class="spinner"></div>
+              <span class="btn-text">Extract with AI</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="split-divider" id="uploadDivider">
+          <div class="split-divider-line"></div>
+          <div class="split-divider-or">or</div>
+          <div class="split-divider-line"></div>
+        </div>
+
+        <div class="split-right">
+          <div class="field">
+            <label>Product Description</label>
+            <textarea id="productDesc" placeholder="e.g. Men's 100% cotton T-shirt, crew neck, short sleeve"></textarea>
+          </div>
+          <div class="field">
+            <label>HTS Code</label>
+            <div class="hts-wrap">
+              <input type="text" id="htsInput" placeholder="Search or type…" oninput="searchHTS(this.value)" autocomplete="off">
+              <div class="hts-dropdown" id="htsDropdown"></div>
+            </div>
+            <div class="rate-preview" id="ratePreview">
+              <div class="rp-code" id="rp-code">—</div>
+              <div class="rp-desc" id="rp-desc">—</div>
+              <div class="rp-rates">
+                <div class="rp-rate"><span class="rl">Base</span><span class="rv" id="rp-base">—</span></div>
+                <div class="rp-rate s301" id="rp-301-wrap"><span class="rl">S.301</span><span class="rv" id="rp-301">—</span></div>
+                <div class="rp-rate eff"><span class="rl">Effective</span><span class="rv" id="rp-eff">—</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Country of Origin</label>
+            <select id="originCountry" onchange="updateRatePreview()">
+              <option value="">Select…</option>
+              <option value="CN">🇨🇳 China</option>
+              <option value="VN">🇻🇳 Vietnam</option>
+              <option value="IN">🇮🇳 India</option>
+              <option value="BD">🇧🇩 Bangladesh</option>
+              <option value="MX">🇲🇽 Mexico</option>
+              <option value="CA">🇨🇦 Canada</option>
+              <option value="KR">🇰🇷 South Korea</option>
+              <option value="JP">🇯🇵 Japan</option>
+              <option value="DE">🇩🇪 Germany</option>
+              <option value="IT">🇮🇹 Italy</option>
+              <option value="TR">🇹🇷 Turkey</option>
+              <option value="PH">🇵🇭 Philippines</option>
+              <option value="ID">🇮🇩 Indonesia</option>
+              <option value="TH">🇹🇭 Thailand</option>
+              <option value="MY">🇲🇾 Malaysia</option>
+              <option value="PK">🇵🇰 Pakistan</option>
+              <option value="TW">🇹🇼 Taiwan</option>
+              <option value="US">🇺🇸 United States</option>
+              <option value="GB">🇬🇧 United Kingdom</option>
+              <option value="Other">🌐 Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Destination Country</label>
+            <select id="destCountry">
+              <option value="US" selected>🇺🇸 United States</option>
+              <option value="GB">🇬🇧 United Kingdom</option>
+              <option value="DE">🇩🇪 Germany</option>
+              <option value="FR">🇫🇷 France</option>
+              <option value="CA">🇨🇦 Canada</option>
+              <option value="AU">🇦🇺 Australia</option>
+              <option value="JP">🇯🇵 Japan</option>
+              <option value="NL">🇳🇱 Netherlands</option>
+              <option value="SG">🇸🇬 Singapore</option>
+              <option value="AE">🇦🇪 UAE</option>
+              <option value="MX">🇲🇽 Mexico</option>
+              <option value="BR">🇧🇷 Brazil</option>
+              <option value="KR">🇰🇷 South Korea</option>
+              <option value="IN">🇮🇳 India</option>
+              <option value="IT">🇮🇹 Italy</option>
+              <option value="ES">🇪🇸 Spain</option>
+              <option value="CH">🇨🇭 Switzerland</option>
+              <option value="SE">🇸🇪 Sweden</option>
+            </select>
+          </div>
+          <button class="btn-ghost" onclick="classifyDescription()">
+            <span class="btn-text">↳ AI Classify Description</span>
+          </button>
+          <div id="classifyResult" style="display:none"></div>
+        </div>
+
       </div>
     </div>
-  </div>
-</section>
 
-<!-- PRICING -->
-<section id="pricing" class="reveal" style="padding:60px 32px;max-width:1100px;margin:0 auto">
-  <div style="text-align:center;margin-bottom:36px">
-    <h2 style="font-family:var(--serif);font-size:clamp(32px,4vw,46px);font-weight:400;line-height:1.1;margin-bottom:12px">Less than lunch.<br><span style="font-style:italic;color:#888">More than worth it.</span></h2>
-    <p style="font-size:17px;color:#888">Pick your plan. Upgrade anytime.</p>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:960px;margin:0 auto" id="pricingGrid"></div>
-</section>
+    <!-- STEP 2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-green">💵</div>
+        <div>
+          <div class="card-title">Step 2 — Shipment Values</div>
+          <div class="card-sub">US customs uses FOB valuation — shipping & insurance are not dutiable</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row-3">
+          <div class="field">
+            <label>Product Value</label>
+            <input type="number" id="productValue" placeholder="0.00" min="0" step="0.01" oninput="checkDeMin()">
+          </div>
+          <div class="field">
+            <label>Currency</label>
+            <select id="currency" onchange="updateRate()">
+              <option value="USD" data-rate="1">USD</option>
+              <option value="EUR" data-rate="1.08">EUR</option>
+              <option value="GBP" data-rate="1.27">GBP</option>
+              <option value="CNY" data-rate="0.138">CNY</option>
+              <option value="JPY" data-rate="0.0067">JPY</option>
+              <option value="PHP" data-rate="0.0175">PHP</option>
+              <option value="AUD" data-rate="0.63">AUD</option>
+              <option value="CAD" data-rate="0.74">CAD</option>
+              <option value="KRW" data-rate="0.00074">KRW</option>
+              <option value="INR" data-rate="0.012">INR</option>
+              <option value="VND" data-rate="0.000040">VND</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>USD Rate</label>
+            <input type="number" id="exchangeRate" value="1.00" min="0.0001" step="0.0001">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Shipping Cost</label>
+            <input type="number" id="shippingCost" placeholder="0.00" min="0" step="0.01" value="0">
+          </div>
+          <div class="field">
+            <label>Insurance</label>
+            <input type="number" id="insuranceCost" placeholder="0.00" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <div class="field">
+          <label>Unit Quantity <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — for per-unit cost breakdown)</span></label>
+          <input type="number" id="unitQty" placeholder="e.g. 500" min="1" step="1">
+        </div>
+        <div class="flag flag-green" id="deMinWarning">
+          <span class="flag-icon">★</span>
+          <span>Value is below the <strong>$800 US de minimis</strong> threshold — no duties apply to this shipment.</span>
+        </div>
+      </div>
+    </div>
 
-<!-- FINAL CTA + FOOTER -->
-<section id="waitlist" style="padding:100px 32px 48px;background:#111;text-align:center">
-  <h2 style="font-family:var(--serif);font-size:clamp(32px,4vw,46px);font-weight:400;color:#fff;margin-bottom:16px">The assistant everyone deserves.</h2>
-  <p style="font-size:17px;color:#888;max-width:440px;margin:0 auto 36px">Join the waitlist.<br>We'll text you when it's your turn.</p>
-  <div style="max-width:420px;margin:0 auto"><form id="footerForm" style="display:flex;gap:10px"><input type="email" id="footerEmail" placeholder="Enter your email" style="flex:1;padding:14px 18px;border-radius:10px;border:1px solid #333;font-size:15px;background:#1a1a1a;color:#fff;font-family:var(--sans)"/><button type="submit" style="padding:14px 28px;border-radius:10px;border:none;background:var(--gold);color:#111;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--sans)">Join Waitlist</button></form></div>
-  <div style="max-width:600px;margin:64px auto 0;border-top:1px solid rgba(255,255,255,0.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
-    <span style="font-size:13px;color:rgba(255,255,255,0.3)">&copy; 2026 Maiden Labs LLC</span>
-    <div style="display:flex;gap:24px"><a href="/terms" style="font-size:13px;color:rgba(255,255,255,0.3);text-decoration:none">Terms</a><a href="/privacy" style="font-size:13px;color:rgba(255,255,255,0.3);text-decoration:none">Privacy</a></div>
+    <!-- STEP 3 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-amber">⚖️</div>
+        <div>
+          <div class="card-title">Step 3 — Trade Details</div>
+          <div class="card-sub">Free trade agreements and manual rate overrides</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label>FTA / Special Program</label>
+            <select id="ftaSelect">
+              <option value="none">None — Standard MFN Rate</option>
+              <option value="usmca">USMCA — Mexico / Canada (0%)</option>
+              <option value="korus">KORUS — South Korea</option>
+              <option value="singapore">US-Singapore FTA (0%)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Duty Rate Override (%)</label>
+            <input type="number" id="dutyOverride" placeholder="Leave blank for auto" min="0" max="300" step="0.1">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-primary" id="calcBtn" onclick="calculate()">
+          <div class="spinner"></div>
+          <span class="btn-text">Calculate Landed Cost →</span>
+        </button>
+        <button class="btn btn-secondary" onclick="resetAll()">Clear All</button>
+      </div>
+    </div>
+
   </div>
-</section>
+
+  <!-- RESULTS -->
+  <div class="sticky-col">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-blue">📊</div>
+        <div>
+          <div class="card-title">Landed Cost Breakdown</div>
+          <div class="card-sub">FOB valuation · MPF included · No federal VAT</div>
+        </div>
+      </div>
+      <div id="resultPlaceholder" class="result-placeholder">
+        <div class="result-placeholder-icon">◎</div>
+        <p>Fill in product and shipment details, then calculate.</p>
+      </div>
+      <div id="resultBody" class="card-body" style="display:none"></div>
+    </div>
+  </div>
+
+</div>
+</div>
 
 <script>
-// Nav scroll
-window.addEventListener('scroll', function() { document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 50); }, { passive: true });
+let fileB64 = null, fileMime = null;
+let selectedHTS = { code:'', rate:null, cn301:null, desc:'' };
+let htsTimer = null;
 
-// Scroll reveal
-document.querySelectorAll('.reveal').forEach(function(el) {
-  new IntersectionObserver(function(e) { if (e[0].isIntersecting) el.classList.add('visible'); }, { threshold: 0.15 }).observe(el);
-});
-
-// Chat demo
-var DEMO = [
-  { role:'user', text:'Find me a great sushi spot in Beverly Hills for tonight' },
-  { role:'bot', text:'Here are the top 3 options:\n\n1. Matsuhisa \u2014 4.6\u2605 \u00B7 $$$$\n   212 N Canon Dr\n\n2. Sugarfish \u2014 4.5\u2605 \u00B7 $$$\n   212 N Canon Dr\n\n3. Sushi Ginza Onodera \u2014 4.7\u2605 \u00B7 $$$$\n   609 La Cienega Blvd\n\nWant me to book one?' },
-  { role:'user', text:'Book Matsuhisa, 2 people, 8pm, under Mike' },
-  { role:'bot', text:"I'm calling Matsuhisa now to book a table for 2 at 8pm under Mike. I'll text you back with the confirmation shortly." },
-  { role:'bot', text:"Confirmed! Table for 2 at Matsuhisa tonight at 8:00 PM under Mike. I've added it to your calendar \uD83D\uDCC5" }
+// ── Local HTS DB (fallback when no backend) ────────────
+const HTS_DB = [
+  { code:'6109.10.00', desc:'T-shirts, singlets and other vests, of cotton, knitted', rate:16.5, cn301:7.5 },
+  { code:'6109.90.10', desc:'T-shirts, singlets and other vests, of man-made fibres', rate:32, cn301:7.5 },
+  { code:'8517.13.00', desc:'Smartphones and other telephone handsets', rate:0, cn301:0 },
+  { code:'8471.30.01', desc:'Laptops and portable computers', rate:0, cn301:0 },
+  { code:'9503.00.00', desc:'Toys, games and puzzles', rate:0, cn301:7.5 },
+  { code:'9401.61.40', desc:'Upholstered seats with wooden frame', rate:0, cn301:25 },
+  { code:'4202.92.08', desc:'Backpacks and daypacks, of textile', rate:17.6, cn301:7.5 },
+  { code:'6403.99.60', desc:'Footwear with leather uppers, rubber soles', rate:10, cn301:7.5 },
+  { code:'6203.42.40', desc:"Men's trousers and breeches, of cotton", rate:16.6, cn301:7.5 },
+  { code:'3304.99.50', desc:'Beauty or make-up preparations', rate:4.9, cn301:7.5 },
+  { code:'9405.10.60', desc:'Chandeliers and ceiling luminaires, base metal', rate:3.9, cn301:25 },
+  { code:'6204.62.40', desc:"Women's trousers and breeches, of cotton", rate:16.6, cn301:7.5 },
+  { code:'8443.32.10', desc:'Inkjet printers', rate:0, cn301:0 },
+  { code:'6301.40.00', desc:'Blankets and travelling rugs, of synthetic fibres', rate:8.5, cn301:7.5 },
+  { code:'3923.21.00', desc:'Sacks and bags of polymers of ethylene (plastic bags)', rate:3, cn301:25 },
 ];
-!function(){var el=document.getElementById('chatMessages'),i=0;function show(){if(i>=DEMO.length){setTimeout(function(){el.innerHTML='';i=0;setTimeout(show,1e3)},4e3);return}var m=DEMO[i];if(m.role==='bot'){el.innerHTML+='<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';el.scrollTop=el.scrollHeight;setTimeout(function(){var t=el.querySelector('.typing');if(t)t.remove();el.innerHTML+='<div class="msg msg-bot">'+m.text.replace(/\n/g,'<br>')+'</div>';el.scrollTop=el.scrollHeight;i++;setTimeout(show,1800)},1500)}else{el.innerHTML+='<div class="msg msg-user">'+m.text+'</div>';el.scrollTop=el.scrollHeight;i++;setTimeout(show,1200)}}setTimeout(show,1500)}();
 
-// Persona switcher
-var cur='ross',pD={ross:{fc1L:'Next booking',fc1V:'Lazy Bear, 7:30 PM',fc2L:'Open reminders',fc2V:'5 pending',fc3L:'This month',fc3V:'$4,287 tracked'},rachel:{fc1L:'Next booking',fc1V:'Flour Pot Bakery, 10:30 AM',fc2L:'Open reminders',fc2V:'4 pending',fc3L:'This month',fc3V:'$632 tracked'}};
-function switchPersona(n){if(n===cur)return;cur=n;var t=document.querySelectorAll('.persona-tab');t.forEach(function(x){x.classList.remove('active')});t[n==='ross'?0:1].classList.add('active');document.getElementById('imgRoss').className=n==='ross'?'visible':'hidden';document.getElementById('imgRachel').className=n==='rachel'?'visible':'hidden';var c=document.querySelectorAll('.float-card');c.forEach(function(x){x.classList.add('swap-out')});setTimeout(function(){var d=pD[n];['fc1L','fc1V','fc2L','fc2V','fc3L','fc3V'].forEach(function(k){document.getElementById(k).textContent=d[k]});c.forEach(function(x){x.classList.remove('swap-out')})},350)}
+// ── Live rates ─────────────────────────────────────────
+async function loadRates() {
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    if (data.rates) {
+      ['EUR','CNY','PHP'].forEach(c => {
+        const el = document.getElementById('rate-' + c);
+        if (el && data.rates[c]) {
+          el.textContent = data.rates[c].toFixed(c === 'PHP' ? 2 : 4);
+          const opt = document.querySelector(`#currency option[value="${c}"]`);
+          if (opt) opt.dataset.rate = (1 / data.rates[c]).toFixed(6);
+        }
+      });
+    }
+  } catch(e) {}
+}
+loadRates();
 
-// Pricing
-var plans=[{n:'Starter',p:10,d:'Your dashboard. Your data.',pop:false,f:[{t:'SMS & WhatsApp messages',y:0},{t:'Voice minutes',y:0},{t:'Daily news briefings',y:1},{t:'Productivity suite',y:1},{t:'Camera IQ',y:1},{t:'Notes, reminders & journal',y:1},{t:'Standard AI intelligence',y:1}]},{n:'Pro',p:25,d:'Text it. It\'s handled.',pop:true,f:[{t:'500 messages (SMS, WA)',y:1},{t:'30 voice min/mo',y:1},{t:'Daily news briefings',y:1},{t:'Productivity suite',y:1},{t:'Camera IQ',y:1},{t:'Notes, reminders & journal',y:1},{t:'Enhanced AI intelligence',y:1}]},{n:'Flex',p:60,d:'For those who never slow down.',pop:false,f:[{t:'2,000 messages (SMS, WA)',y:1},{t:'120 voice min/mo',y:1},{t:'Daily news briefings',y:1},{t:'Productivity suite',y:1},{t:'Camera IQ',y:1},{t:'Notes, reminders & journal',y:1},{t:'Elite AI intelligence',y:1}]}];
-var g=document.getElementById('pricingGrid');plans.forEach(function(p){var dk=p.pop,ck='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4" stroke="'+(dk?'#d4af37':'#111')+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',ds='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8H12" stroke="'+(dk?'#444':'#ddd')+'" stroke-width="2" stroke-linecap="round"/></svg>',fs=p.f.map(function(f){return'<div style="display:flex;align-items:center;gap:10px;font-size:14px;color:'+(f.y?(dk?'#ddd':'#555'):(dk?'#555':'#ccc'))+'">'+(f.y?ck:ds)+f.t+'</div>'}).join('');var priceDisplay='$'+p.p;var perLabel='/mo';var btnText='Coming Soon';g.innerHTML+='<div class="plan-card" style="padding:36px;border-radius:20px;background:'+(dk?'#111':'#fff')+';color:'+(dk?'#fff':'#111')+';border:'+(dk?'none':'1px solid #eee')+';position:relative">'+(p.pop?'<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#d4af37;color:#111;padding:4px 16px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Most Popular</div>':'')+'<div style="font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#999;margin-bottom:4px">'+p.n+'</div><div style="margin-bottom:4px"><span style="font-family:var(--serif);font-size:52px;font-weight:400">'+priceDisplay+'</span><span style="font-size:15px;color:'+(dk?'#888':'#999')+'">'+perLabel+'</span></div><p style="font-size:14px;color:'+(dk?'#aaa':'#888')+';margin-bottom:28px">'+p.d+'</p><div style="display:flex;flex-direction:column;gap:14px;margin-bottom:28px">'+fs+'</div><div style="text-align:center;padding:12px 0;border-radius:10px;font-size:14px;font-weight:600;background:'+(dk?'#d4af37':'transparent')+';color:'+(dk?'#111':'#111')+';border:'+(dk?'none':'1px solid #ddd')+'">'+btnText+'</div></div>'});
+// File handling
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('uploadZone').classList.add('has-file');
+  const pill = document.getElementById('filePill');
+  pill.classList.add('show');
+  document.getElementById('filePillName').textContent = file.name.length > 22 ? file.name.slice(0,20)+'…' : file.name;
+  document.getElementById('extractBtn').disabled = false;
+  const reader = new FileReader();
+  reader.onload = e => { const p = e.target.result.split(','); fileB64 = p[1]; fileMime = file.type||'image/jpeg'; };
+  reader.readAsDataURL(file);
+}
 
-// Forms (mock)
-document.getElementById('heroForm').onsubmit=function(e){e.preventDefault();if(document.getElementById('heroEmail').value)this.innerHTML='<div style="padding:14px 18px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:15px;color:#15803d;width:100%">You\'re on the list! We\'ll be in touch soon.</div>'};
-document.getElementById('footerForm').onsubmit=function(e){e.preventDefault();if(document.getElementById('footerEmail').value)this.innerHTML='<div style="padding:14px 18px;border-radius:10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);font-size:15px;color:#d4af37;width:100%">You\'re on the list! We\'ll be in touch soon.</div>'};
+function clearFile(e) {
+  if (e) e.stopPropagation();
+  fileB64 = null; fileMime = null;
+  document.getElementById('uploadZone').classList.remove('has-file');
+  document.getElementById('filePill').classList.remove('show');
+  document.getElementById('extractBtn').disabled = true;
+  document.getElementById('extractedSection').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+}
+
+// Extract invoice
+async function extractInvoice() {
+  if (!fileB64) return;
+  const btn = document.getElementById('extractBtn');
+  btn.classList.add('btn-loading'); btn.disabled = true;
+  try {
+    const res = await fetch('/api/classify', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image_b64: fileB64, image_mime: fileMime })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (data.product_description) document.getElementById('productDesc').value = data.product_description;
+    if (data.total_value)   document.getElementById('productValue').value = parseFloat(data.total_value)||'';
+    if (data.currency)      { document.getElementById('currency').value = data.currency; updateRate(); }
+    if (data.shipping_cost) document.getElementById('shippingCost').value = parseFloat(data.shipping_cost)||0;
+    if (data.insurance)     document.getElementById('insuranceCost').value = parseFloat(data.insurance)||0;
+    if (data.country_of_origin) document.getElementById('originCountry').value = data.country_of_origin;
+    if (data.hts_code) { document.getElementById('htsInput').value = data.hts_code; selectedHTS = { code:data.hts_code, desc:data.hts_description||'', rate:data.base_rate, cn301:data.cn_301_rate }; }
+    const sec = document.getElementById('extractedSection');
+    sec.style.display = 'block';
+    const conf = data.classification_confidence||'medium';
+    document.getElementById('extractedContent').innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:0.76rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:600;font-size:0.77rem">Extracted Fields</span>
+          <span class="confidence conf-${conf}">${conf}</span>
+        </div>
+        ${xrow('Product',data.product_description)}
+        ${xrow('Value',(data.currency||'')+' '+(data.total_value||'—'))}
+        ${xrow('Origin',data.country_of_origin||'—')}
+        ${xrow('HTS',data.hts_code||'—')}
+        ${xrow('Terms',data.incoterms||'—')}
+      </div>`;
+    checkDeMin();
+  } catch(e) {
+    // Fallback: load demo data when no backend available
+    const demo = { product_description:"Men's 100% Cotton T-Shirts, short sleeve, assorted S–XL", total_value:15800, currency:'CNY', country_of_origin:'CN', hts_code:'6109.10.00', hts_description:'T-shirts, singlets and other vests, of cotton, knitted', incoterms:'FOB Shanghai', classification_confidence:'high' };
+    document.getElementById('productDesc').value = demo.product_description;
+    document.getElementById('productValue').value = demo.total_value;
+    document.getElementById('currency').value = demo.currency; updateRate();
+    document.getElementById('originCountry').value = demo.country_of_origin;
+    document.getElementById('htsInput').value = demo.hts_code;
+    selectedHTS = { code:'6109.10.00', desc:demo.hts_description, rate:16.5, cn301:7.5 };
+    const sec = document.getElementById('extractedSection');
+    sec.style.display = 'block';
+    document.getElementById('extractedContent').innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:0.76rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:600;font-size:0.77rem">Demo Extraction</span>
+          <span class="confidence conf-high">high</span>
+        </div>
+        ${xrow('Product',demo.product_description)}
+        ${xrow('Value','CNY 15,800')}
+        ${xrow('Origin','CN')}
+        ${xrow('HTS',demo.hts_code)}
+        ${xrow('Terms',demo.incoterms)}
+      </div>`;
+    btn.style.background = 'var(--green)';
+    btn.querySelector('.btn-text').textContent = '✓ Demo data loaded';
+    checkDeMin();
+  }
+  btn.classList.remove('btn-loading'); btn.disabled = false;
+}
+
+function xrow(k,v) {
+  return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">${k}</span><span style="font-weight:500;max-width:155px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v||'—'}</span></div>`;
+}
+
+// HTS search — tries API first, falls back to local DB
+async function searchHTS(val) {
+  const dd = document.getElementById('htsDropdown');
+  if (!val || val.length < 2) { dd.classList.remove('show'); return; }
+  clearTimeout(htsTimer);
+  htsTimer = setTimeout(async () => {
+    let results = [];
+    try {
+      const res = await fetch(`/api/hts-search?q=${encodeURIComponent(val)}`);
+      if (res.ok) results = await res.json();
+    } catch(e) {}
+    // Fall back to local DB if API unavailable or returned nothing
+    if (!results.length) {
+      const q = val.toLowerCase();
+      results = HTS_DB.filter(r => r.code.includes(q) || r.desc.toLowerCase().includes(q))
+        .slice(0, 6)
+        .map(r => ({ code: r.code, desc: r.desc, rate: r.rate, cn_301: r.cn301 }));
+    }
+    if (!results.length) { dd.classList.remove('show'); return; }
+    dd.innerHTML = results.map(r => `
+      <div class="hts-opt" onclick="selectHTS('${r.code}','${(r.desc||'').replace(/'/g,"\\'")}',${r.rate},${r.cn_301??r.cn301??0})">
+        <div class="hts-opt-code">${r.code}</div>
+        <div class="hts-opt-desc">${r.desc}</div>
+        <div class="hts-opt-rate">Base ${r.rate}%${(r.cn_301||r.cn301)>0?` · CN 301 +${r.cn_301??r.cn301}%`:''}</div>
+      </div>`).join('');
+    dd.classList.add('show');
+  }, 180);
+}
+
+function selectHTS(code,desc,rate,cn301) {
+  selectedHTS = {code,desc,rate,cn301};
+  document.getElementById('htsInput').value = code;
+  document.getElementById('htsDropdown').classList.remove('show');
+  updateRatePreview();
+}
+
+function updateRatePreview() {
+  const preview = document.getElementById('ratePreview');
+  if (!selectedHTS.code || selectedHTS.rate === null) { preview.classList.remove('show'); return; }
+  const origin = document.getElementById('originCountry').value;
+  const s301 = (origin === 'CN') ? (selectedHTS.cn301 || 0) : 0;
+  const eff = (selectedHTS.rate || 0) + s301;
+  document.getElementById('rp-code').textContent = selectedHTS.code;
+  document.getElementById('rp-desc').textContent = selectedHTS.desc || '—';
+  document.getElementById('rp-base').textContent = (selectedHTS.rate || 0).toFixed(1) + '%';
+  const wrap301 = document.getElementById('rp-301-wrap');
+  if (s301 > 0) {
+    document.getElementById('rp-301').textContent = '+' + s301.toFixed(1) + '%';
+    wrap301.style.display = '';
+  } else {
+    wrap301.style.display = 'none';
+  }
+  document.getElementById('rp-eff').textContent = eff.toFixed(1) + '%';
+  preview.classList.add('show');
+}
+document.addEventListener('click', e => { if (!e.target.closest('.hts-wrap')) document.getElementById('htsDropdown').classList.remove('show'); });
+
+// AI classify
+async function classifyDescription() {
+  const desc = document.getElementById('productDesc').value.trim();
+  if (!desc) { alert('Enter a product description first.'); return; }
+  const div = document.getElementById('classifyResult');
+  div.style.display = 'none';
+  const btn = event.target.closest('button');
+  const orig = btn.querySelector('.btn-text')?.textContent || btn.textContent;
+  if (btn.querySelector('.btn-text')) btn.querySelector('.btn-text').textContent = 'Classifying…';
+  try {
+    const res = await fetch('/api/classify', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({description:desc}) });
+    if (!res.ok) throw new Error('no backend');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    selectedHTS = {code:data.hts_code||'',desc:data.hts_description||'',rate:data.base_rate,cn301:data.cn_301_rate};
+    if (data.hts_code) document.getElementById('htsInput').value = data.hts_code;
+    const conf = data.classification_confidence||'medium';
+    div.style.display = 'block';
+    div.innerHTML = `<div class="classify-box">
+      <div class="classify-box-head"><span class="classify-code">${data.hts_code||'—'}</span><span class="confidence conf-${conf}">${conf}</span></div>
+      <div style="color:var(--ink);font-size:0.78rem;margin-bottom:3px">${data.hts_description||''}</div>
+      ${data.base_rate!==undefined?`<div style="color:var(--muted);font-size:0.69rem">Base ${data.base_rate}%${data.cn_301_rate>0?` · Section 301 +${data.cn_301_rate}%`:''}</div>`:''}
+      ${data.classification_notes?`<div style="color:var(--muted);font-size:0.69rem;margin-top:2px">${data.classification_notes}</div>`:''}
+    </div>`;
+  } catch(e) {
+    // Fallback: match against local DB by keyword
+    const q = desc.toLowerCase();
+    const match = HTS_DB.find(r => r.desc.toLowerCase().split(' ').some(w => w.length > 4 && q.includes(w))) || HTS_DB[0];
+    selectedHTS = { code:match.code, desc:match.desc, rate:match.rate, cn301:match.cn301 };
+    document.getElementById('htsInput').value = match.code;
+    div.style.display = 'block';
+    div.innerHTML = `<div class="classify-box">
+      <div class="classify-box-head"><span class="classify-code">${match.code}</span><span class="confidence conf-medium">local</span></div>
+      <div style="color:var(--ink);font-size:0.78rem;margin-bottom:3px">${match.desc}</div>
+      <div style="color:var(--muted);font-size:0.69rem">Base ${match.rate}%${match.cn301>0?` · Section 301 +${match.cn301}%`:''} · Local match only — AI not available</div>
+    </div>`;
+  }
+  if (btn.querySelector('.btn-text')) btn.querySelector('.btn-text').textContent = orig;
+}
+
+// Currency
+function updateRate() {
+  const sel = document.getElementById('currency');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt.dataset.rate) document.getElementById('exchangeRate').value = opt.dataset.rate;
+  checkDeMin();
+}
+function checkDeMin() {
+  const v = parseFloat(document.getElementById('productValue').value)||0;
+  const r = parseFloat(document.getElementById('exchangeRate').value)||1;
+  document.getElementById('deMinWarning').style.display = v*r>0&&v*r<=800?'flex':'none';
+}
+
+// Calculate — tries API first, falls back to local math
+async function calculate() {
+  const productVal = parseFloat(document.getElementById('productValue').value)||0;
+  if (!productVal) { alert('Please enter the product value.'); return; }
+  const btn = document.getElementById('calcBtn');
+  btn.classList.add('btn-loading');
+  try {
+    const payload = {
+      product_value:  productVal,
+      shipping:       parseFloat(document.getElementById('shippingCost').value)||0,
+      insurance:      parseFloat(document.getElementById('insuranceCost').value)||0,
+      hts_code:       selectedHTS.code||document.getElementById('htsInput').value.trim(),
+      origin_country: document.getElementById('originCountry').value,
+      dest_country:   document.getElementById('destCountry').value,
+      fta:            document.getElementById('ftaSelect').value,
+      currency:       document.getElementById('currency').value,
+      exchange_rate:  parseFloat(document.getElementById('exchangeRate').value)||1,
+    };
+    const ov = document.getElementById('dutyOverride').value;
+    if (ov) payload.duty_rate_override = parseFloat(ov);
+    const res = await fetch('/api/calculate', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    if (!res.ok) throw new Error('no backend');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderResults(data);
+  } catch(e) {
+    // Fallback: calculate locally without backend
+    const pv = productVal, sh = parseFloat(document.getElementById('shippingCost').value)||0, ins = parseFloat(document.getElementById('insuranceCost').value)||0;
+    const rate = parseFloat(document.getElementById('exchangeRate').value)||1;
+    const curr = document.getElementById('currency').value, origin = document.getElementById('originCountry').value, fta = document.getElementById('ftaSelect').value;
+    const hts = selectedHTS.code||document.getElementById('htsInput').value.trim();
+    const ovr = document.getElementById('dutyOverride').value;
+    const pUSD = pv*rate, sUSD = sh*rate, iUSD = ins*rate;
+    if (pUSD <= 800 && pUSD > 0) { renderResults({ de_minimis:true, message:'Value is under the $800 de minimis threshold — no duties apply.', total_landed_usd:pUSD+sUSD+iUSD, currency:curr }); btn.classList.remove('btn-loading'); return; }
+    const entry = HTS_DB.find(r=>r.code===hts) || { desc:'General merchandise', rate:6, cn301:0 };
+    let base = ovr ? parseFloat(ovr) : entry.rate, cn301 = entry.cn301, ftaApplied=false, ftaName='';
+    if (fta==='usmca'&&(origin==='MX'||origin==='CA')) { base=0; cn301=0; ftaApplied=true; ftaName='USMCA'; }
+    if (fta==='singapore'&&origin==='SG') { base=0; cn301=0; ftaApplied=true; ftaName='US-Singapore FTA'; }
+    const s301 = (origin==='CN'&&!ftaApplied) ? cn301 : 0;
+    const eff = base+s301, duty = pUSD*(eff/100), mpf = Math.min(614.35,Math.max(32.71,pUSD*0.003464));
+    renderResults({ de_minimis:false, hts_code:hts, hts_desc:entry.desc, base_duty_rate:base, china_301_surcharge:s301, effective_duty_rate:eff, product_value_usd:pUSD, shipping_usd:sUSD, insurance_usd:iUSD, taxable_base_usd:pUSD, duty_amount:duty, total_duties:duty+mpf, total_landed_usd:pUSD+sUSD+iUSD+duty+mpf, fta_applied:ftaApplied, fta_name:ftaName, db_match:!!HTS_DB.find(r=>r.code===hts), currency:curr });
+  }
+  btn.classList.remove('btn-loading');
+}
+
+// Load demo
+function loadDemo() {
+  // Collapse upload section — demo data is pre-filled, no need to upload
+  document.getElementById('uploadCollapse').style.display = 'none';
+  document.getElementById('uploadDivider').style.display = 'none';
+
+  document.getElementById('productDesc').value = "Men's 100% Cotton T-Shirts, crew neck, short sleeve, assorted S–XL";
+  document.getElementById('htsInput').value = '6109.10.00';
+  document.getElementById('originCountry').value = 'CN';
+  document.getElementById('productValue').value = 15800;
+  document.getElementById('currency').value = 'CNY';
+  document.getElementById('exchangeRate').value = '0.138';
+  document.getElementById('shippingCost').value = '320';
+  document.getElementById('insuranceCost').value = '0';
+  document.getElementById('ftaSelect').value = 'none';
+  document.getElementById('unitQty').value = '500';
+  selectedHTS = { code:'6109.10.00', desc:'T-shirts, singlets and other vests, of cotton, knitted', rate:16.5, cn301:7.5 };
+  updateRatePreview();
+  document.getElementById('classifyResult').style.display = 'block';
+  document.getElementById('classifyResult').innerHTML = `<div class="classify-box">
+    <div class="classify-box-head"><span class="classify-code">6109.10.00</span><span class="confidence conf-high">high</span></div>
+    <div style="color:var(--ink);font-size:0.78rem;margin-bottom:3px">T-shirts, singlets and other vests, of cotton, knitted</div>
+    <div style="color:var(--muted);font-size:0.69rem">Base 16.5% · Section 301 +7.5% · Effective 24.0% from CN</div>
+  </div>`;
+  checkDeMin();
+  calculate();
+}
+
+// Render results
+function renderResults(d) {
+  document.getElementById('resultPlaceholder').style.display = 'none';
+  const body = document.getElementById('resultBody');
+  body.style.display = 'block';
+  const fmt = n => '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const pct = n => n.toFixed(2)+'%';
+  const mpf = Math.min(614.35, Math.max(32.71, d.taxable_base_usd * 0.003464));
+  let h = '<div class="result-anim">';
+
+  if (d.de_minimis) {
+    h += `<div class="flag flag-green"><span class="flag-icon">★</span><span>${d.message}</span></div>`;
+    h += `<div class="breakdown"><div class="br-row"><span class="lbl">Product Value</span><span class="val">${fmt(d.total_landed_usd)}</span></div><div class="br-row"><span class="lbl">Duties & Fees</span><span class="val">$0.00</span></div><div class="br-total"><span class="lbl">Total Landed Cost</span><span class="val">${fmt(d.total_landed_usd)}</span></div></div>`;
+    h += '</div>'; body.innerHTML = h; window._lastResult = d; return;
+  }
+
+  if (d.china_301_surcharge > 0) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>China origin — <strong>Section 301 +${d.china_301_surcharge}%</strong> added to base rate.</span></div>`;
+  if (d.fta_applied) h += `<div class="flag flag-green"><span class="flag-icon">✓</span><span><strong>${d.fta_name}</strong> — preferential rate applied.</span></div>`;
+  if (d.effective_duty_rate > 25 && !d.fta_applied) h += `<div class="flag flag-amber"><span class="flag-icon">!</span><span>High rate (${pct(d.effective_duty_rate)}). Consider verifying HTS classification.</span></div>`;
+  if (!d.db_match && d.hts_code) h += `<div class="flag flag-amber"><span class="flag-icon">i</span><span>Code <strong>${d.hts_code}</strong> not in verified DB — rate is estimated.</span></div>`;
+  const dest = document.getElementById('destCountry').value;
+  if (dest && dest !== 'US') h += `<div class="flag flag-amber"><span class="flag-icon">🌐</span><span>Destination set to <strong>${dest}</strong>. Duty rates shown are US-based (USITC). Rates for other destinations vary — contact a local broker.</span></div>`;
+
+  if (d.hts_code) h += `<div class="hts-chip"><div class="hts-chip-code">${d.hts_code}</div><div><div class="hts-chip-desc">${d.hts_desc||'Unverified code'}</div><div class="hts-chip-rate">Base ${pct(d.base_duty_rate)}${d.china_301_surcharge>0?` + ${pct(d.china_301_surcharge)} S.301`:''} = <strong>${pct(d.effective_duty_rate)}</strong> effective · FOB</div></div></div>`;
+
+  const curr = d.currency!=='USD'?` (${d.currency})`:'';
+  h += `<div class="breakdown">
+    <div class="br-row"><span class="lbl">Product Value${curr}</span><span class="val">${fmt(d.product_value_usd)}</span></div>
+    ${d.shipping_usd>0?`<div class="br-row"><span class="lbl">Shipping</span><span class="val">${fmt(d.shipping_usd)}</span></div>`:''}
+    ${d.insurance_usd>0?`<div class="br-row"><span class="lbl">Insurance</span><span class="val">${fmt(d.insurance_usd)}</span></div>`:''}
+    <div class="br-row sub"><span class="lbl">FOB Taxable Base</span><span class="val">${fmt(d.taxable_base_usd)}</span></div>
+    <div class="br-row"><span class="lbl">Customs Duty (${pct(d.effective_duty_rate)})</span><span class="val">${fmt(d.duty_amount)}</span></div>
+    <div class="br-row"><span class="lbl">MPF (0.3464%)</span><span class="val">${fmt(mpf)}</span></div>
+    <div class="br-row sub"><span class="lbl">Total Duties & Fees</span><span class="val">${fmt(d.total_duties + mpf)}</span></div>
+    <div class="br-total"><span class="lbl">Total Landed Cost</span><span class="val">${fmt(d.total_landed_usd + mpf)}</span></div>
+  </div>`;
+
+  h += `<p class="text-muted mt-10">FOB valuation · MPF included · No US federal VAT · State sales tax excluded</p>`;
+
+  // Per-unit breakdown if quantity entered
+  const qty = parseInt(document.getElementById('unitQty').value) || 0;
+  if (qty > 0 && !d.de_minimis) {
+    const perUnit = d.total_landed_usd / qty;
+    const dutyPerUnit = (d.duty_amount + mpf) / qty;
+    const prodPerUnit = d.product_value_usd / qty;
+    h += `<div class="breakdown" style="margin-top:10px">
+      <div class="br-row"><span class="lbl">Units</span><span class="val">${qty.toLocaleString()}</span></div>
+      <div class="br-row"><span class="lbl">Product cost / unit</span><span class="val">${fmt(prodPerUnit)}</span></div>
+      <div class="br-row"><span class="lbl">Duty + MPF / unit</span><span class="val">${fmt(dutyPerUnit)}</span></div>
+      <div class="br-total"><span class="lbl">Landed cost / unit</span><span class="val">${fmt(perUnit)}</span></div>
+    </div>`;
+  }
+
+  h += `<button class="btn btn-secondary" style="margin-top:10px" onclick="copyResults()">Copy Summary</button>`;
+  h += '</div>';
+  body.innerHTML = h;
+  window._lastResult = d;
+}
+
+// Copy
+function copyResults() {
+  const d = window._lastResult;
+  if (!d) return;
+  const fmt = n => '$'+Number(n).toFixed(2);
+  const mpf = Math.min(614.35,Math.max(32.71,d.taxable_base_usd*0.003464));
+  const text = `iDUTIES — LANDED COST\nHTS: ${d.hts_code} — ${d.hts_desc}\nDuty Rate: ${d.effective_duty_rate}%\nDuty: ${fmt(d.duty_amount)} · MPF: ${fmt(mpf)}\n────────────────\nTotal Landed: ${fmt(d.total_landed_usd+mpf)}\n(FOB · No US federal VAT)`;
+  navigator.clipboard.writeText(text).then(() => { const b=event.target; b.textContent='Copied ✓'; setTimeout(()=>b.textContent='Copy Summary',2000); });
+}
+
+// Reset
+function resetAll() {
+  // Restore upload section if hidden by demo
+  document.getElementById('uploadCollapse').style.display = '';
+  document.getElementById('uploadDivider').style.display = '';
+
+  ['productDesc','htsInput','productValue','dutyOverride','unitQty'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ratePreview').classList.remove('show');;
+  document.getElementById('shippingCost').value='0';
+  document.getElementById('insuranceCost').value='0';
+  document.getElementById('originCountry').value='';
+  document.getElementById('destCountry').value='US';
+  document.getElementById('ftaSelect').value='none';
+  document.getElementById('currency').value='USD';
+  document.getElementById('exchangeRate').value='1.00';
+  selectedHTS={code:'',rate:null,cn301:null,desc:''};
+  clearFile();
+  document.getElementById('resultPlaceholder').style.display='block';
+  document.getElementById('resultBody').style.display='none';
+  document.getElementById('deMinWarning').style.display='none';
+  document.getElementById('classifyResult').style.display='none';
+  document.getElementById('extractedSection').style.display='none';
+  const eb = document.getElementById('extractBtn');
+  eb.style.background = ''; eb.querySelector('.btn-text').textContent = 'Extract with AI';
+}
+
+// Drag & drop
+const zone = document.getElementById('uploadZone');
+['dragenter','dragover'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.add('drag-over');}));
+['dragleave','drop'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.remove('drag-over');}));
+zone.addEventListener('drop',ev=>{const f=ev.dataTransfer.files[0];if(f){const dt=new DataTransfer();dt.items.add(f);document.getElementById('fileInput').files=dt.files;handleFile(document.getElementById('fileInput'));}});
 </script>
 </body>
 </html>
