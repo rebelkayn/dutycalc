@@ -1130,7 +1130,7 @@ async function searchHTS(val) {
       const s301val = (r.cn_301||r.cn301||0);
       const s301 = (origin==='CN'&&s301val>0)?s301val:0;
       const ch = parseInt((r.code||'').replace(/\./g,'').substring(0,2))||0;
-      const s232 = (ch===72||ch===73||ch===76)?25:0;
+      const s232 = (ch===72||ch===73||ch===76||ch===87)?25:0;
       const s122 = 15;
       const eff = r.rate+s301+s232+s122;
       let rateStr = 'Base '+r.rate+'%';
@@ -1179,7 +1179,7 @@ function updateRatePreview() {
   const ftaApplied = (fta==='usmca'&&(origin==='MX'||origin==='CA')) || (fta==='singapore'&&origin==='SG');
   const s301 = (origin === 'CN' && !ftaApplied) ? (selectedHTS.cn301 || 0) : 0;
   const ch = parseInt(selectedHTS.code.replace(/\./g,'').substring(0,2)) || 0;
-  const s232 = (!ftaApplied && (ch===72||ch===73||ch===76)) ? 25 : 0;
+  const s232 = (!ftaApplied && (ch===72||ch===73||ch===76||ch===87)) ? 25 : 0;
   const s122 = ftaApplied ? 0 : 15;
   const base = ftaApplied ? 0 : (selectedHTS.rate || 0);
   const eff = base + s301 + s232 + s122;
@@ -1225,7 +1225,7 @@ async function classifyDescription() {
         const o=document.getElementById('originCountry').value;
         const s301=data.cn_301_rate>0&&o==='CN'?data.cn_301_rate:0;
         const ch=parseInt((data.hts_code||'').replace(/\./g,'').substring(0,2))||0;
-        const s232=(ch===72||ch===73||ch===76)?25:0;
+        const s232=(ch===72||ch===73||ch===76||ch===87)?25:0;
         const s122=15;
         const eff=data.base_rate+s301+s232+s122;
         let t='Base '+data.base_rate+'%';
@@ -1268,7 +1268,7 @@ async function classifyDescription() {
             const o=document.getElementById('originCountry').value;
             const s301=match.cn301>0&&o==='CN'?match.cn301:0;
             const ch=parseInt(match.code.replace(/\./g,'').substring(0,2))||0;
-            const s232=(ch===72||ch===73||ch===76)?25:0;
+            const s232=(ch===72||ch===73||ch===76||ch===87)?25:0;
             const s122=15;
             const eff=match.rate+s301+s232+s122;
             let t='Base '+match.rate+'%';
@@ -1340,7 +1340,7 @@ async function calculate() {
     if (fta==='singapore'&&origin==='SG') { base=0; cn301=0; ftaApplied=true; ftaName='US-Singapore FTA'; }
     const s301 = (origin==='CN'&&!ftaApplied) ? cn301 : 0;
     const ch = parseInt(hts.replace(/\./g,'').substring(0,2))||0;
-    const s232 = (!ftaApplied && (ch===72||ch===73||ch===76)) ? 25 : 0;
+    const s232 = (!ftaApplied && (ch===72||ch===73||ch===76||ch===87)) ? 25 : 0;
     const s122 = ftaApplied ? 0 : 15;
     const eff = base+s301+s232+s122, duty = pUSD*(eff/100), mpf = Math.min(614.35,Math.max(32.71,pUSD*0.003464));
     renderResults({ de_minimis:false, hts_code:hts, hts_desc:entry.desc, base_duty_rate:base, china_301_surcharge:s301, section_232:s232, section_122:s122, effective_duty_rate:eff, product_value_usd:pUSD, shipping_usd:sUSD, insurance_usd:iUSD, taxable_base_usd:pUSD, valuation_method:'FOB', duty_amount:duty, mpf:mpf, vat_amount:0, vat_rate:0, total_duties:duty+mpf, total_landed_usd:pUSD+sUSD+iUSD+duty+mpf, fta_applied:ftaApplied, fta_name:ftaName, db_match:!!HTS_DB.find(r=>r.code===hts), currency:curr, dest_name:'United States', notes:'Local fallback — FOB valuation. No federal VAT.' });
@@ -1368,7 +1368,7 @@ function renderResults(d) {
   }
 
   if (d.china_301_surcharge > 0) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>China origin — <strong>Section 301 +${d.china_301_surcharge}%</strong> added.</span></div>`;
-  if (d.section_232 > 0) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>Steel/aluminum — <strong>Section 232 +${d.section_232}%</strong> added.</span></div>`;
+  if (d.section_232 > 0) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>Steel/aluminum/auto parts — <strong>Section 232 +${d.section_232}%</strong> added.</span></div>`;
   if (d.section_122 > 0) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span><strong>Section 122 +${d.section_122}%</strong> — temporary universal surcharge (expires ~July 2026).</span></div>`;
   if (d.fta_applied) h += `<div class="flag flag-green"><span class="flag-icon">✓</span><span><strong>${d.fta_name}</strong> — preferential rate applied. Section 122 waived.</span></div>`;
   if (d.effective_duty_rate > 40 && !d.fta_applied) h += `<div class="flag flag-amber"><span class="flag-icon">!</span><span>High rate (${pct(d.effective_duty_rate)}). Verify HTS classification.</span></div>`;

@@ -663,10 +663,10 @@ def calculate():
         if dest_country == "US" and origin_country == "CN" and not fta_applied and cn_301 > 0:
             china_surcharge = cn_301
 
-        # Section 232 (US steel/aluminum only — chapters 72, 73, 76)
+        # Section 232 (US steel/aluminum ch 72,73,76 + auto parts ch 87)
         section_232 = 0.0
         chapter = int(str(hts_code).replace(".", "")[:2]) if hts_code and str(hts_code).replace(".", "")[:2].isdigit() else 0
-        if dest_country == "US" and not fta_applied and chapter in (72, 73, 76):
+        if dest_country == "US" and not fta_applied and chapter in (72, 73, 76, 87):
             section_232 = 25.0
 
         # Section 122 temporary surcharge (15%, effective Feb 20 2026, 150-day limit → ~July 20 2026)
