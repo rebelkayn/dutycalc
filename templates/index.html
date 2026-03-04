@@ -695,7 +695,8 @@ async function searchHTS(val) {
   htsTimer = setTimeout(async () => {
     let results = [];
     try {
-      const res = await fetch(`/api/hts-search?q=${encodeURIComponent(val)}`);
+      const dest = document.getElementById('destCountry').value || 'US';
+      const res = await fetch(`/api/hts-search?q=${encodeURIComponent(val)}&dest=${dest}`);
       if (res.ok) results = await res.json();
     } catch(e) {}
     // Fall back to local DB if API unavailable or returned nothing
@@ -837,7 +838,7 @@ async function calculate() {
     if (fta==='singapore'&&origin==='SG') { base=0; cn301=0; ftaApplied=true; ftaName='US-Singapore FTA'; }
     const s301 = (origin==='CN'&&!ftaApplied) ? cn301 : 0;
     const eff = base+s301, duty = pUSD*(eff/100), mpf = Math.min(614.35,Math.max(32.71,pUSD*0.003464));
-    renderResults({ de_minimis:false, hts_code:hts, hts_desc:entry.desc, base_duty_rate:base, china_301_surcharge:s301, effective_duty_rate:eff, product_value_usd:pUSD, shipping_usd:sUSD, insurance_usd:iUSD, taxable_base_usd:pUSD, duty_amount:duty, total_duties:duty+mpf, total_landed_usd:pUSD+sUSD+iUSD+duty+mpf, fta_applied:ftaApplied, fta_name:ftaName, db_match:!!HTS_DB.find(r=>r.code===hts), currency:curr });
+    renderResults({ de_minimis:false, hts_code:hts, hts_desc:entry.desc, base_duty_rate:base, china_301_surcharge:s301, effective_duty_rate:eff, product_value_usd:pUSD, shipping_usd:sUSD, insurance_usd:iUSD, taxable_base_usd:pUSD, valuation_method:'FOB', duty_amount:duty, mpf:mpf, vat_amount:0, vat_rate:0, total_duties:duty+mpf, total_landed_usd:pUSD+sUSD+iUSD+duty+mpf, fta_applied:ftaApplied, fta_name:ftaName, db_match:!!HTS_DB.find(r=>r.code===hts), currency:curr, dest_name:'United States', notes:'Local fallback — FOB valuation. No federal VAT.' });
   }
   btn.classList.remove('btn-loading');
 }
@@ -877,7 +878,10 @@ function renderResults(d) {
   body.style.display = 'block';
   const fmt = n => '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
   const pct = n => n.toFixed(2)+'%';
-  const mpf = Math.min(614.35, Math.max(32.71, d.taxable_base_usd * 0.003464));
+  const mpf = d.mpf ?? Math.min(614.35, Math.max(32.71, d.taxable_base_usd * 0.003464));
+  const vatAmount = d.vat_amount ?? 0;
+  const vatName = d.vat_name || 'VAT';
+  const vatRate = d.vat_rate ?? 0;
   let h = '<div class="result-anim">';
 
   if (d.de_minimis) {
@@ -891,29 +895,32 @@ function renderResults(d) {
   if (d.effective_duty_rate > 25 && !d.fta_applied) h += `<div class="flag flag-amber"><span class="flag-icon">!</span><span>High rate (${pct(d.effective_duty_rate)}). Consider verifying HTS classification.</span></div>`;
   if (!d.db_match && d.hts_code) h += `<div class="flag flag-amber"><span class="flag-icon">i</span><span>Code <strong>${d.hts_code}</strong> not in verified DB — rate is estimated.</span></div>`;
   const dest = document.getElementById('destCountry').value;
-  if (dest && dest !== 'US') h += `<div class="flag flag-amber"><span class="flag-icon">🌐</span><span>Destination set to <strong>${dest}</strong>. Duty rates shown are US-based (USITC). Rates for other destinations vary — contact a local broker.</span></div>`;
+  const noDb = ['AE','IN','BR','KR','MX','CH'];
+  if (dest && dest !== 'US' && noDb.includes(dest)) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>Destination <strong>${dest}</strong> — estimated rates only. No official tariff DB loaded. Consult a local broker for binding figures.</span></div>`;
 
   if (d.hts_code) h += `<div class="hts-chip"><div class="hts-chip-code">${d.hts_code}</div><div><div class="hts-chip-desc">${d.hts_desc||'Unverified code'}</div><div class="hts-chip-rate">Base ${pct(d.base_duty_rate)}${d.china_301_surcharge>0?` + ${pct(d.china_301_surcharge)} S.301`:''} = <strong>${pct(d.effective_duty_rate)}</strong> effective · FOB</div></div></div>`;
 
   const curr = d.currency!=='USD'?` (${d.currency})`:'';
+  const valuationLabel = (d.valuation_method === 'CIF') ? 'CIF Taxable Base' : 'FOB Taxable Base';
   h += `<div class="breakdown">
     <div class="br-row"><span class="lbl">Product Value${curr}</span><span class="val">${fmt(d.product_value_usd)}</span></div>
     ${d.shipping_usd>0?`<div class="br-row"><span class="lbl">Shipping</span><span class="val">${fmt(d.shipping_usd)}</span></div>`:''}
     ${d.insurance_usd>0?`<div class="br-row"><span class="lbl">Insurance</span><span class="val">${fmt(d.insurance_usd)}</span></div>`:''}
-    <div class="br-row sub"><span class="lbl">FOB Taxable Base</span><span class="val">${fmt(d.taxable_base_usd)}</span></div>
+    <div class="br-row sub"><span class="lbl">${valuationLabel}</span><span class="val">${fmt(d.taxable_base_usd)}</span></div>
     <div class="br-row"><span class="lbl">Customs Duty (${pct(d.effective_duty_rate)})</span><span class="val">${fmt(d.duty_amount)}</span></div>
-    <div class="br-row"><span class="lbl">MPF (0.3464%)</span><span class="val">${fmt(mpf)}</span></div>
-    <div class="br-row sub"><span class="lbl">Total Duties & Fees</span><span class="val">${fmt(d.total_duties + mpf)}</span></div>
-    <div class="br-total"><span class="lbl">Total Landed Cost</span><span class="val">${fmt(d.total_landed_usd + mpf)}</span></div>
-  </div>`;
+    ${mpf>0?`<div class="br-row"><span class="lbl">MPF (0.3464%)</span><span class="val">${fmt(mpf)}</span></div>`:''}
+    ${vatAmount>0?`<div class="br-row"><span class="lbl">${vatName} (${vatRate}%)</span><span class="val">${fmt(vatAmount)}</span></div>`:''}
+    <div class="br-row sub"><span class="lbl">Total Duties & Fees</span><span class="val">${fmt(d.duty_amount + mpf + vatAmount)}</span></div>
+    <div class="br-total"><span class="lbl">Total Landed Cost</span><span class="val">${fmt(d.total_landed_usd)}</span></div>
+  </div>\`;
 
-  h += `<p class="text-muted mt-10">FOB valuation · MPF included · No US federal VAT · State sales tax excluded</p>`;
+  h += `<p class="text-muted mt-10">${d.notes || (d.valuation_method+' valuation')}</p>`;
 
   // Per-unit breakdown if quantity entered
   const qty = parseInt(document.getElementById('unitQty').value) || 0;
   if (qty > 0 && !d.de_minimis) {
     const perUnit = d.total_landed_usd / qty;
-    const dutyPerUnit = (d.duty_amount + mpf) / qty;
+    const dutyPerUnit = (d.duty_amount + mpf + vatAmount) / qty;
     const prodPerUnit = d.product_value_usd / qty;
     h += `<div class="breakdown" style="margin-top:10px">
       <div class="br-row"><span class="lbl">Units</span><span class="val">${qty.toLocaleString()}</span></div>
@@ -935,7 +942,7 @@ function copyResults() {
   if (!d) return;
   const fmt = n => '$'+Number(n).toFixed(2);
   const mpf = Math.min(614.35,Math.max(32.71,d.taxable_base_usd*0.003464));
-  const text = `iDUTIES — LANDED COST\nHTS: ${d.hts_code} — ${d.hts_desc}\nDuty Rate: ${d.effective_duty_rate}%\nDuty: ${fmt(d.duty_amount)} · MPF: ${fmt(mpf)}\n────────────────\nTotal Landed: ${fmt(d.total_landed_usd+mpf)}\n(FOB · No US federal VAT)`;
+  const text = `iDUTIES — LANDED COST\nDestination: ${d.dest_name||''}\nHTS: ${d.hts_code} — ${d.hts_desc}\nDuty: ${d.effective_duty_rate}% = ${fmt(d.duty_amount)}${mpf>0?' · MPF: '+fmt(mpf):''}${vatAmount>0?' · '+vatName+': '+fmt(vatAmount):''}\n────────────────\nTotal Landed: ${fmt(d.total_landed_usd)}\n(${d.notes||''})`;
   navigator.clipboard.writeText(text).then(() => { const b=event.target; b.textContent='Copied ✓'; setTimeout(()=>b.textContent='Copy Summary',2000); });
 }
 
