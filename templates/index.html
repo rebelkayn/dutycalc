@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iDuties — US Import Duty Calculator</title>
+<title>iDuties — Global Duty Assessment</title>
+<meta name="description" content="Instant global import duty calculator. Enter a product, origin country, and destination — get an accurate landed cost breakdown including tariffs, MPF, and Section 301 surcharges.">
+<meta name="keywords" content="import duty calculator, landed cost, HTS code, tariff calculator, customs duty, Section 301, global trade">
+<meta property="og:title" content="iDuties — Global Duty Assessment">
+<meta property="og:description" content="Instant import duty and landed cost calculator for global trade. Powered by USITC HTS data.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iduties.ai">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iDuties — Global Duty Assessment">
+<meta name="twitter:description" content="Instant import duty and landed cost calculator for global trade.">`
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -91,13 +100,43 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .split-divider { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px 0; }
 .split-divider-line { flex: 1; width: 1px; background: var(--border); }
 .split-divider-or { font-size: 0.65rem; font-weight: 700; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 3px 6px; letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0; }
-@media (max-width: 600px) {
-  .split-panel { grid-template-columns: 1fr; }
-  .split-divider { flex-direction: row; padding: 0 20px; height: 32px; }
-  .split-divider-line { flex: 1; height: 1px; width: auto; }
-}
 
-/* ── UPLOAD ───────────────────────────────────────────── */
+/* ── MOBILE ───────────────────────────────────────────── */
+@media (max-width: 680px) {
+  /* Nav */
+  .nav { padding: 0 14px; height: 48px; }
+  .nav-ticker { display: none; }
+  .nav-links { gap: 0; }
+  .nav-link { padding: 4px 8px; font-size: 0.75rem; }
+  /* Hero */
+  .hero { padding: 24px 16px 18px; }
+  .hero h1 { font-size: 1.65rem; }
+  /* Main */
+  .main { padding: 0 10px 60px; }
+  /* Demo bar */
+  .demo-bar { flex-wrap: wrap; gap: 8px; padding: 9px 12px; text-align: center; }
+  /* Cards */
+  .card-header { padding: 12px 14px 10px; }
+  .card-body { padding: 14px; }
+  /* Split panel — stack vertically */
+  .split-panel { grid-template-columns: 1fr; min-height: auto; }
+  .split-left { padding: 14px 14px 0; }
+  .split-right { padding: 0 14px 14px; }
+  .split-divider { flex-direction: row; padding: 8px 14px; height: auto; }
+  .split-divider-line { flex: 1; height: 1px; width: auto; }
+  /* Upload zone — shorter on mobile */
+  .upload-zone { min-height: 110px; padding: 14px 12px; }
+  .upload-icon { font-size: 1.4rem; }
+  /* Rate preview — scrollable */
+  .rate-preview { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .rp-desc { display: none; }
+  /* Fields */
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 400px) {
+  .nav-brand { font-size: 0.92rem; }
+  .hero h1 { font-size: 1.4rem; }
+}
 .upload-zone { border: 1.5px dashed var(--border2); border-radius: var(--radius-sm); padding: 24px 14px; text-align: center; cursor: pointer; transition: all 0.18s; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 190px; }
 .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-soft); }
@@ -124,7 +163,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
 .field-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .field-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; }
-@media (max-width: 500px) { .field-row, .field-row-3 { grid-template-columns: 1fr; } }
 
 /* ── HTS SEARCH ───────────────────────────────────────── */
 .hts-wrap { position: relative; }
@@ -172,6 +210,19 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .hts-chip-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.83rem; color: var(--blue); font-weight: 700; flex-shrink: 0; padding-top: 1px; }
 .hts-chip-desc { font-size: 0.77rem; color: var(--ink); line-height: 1.4; }
 .hts-chip-rate { font-size: 0.66rem; color: var(--muted); margin-top: 3px; }
+
+/* ── RATE PREVIEW ─────────────────────────────────────── */
+.rate-preview { display: none; align-items: center; gap: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 6px; font-size: 0.72rem; }
+.rate-preview.show { display: flex; }
+.rp-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.7rem; font-weight: 700; color: var(--blue); padding: 6px 10px; border-right: 1px solid var(--border); white-space: nowrap; background: var(--blue-soft); }
+.rp-desc { color: var(--muted); padding: 6px 10px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); }
+.rp-rates { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
+.rp-rate { padding: 6px 9px; border-right: 1px solid var(--border); white-space: nowrap; }
+.rp-rate:last-child { border: none; }
+.rp-rate .rl { color: var(--muted); font-size: 0.65rem; display: block; }
+.rp-rate .rv { font-weight: 700; color: var(--ink); font-size: 0.75rem; }
+.rp-rate.eff .rv { color: var(--blue); }
+.rp-rate.s301 .rv { color: #92400e; }
 
 /* ── BREAKDOWN ────────────────────────────────────────── */
 .breakdown { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 10px; }
@@ -308,10 +359,19 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
               <input type="text" id="htsInput" placeholder="Search or type…" oninput="searchHTS(this.value)" autocomplete="off">
               <div class="hts-dropdown" id="htsDropdown"></div>
             </div>
+            <div class="rate-preview" id="ratePreview">
+              <div class="rp-code" id="rp-code">—</div>
+              <div class="rp-desc" id="rp-desc">—</div>
+              <div class="rp-rates">
+                <div class="rp-rate"><span class="rl">Base</span><span class="rv" id="rp-base">—</span></div>
+                <div class="rp-rate s301" id="rp-301-wrap"><span class="rl">S.301</span><span class="rv" id="rp-301">—</span></div>
+                <div class="rp-rate eff"><span class="rl">Effective</span><span class="rv" id="rp-eff">—</span></div>
+              </div>
+            </div>
           </div>
           <div class="field">
             <label>Country of Origin</label>
-            <select id="originCountry">
+            <select id="originCountry" onchange="updateRatePreview()">
               <option value="">Select…</option>
               <option value="CN">🇨🇳 China</option>
               <option value="VN">🇻🇳 Vietnam</option>
@@ -333,6 +393,29 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
               <option value="US">🇺🇸 United States</option>
               <option value="GB">🇬🇧 United Kingdom</option>
               <option value="Other">🌐 Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Destination Country</label>
+            <select id="destCountry">
+              <option value="US" selected>🇺🇸 United States</option>
+              <option value="GB">🇬🇧 United Kingdom</option>
+              <option value="DE">🇩🇪 Germany</option>
+              <option value="FR">🇫🇷 France</option>
+              <option value="CA">🇨🇦 Canada</option>
+              <option value="AU">🇦🇺 Australia</option>
+              <option value="JP">🇯🇵 Japan</option>
+              <option value="NL">🇳🇱 Netherlands</option>
+              <option value="SG">🇸🇬 Singapore</option>
+              <option value="AE">🇦🇪 UAE</option>
+              <option value="MX">🇲🇽 Mexico</option>
+              <option value="BR">🇧🇷 Brazil</option>
+              <option value="KR">🇰🇷 South Korea</option>
+              <option value="IN">🇮🇳 India</option>
+              <option value="IT">🇮🇹 Italy</option>
+              <option value="ES">🇪🇸 Spain</option>
+              <option value="CH">🇨🇭 Switzerland</option>
+              <option value="SE">🇸🇪 Sweden</option>
             </select>
           </div>
           <button class="btn-ghost" onclick="classifyDescription()">
@@ -389,6 +472,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
             <label>Insurance</label>
             <input type="number" id="insuranceCost" placeholder="0.00" min="0" step="0.01" value="0">
           </div>
+        </div>
+        <div class="field">
+          <label>Unit Quantity <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — for per-unit cost breakdown)</span></label>
+          <input type="number" id="unitQty" placeholder="e.g. 500" min="1" step="1">
         </div>
         <div class="flag flag-green" id="deMinWarning">
           <span class="flag-icon">★</span>
@@ -623,6 +710,27 @@ function selectHTS(code,desc,rate,cn301) {
   selectedHTS = {code,desc,rate,cn301};
   document.getElementById('htsInput').value = code;
   document.getElementById('htsDropdown').classList.remove('show');
+  updateRatePreview();
+}
+
+function updateRatePreview() {
+  const preview = document.getElementById('ratePreview');
+  if (!selectedHTS.code || selectedHTS.rate === null) { preview.classList.remove('show'); return; }
+  const origin = document.getElementById('originCountry').value;
+  const s301 = (origin === 'CN') ? (selectedHTS.cn301 || 0) : 0;
+  const eff = (selectedHTS.rate || 0) + s301;
+  document.getElementById('rp-code').textContent = selectedHTS.code;
+  document.getElementById('rp-desc').textContent = selectedHTS.desc || '—';
+  document.getElementById('rp-base').textContent = (selectedHTS.rate || 0).toFixed(1) + '%';
+  const wrap301 = document.getElementById('rp-301-wrap');
+  if (s301 > 0) {
+    document.getElementById('rp-301').textContent = '+' + s301.toFixed(1) + '%';
+    wrap301.style.display = '';
+  } else {
+    wrap301.style.display = 'none';
+  }
+  document.getElementById('rp-eff').textContent = eff.toFixed(1) + '%';
+  preview.classList.add('show');
 }
 document.addEventListener('click', e => { if (!e.target.closest('.hts-wrap')) document.getElementById('htsDropdown').classList.remove('show'); });
 
@@ -692,6 +800,7 @@ async function calculate() {
       insurance:      parseFloat(document.getElementById('insuranceCost').value)||0,
       hts_code:       selectedHTS.code||document.getElementById('htsInput').value.trim(),
       origin_country: document.getElementById('originCountry').value,
+      dest_country:   document.getElementById('destCountry').value,
       fta:            document.getElementById('ftaSelect').value,
       currency:       document.getElementById('currency').value,
       exchange_rate:  parseFloat(document.getElementById('exchangeRate').value)||1,
@@ -734,7 +843,9 @@ function loadDemo() {
   document.getElementById('shippingCost').value = '320';
   document.getElementById('insuranceCost').value = '0';
   document.getElementById('ftaSelect').value = 'none';
+  document.getElementById('unitQty').value = '500';
   selectedHTS = { code:'6109.10.00', desc:'T-shirts, singlets and other vests, of cotton, knitted', rate:16.5, cn301:7.5 };
+  updateRatePreview();
   document.getElementById('classifyResult').style.display = 'block';
   document.getElementById('classifyResult').innerHTML = `<div class="classify-box">
     <div class="classify-box-head"><span class="classify-code">6109.10.00</span><span class="confidence conf-high">high</span></div>
@@ -765,6 +876,8 @@ function renderResults(d) {
   if (d.fta_applied) h += `<div class="flag flag-green"><span class="flag-icon">✓</span><span><strong>${d.fta_name}</strong> — preferential rate applied.</span></div>`;
   if (d.effective_duty_rate > 25 && !d.fta_applied) h += `<div class="flag flag-amber"><span class="flag-icon">!</span><span>High rate (${pct(d.effective_duty_rate)}). Consider verifying HTS classification.</span></div>`;
   if (!d.db_match && d.hts_code) h += `<div class="flag flag-amber"><span class="flag-icon">i</span><span>Code <strong>${d.hts_code}</strong> not in verified DB — rate is estimated.</span></div>`;
+  const dest = document.getElementById('destCountry').value;
+  if (dest && dest !== 'US') h += `<div class="flag flag-amber"><span class="flag-icon">🌐</span><span>Destination set to <strong>${dest}</strong>. Duty rates shown are US-based (USITC). Rates for other destinations vary — contact a local broker.</span></div>`;
 
   if (d.hts_code) h += `<div class="hts-chip"><div class="hts-chip-code">${d.hts_code}</div><div><div class="hts-chip-desc">${d.hts_desc||'Unverified code'}</div><div class="hts-chip-rate">Base ${pct(d.base_duty_rate)}${d.china_301_surcharge>0?` + ${pct(d.china_301_surcharge)} S.301`:''} = <strong>${pct(d.effective_duty_rate)}</strong> effective · FOB</div></div></div>`;
 
@@ -781,6 +894,21 @@ function renderResults(d) {
   </div>`;
 
   h += `<p class="text-muted mt-10">FOB valuation · MPF included · No US federal VAT · State sales tax excluded</p>`;
+
+  // Per-unit breakdown if quantity entered
+  const qty = parseInt(document.getElementById('unitQty').value) || 0;
+  if (qty > 0 && !d.de_minimis) {
+    const perUnit = d.total_landed_usd / qty;
+    const dutyPerUnit = (d.duty_amount + mpf) / qty;
+    const prodPerUnit = d.product_value_usd / qty;
+    h += `<div class="breakdown" style="margin-top:10px">
+      <div class="br-row"><span class="lbl">Units</span><span class="val">${qty.toLocaleString()}</span></div>
+      <div class="br-row"><span class="lbl">Product cost / unit</span><span class="val">${fmt(prodPerUnit)}</span></div>
+      <div class="br-row"><span class="lbl">Duty + MPF / unit</span><span class="val">${fmt(dutyPerUnit)}</span></div>
+      <div class="br-total"><span class="lbl">Landed cost / unit</span><span class="val">${fmt(perUnit)}</span></div>
+    </div>`;
+  }
+
   h += `<button class="btn btn-secondary" style="margin-top:10px" onclick="copyResults()">Copy Summary</button>`;
   h += '</div>';
   body.innerHTML = h;
@@ -799,10 +927,12 @@ function copyResults() {
 
 // Reset
 function resetAll() {
-  ['productDesc','htsInput','productValue','dutyOverride'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['productDesc','htsInput','productValue','dutyOverride','unitQty'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ratePreview').classList.remove('show');;
   document.getElementById('shippingCost').value='0';
   document.getElementById('insuranceCost').value='0';
   document.getElementById('originCountry').value='';
+  document.getElementById('destCountry').value='US';
   document.getElementById('ftaSelect').value='none';
   document.getElementById('currency').value='USD';
   document.getElementById('exchangeRate').value='1.00';
