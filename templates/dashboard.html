@@ -52,6 +52,22 @@ body {
 .nav-link:hover { color: var(--ink); background: var(--surface2); }
 .nav-link.active { color: var(--ink); background: var(--surface); border-color: var(--border2); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
 .nav-spacer { flex: 1; }
+.nav-ticker {
+  display: none; align-items: center;
+  border: 1px solid var(--border); border-radius: var(--radius-xs);
+  background: var(--surface); overflow: hidden;
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; font-size: 0.72rem; font-weight: 500;
+  border-right: 1px solid var(--border); white-space: nowrap;
+}
+.ticker-item:last-child { border: none; }
+.ticker-label { color: var(--muted); }
+.ticker-value { color: var(--ink); font-variant-numeric: tabular-nums; }
+.ticker-dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+.s301-active { color: var(--amber); }
+@media (min-width: 860px) { .nav-ticker { display: flex; } }
 .nav-user {
   display: flex; align-items: center; gap: 10px; font-size: 0.82rem;
 }
@@ -252,11 +268,16 @@ body {
     <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
   <div class="nav-links">
+    <a class="nav-link" href="/">Home</a>
     <a class="nav-link" href="/calculator">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund</a>
     <a class="nav-link active" href="/dashboard">Dashboard</a>
   </div>
   <div class="nav-spacer"></div>
+  <div class="nav-ticker">
+    <div class="ticker-item"><div class="ticker-dot"></div><span class="ticker-label">S.301</span><span class="ticker-value s301-active">Active</span></div>
+    <div class="ticker-item"><span class="ticker-label">De Min</span><span class="ticker-value">$800</span></div>
+  </div>
   <div class="nav-user">
     <span class="nav-user-email">{{ user.email }}</span>
     <a class="nav-signout" href="/signout">Sign Out</a>

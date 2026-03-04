@@ -124,6 +124,7 @@ body {
 /* ═══════ HERO CTA ═══════ */
 .hero-cta {
   text-align: center; padding: 56px 20px 48px;
+  max-width: 800px; margin: 0 auto;
 }
 .hero-tagline {
   font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 700;
@@ -283,6 +284,7 @@ body {
 /* ═══════ BOTTOM CTA ═══════ */
 .bottom-cta {
   text-align: center; padding: 40px 20px 80px;
+  max-width: 800px; margin: 0 auto;
 }
 .bottom-cta h2 {
   font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 700;
@@ -290,6 +292,7 @@ body {
 }
 .bottom-cta p {
   font-size: 0.9rem; color: var(--muted); margin-bottom: 24px;
+  max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.55;
 }
 
 /* ═══════ FOOTER ═══════ */
@@ -312,6 +315,7 @@ body {
     <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
   <div class="nav-links">
+    <a class="nav-link active" href="/">Home</a>
     <a class="nav-link" href="/calculator">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund</a>
     {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}

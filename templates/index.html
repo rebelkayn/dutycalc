@@ -291,8 +291,8 @@ body {
 @media (max-width: 500px) { .hero { padding: 28px 16px 20px; } }
 
 /* ═══════ MAIN ═══════ */
-.main { max-width: 800px; margin: 0 auto; padding: 0 16px 80px; }
-@media (min-width: 600px) { .main { padding: 0 20px 80px; } }
+.main { max-width: 800px; margin: 0 auto; padding: 0 20px 80px; }
+@media (max-width: 500px) { .main { padding: 0 16px 60px; } }
 
 /* ═══════ DEMO BAR ═══════ */
 .demo-bar {
@@ -546,9 +546,11 @@ body {
 
 /* ═══════ FOOTER ═══════ */
 .footer {
-  max-width: 800px; margin: 0 auto; padding: 20px 16px 32px;
+  max-width: 800px; margin: 0 auto; padding: 20px 20px 32px;
   display: flex; justify-content: space-between; align-items: center;
   font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border);
+}
+@media (max-width: 500px) { .footer { padding: 20px 16px 32px; } }
   flex-wrap: wrap; gap: 8px;
 }
 .footer a { color: var(--blue); text-decoration: none; font-weight: 500; }
@@ -563,11 +565,12 @@ body {
 
 <!-- ═══════ NAV ═══════ -->
 <nav class="nav">
-  <div class="nav-brand">
+  <a class="nav-brand" href="/">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
     <span>iDuties<span class="nav-dot">.ai</span></span>
-  </div>
+  </a>
   <div class="nav-links">
+    <a class="nav-link" href="/">Home</a>
     <a class="nav-link active" href="/calculator">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund</a>
     {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
@@ -576,9 +579,6 @@ body {
   <div class="nav-ticker">
     <div class="ticker-item"><div class="ticker-dot"></div><span class="ticker-label">S.301</span><span class="ticker-value s301-active">Active</span></div>
     <div class="ticker-item"><span class="ticker-label">De Min</span><span class="ticker-value">$800</span></div>
-    <div class="ticker-item"><span class="ticker-label">EUR</span><span class="ticker-value" id="rate-EUR">—</span></div>
-    <div class="ticker-item"><span class="ticker-label">CNY</span><span class="ticker-value" id="rate-CNY">—</span></div>
-    <div class="ticker-item"><span class="ticker-label">PHP</span><span class="ticker-value" id="rate-PHP">—</span></div>
   </div>
   {% if user %}
     <a href="/signout" class="nav-auth-btn" title="Sign out">{{ user.email[:20] }}</a>
@@ -623,8 +623,7 @@ body {
         <div class="refund-field">
           <label>Origin Country</label>
           <select id="refundOrigin">
-            <option value="">Select…</option>
-            <option value="CN">🇨🇳 China</option>
+            <option value="CN" selected>🇨🇳 China</option>
             <option value="CA">🇨🇦 Canada</option>
             <option value="MX">🇲🇽 Mexico</option>
             <option value="EU">🇪🇺 European Union</option>
@@ -805,8 +804,7 @@ body {
             <div class="field">
               <label>Country of Origin</label>
               <select id="originCountry" onchange="updateRatePreview()">
-                <option value="">Select…</option>
-                <option value="CN">🇨🇳 China</option>
+                <option value="CN" selected>🇨🇳 China</option>
                 <option value="VN">🇻🇳 Vietnam</option>
                 <option value="IN">🇮🇳 India</option>
                 <option value="BD">🇧🇩 Bangladesh</option>
