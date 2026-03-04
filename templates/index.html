@@ -144,21 +144,6 @@ body {
 .ws-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 .ws-tab-icon { font-size: 0.9rem; }
 
-/* ═══════ IEEPA CONTEXT BAR ═══════ */
-.ieepa-context {
-  display: none; background: linear-gradient(135deg, #0C1D2E 0%, #162B44 100%);
-  color: rgba(255,255,255,0.85); padding: 14px 20px;
-}
-.ieepa-context.show { display: block; }
-.ieepa-context-inner {
-  max-width: 800px; margin: 0 auto;
-  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
-}
-.ieepa-context-text { font-size: 0.8rem; line-height: 1.5; }
-.ieepa-context-text strong { color: #fff; }
-.ieepa-context-link { font-size: 0.78rem; font-weight: 600; color: #60A5FA; text-decoration: none; white-space: nowrap; }
-.ieepa-context-link:hover { color: #93C5FD; }
-
 /* ═══════ WORKSPACE PANELS ═══════ */
 .ws-panel { display: none; }
 .ws-panel.active { display: block; }
@@ -570,7 +555,6 @@ body.embed { background: #fff; }
 body.embed .nav,
 body.embed .footer { display: none !important; }
 body.embed .ws-header { display: none !important; }
-body.embed .ieepa-context { display: none !important; }
 body.embed-calc .ws-panel:not(#panelCalc) { display: none !important; }
 body.embed-calc #panelCalc { display: block !important; }
 body.embed-calc .main { padding-top: 12px; }
@@ -587,8 +571,8 @@ body.embed-refund #panelRefund { display: block !important; }
     <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
   <div class="nav-links">
-    <a class="nav-link active" href="/calculator">Calculator</a>
-    <a class="nav-link" href="/refund-guide.html">Refund</a>
+    <a class="nav-link active" href="/calculator">Duty Calculator</a>
+    <a class="nav-link" href="/refund-guide.html">Refund Guide</a>
     {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
   </div>
   <div class="nav-spacer"></div>
@@ -619,7 +603,7 @@ body.embed-refund #panelRefund { display: block !important; }
     </div>
     <div class="ws-tabs">
       <button class="ws-tab active" onclick="switchWorkspace('calc', this)">
-        <span class="ws-tab-icon">📦</span> Calculator
+        <span class="ws-tab-icon">📦</span> Duty Calculator
       </button>
       <button class="ws-tab" onclick="switchWorkspace('refund', this)">
         <span class="ws-tab-icon">💰</span> Refund Estimator
@@ -631,19 +615,14 @@ body.embed-refund #panelRefund { display: block !important; }
   </div>
 </div>
 
-<!-- ═══════ IEEPA CONTEXT BAR (shows in refund/scan mode) ═══════ -->
-<div class="ieepa-context" id="ieepaContext">
-  <div class="ieepa-context-inner">
-    <div class="ieepa-context-text">
-      <strong>IEEPA tariffs ruled unlawful</strong> — Supreme Court, Feb 20, 2026. Over $175B in duties may be refundable. Importers have 180 days from liquidation to file.
-    </div>
-    <a class="ieepa-context-link" href="/refund-guide.html">Read the full guide →</a>
-  </div>
-</div>
-
 <!-- ═══════ REFUND PANEL ═══════ -->
 <div class="ws-panel" id="panelRefund">
   <div class="refund-inner">
+
+    <div class="demo-bar" style="margin-bottom:20px">
+      <span>⚖️ IEEPA tariffs ruled unlawful — $175B in duties may be refundable. Importers have 180 days from liquidation to file.</span>
+      <a href="/refund-guide.html" class="demo-btn demo-btn-fill" style="text-decoration:none">Read Guide</a>
+    </div>
 
     <div class="refund-grid">
       <div class="refund-field">
@@ -713,6 +692,11 @@ body.embed-refund #panelRefund { display: block !important; }
 <!-- ═══════ SCAN PANEL ═══════ -->
 <div class="ws-panel" id="panelScan">
   <div class="refund-inner">
+
+    <div class="demo-bar" style="margin-bottom:20px">
+      <span>📋 Upload CBP 7501 forms or ACE exports to identify IEEPA headings and calculate your refundable amount.</span>
+    </div>
+
     <h2 class="refund-h">IEEPA Recovery Scan</h2>
     <p class="scan-intro">Upload your CBP entry summaries (Form 7501) or ACE export data. Our AI will identify every IEEPA-specific tariff heading, calculate your total refundable amount, and generate a filing-ready worksheet.</p>
 
@@ -1587,12 +1571,6 @@ function switchWorkspace(mode, el) {
   const panelId = mode === 'calc' ? 'panelCalc' : mode === 'refund' ? 'panelRefund' : 'panelScan';
   const panel = document.getElementById(panelId);
   if (panel) panel.classList.add('active');
-  // Show IEEPA context bar for refund/scan modes
-  const ctx = document.getElementById('ieepaContext');
-  if (ctx) {
-    if (mode === 'refund' || mode === 'scan') ctx.classList.add('show');
-    else ctx.classList.remove('show');
-  }
   // Update title
   const titles = { calc: 'Duty Calculator', refund: 'Refund Estimator', scan: 'Recovery Scan' };
   const subs = {
