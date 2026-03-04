@@ -586,7 +586,14 @@ Product: {description}\nReference HTS codes:\n{hts_list}\nReturn ONLY the JSON o
             result["base_rate"]   = HTS_DB[hts_code]["rate"]
             result["cn_301_rate"] = HTS_DB[hts_code]["cn_301"]
         else:
-            result["db_match"] = False
+            # Try 8-digit parent
+            parent = '.'.join(hts_code.split('.')[:3])
+            if parent in HTS_DB:
+                result["db_match"]    = True
+                result["base_rate"]   = HTS_DB[parent]["rate"]
+                result["cn_301_rate"] = HTS_DB[parent]["cn_301"]
+            else:
+                result["db_match"] = False
         return jsonify(result)
     except json.JSONDecodeError:
         return jsonify({"error": "Could not parse AI response"}), 500
@@ -640,6 +647,10 @@ def calculate():
         # Tariff lookup
         tariff_db = _load_tariff_db(dest_country)
         db_entry  = tariff_db.get(hts_code, {})
+        if not db_entry:
+            # Try 8-digit parent
+            parent = '.'.join(hts_code.split('.')[:3])
+            db_entry = tariff_db.get(parent, {})
         base_rate = float(db_entry.get("rate", config.get("default_rate", 12.0))) if db_entry else config.get("default_rate", 12.0)
         cn_301    = float(db_entry.get("cn_301", 0.0)) if db_entry else 0.0
 

@@ -1162,17 +1162,41 @@ function selectHTS(code,desc,rate,cn301) {
 function handleManualHTS() {
   const val = document.getElementById('htsInput').value.trim();
   if (!val || val.length < 7) return;
-  // If user already selected from dropdown, don't override
   if (selectedHTS.code === val) return;
-  // Check local DB first
-  const local = HTS_DB.find(r => r.code === val);
+  // Exact match or 8-digit parent
+  const local = HTS_DB.find(r => r.code === val)
+    || HTS_DB.find(r => r.code === val.split('.').slice(0,3).join('.'));
   if (local) {
-    selectedHTS = { code:local.code, desc:local.desc, rate:local.rate, cn301:local.cn301 };
-  } else if (val.match(/^\d{4}\.\d{2}/)) {
-    // Valid HTS format but not in local DB — allow it with 0 rate (API will resolve)
-    selectedHTS = { code:val, desc:'', rate:0, cn301:0, manual:true };
+    selectedHTS = { code:val, desc:local.desc, rate:local.rate, cn301:local.cn301 };
+    updateRatePreview();
+    return;
   }
-  updateRatePreview();
+  // Code not found — show nearby suggestions
+  if (val.match(/^\d{4}\.\d{2}/)) {
+    const heading = val.split('.').slice(0,2).join('.');
+    const nearby = HTS_DB.filter(r => r.code.startsWith(heading)).slice(0, 6);
+    if (nearby.length) {
+      const dd = document.getElementById('htsDropdown');
+      dd.innerHTML = `<div style="padding:8px 12px;font-size:0.72rem;color:var(--amber);font-weight:600">Code ${val} not found. Did you mean:</div>` +
+        nearby.map(r => {
+          const origin = document.getElementById('originCountry').value;
+          const s301val = r.cn301||0;
+          const s301 = (origin==='CN'&&s301val>0)?s301val:0;
+          const ch = parseInt((r.code||'').replace(/\./g,'').substring(0,2))||0;
+          const s232 = (ch===72||ch===73||ch===76||ch===87)?25:0;
+          const s122 = 15;
+          const eff = r.rate+s301+s232+s122;
+          return `<div class="hts-opt" onclick="selectHTS('${r.code}','${(r.desc||'').replace(/'/g,"\\'")}',${r.rate},${s301val})">
+            <div class="hts-opt-code">${r.code}</div>
+            <div class="hts-opt-desc">${r.desc}</div>
+            <div class="hts-opt-rate">Base ${r.rate}% · Eff. ${eff.toFixed(1)}%</div>
+          </div>`;
+        }).join('');
+      dd.classList.add('show');
+    }
+    selectedHTS = { code:val, desc:'', rate:0, cn301:0, manual:true };
+    updateRatePreview();
+  }
 }
 
 function updateRatePreview() {
@@ -1338,7 +1362,8 @@ async function calculate() {
     const ovr = document.getElementById('dutyOverride').value;
     const pUSD = pv*rate, sUSD = sh*rate, iUSD = ins*rate;
     if (pUSD <= 800 && pUSD > 0) { renderResults({ de_minimis:true, message:'Value is under the $800 de minimis threshold — no duties apply.', total_landed_usd:pUSD+sUSD+iUSD, currency:curr }); btn.classList.remove('btn-loading'); return; }
-    const entry = HTS_DB.find(r=>r.code===hts) || (selectedHTS.code===hts ? {desc:selectedHTS.desc||'Custom classification',rate:selectedHTS.rate||0,cn301:selectedHTS.cn301||0} : { desc:'Unknown — use duty rate override', rate:0, cn301:0 });
+    let entry = HTS_DB.find(r=>r.code===hts) || HTS_DB.find(r=>r.code===hts.split('.').slice(0,3).join('.'));
+    if (!entry) entry = (selectedHTS.code===hts ? {desc:selectedHTS.desc||'Custom',rate:selectedHTS.rate||0,cn301:selectedHTS.cn301||0} : {desc:'Code not found — use duty rate override',rate:0,cn301:0});
     let base = ovr ? parseFloat(ovr) : entry.rate, cn301 = entry.cn301, ftaApplied=false, ftaName='';
     if (fta==='usmca'&&(origin==='MX'||origin==='CA')) { base=0; cn301=0; ftaApplied=true; ftaName='USMCA'; }
     if (fta==='singapore'&&origin==='SG') { base=0; cn301=0; ftaApplied=true; ftaName='US-Singapore FTA'; }
