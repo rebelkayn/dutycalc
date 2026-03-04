@@ -131,8 +131,11 @@ body {
 .ws-dot-amber { background: #f59e0b; }
 .ws-dot-green { background: #22c55e; }
 .ws-tabs {
-  display: flex; gap: 0; border-bottom: none;
+  display: flex; gap: 0; border-bottom: 1px solid var(--border);
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; -ms-overflow-style: none;
 }
+.ws-tabs::-webkit-scrollbar { display: none; }
 .ws-tab {
   display: flex; align-items: center; gap: 6px;
   padding: 10px 18px; font-family: var(--font); font-size: 0.82rem; font-weight: 600;
@@ -151,7 +154,7 @@ body {
 
 @media (max-width: 600px) {
   .ws-top { flex-direction: column; gap: 12px; }
-  .ws-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .ws-tabs { /* scrollbar already hidden via base styles */ }
   .ws-tab { padding: 10px 14px; font-size: 0.78rem; }
   .ws-status { gap: 5px; }
   .ws-status-item { font-size: 0.62rem; padding: 3px 8px; }
@@ -281,7 +284,7 @@ body {
 .scan-coming { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; background: var(--amber-bg); color: var(--amber); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-left: 6px; }
 
 /* ═══════ MAIN ═══════ */
-.main { max-width: 800px; margin: 0 auto; padding: 20px 20px 80px; }
+.main { max-width: 800px; margin: 0 auto; padding: 32px 20px 80px; }
 @media (max-width: 500px) { .main { padding: 0 16px 60px; } }
 
 /* ═══════ DEMO BAR ═══════ */
@@ -620,9 +623,8 @@ body.embed-refund #panelRefund { display: block !important; }
 <div class="ws-panel" id="panelRefund">
   <div class="refund-inner">
 
-    <div class="demo-bar" style="margin-bottom:20px;justify-content:flex-start;gap:16px">
-      <span>⚖️ IEEPA tariffs ruled unlawful — $175B in duties may be refundable.<br>Importers have 180 days from liquidation to file.</span>
-      <a href="/refund-guide.html" class="demo-btn demo-btn-fill" style="text-decoration:none;flex-shrink:0">Read Guide</a>
+    <div class="demo-bar" style="margin-bottom:20px">
+      <span>⚖️ IEEPA tariffs ruled unlawful — $175B in duties may be refundable. Importers have 180 days from liquidation to file. <a href="/refund-guide.html" style="color:var(--blue);font-weight:600;text-decoration:none">Read guide →</a></span>
     </div>
 
     <div class="refund-grid">
@@ -861,9 +863,6 @@ body.embed-refund #panelRefund { display: block !important; }
               </select>
             </div>
           </div>
-          <button class="btn-ghost" onclick="classifyDescription()">
-            <span class="btn-text">↳ AI Classify Description</span>
-          </button>
           <div id="classifyResult" style="display:none"></div>
         </div>
       </div>
@@ -1371,12 +1370,40 @@ async function calculate() {
   if (!productVal) { alert('Please enter the product value.'); return; }
   const btn = document.getElementById('calcBtn');
   btn.classList.add('btn-loading');
+
+  // Auto-classify if user has description but no HTS code
+  let htsCode = selectedHTS.code || document.getElementById('htsInput').value.trim();
+  const desc = document.getElementById('productDesc').value.trim();
+  if (!htsCode && desc) {
+    try {
+      const classRes = await fetch('/api/classify', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({description:desc}) });
+      if (classRes.ok) {
+        const classData = await classRes.json();
+        if (classData.hts_code && !classData.error) {
+          htsCode = classData.hts_code;
+          selectedHTS = {code:classData.hts_code, desc:classData.hts_description||'', rate:classData.base_rate, cn301:classData.cn_301_rate};
+          document.getElementById('htsInput').value = classData.hts_code;
+          const conf = classData.classification_confidence||'medium';
+          const div = document.getElementById('classifyResult');
+          div.style.display = 'block';
+          div.innerHTML = `<div class="classify-box">
+            <div class="classify-box-head"><span class="classify-code">${classData.hts_code}</span><span class="confidence conf-${conf}">${conf}</span></div>
+            <div style="color:var(--ink);font-size:0.8rem;margin-bottom:3px">${classData.hts_description||''}</div>
+            <div style="color:var(--muted);font-size:0.72rem">Auto-classified from your description</div>
+          </div>`;
+          updateRatePreview();
+        }
+      }
+    } catch(e) {}
+  }
+
   try {
     const payload = {
       product_value:  productVal,
       shipping:       parseFloat(document.getElementById('shippingCost').value)||0,
       insurance:      parseFloat(document.getElementById('insuranceCost').value)||0,
-      hts_code:       selectedHTS.code||document.getElementById('htsInput').value.trim(),
+      hts_code:       htsCode || selectedHTS.code || document.getElementById('htsInput').value.trim(),
+      description:    desc,
       origin_country: document.getElementById('originCountry').value,
       dest_country:   document.getElementById('destCountry').value,
       fta:            document.getElementById('ftaSelect').value,
@@ -1394,7 +1421,7 @@ async function calculate() {
     const pv = productVal, sh = parseFloat(document.getElementById('shippingCost').value)||0, ins = parseFloat(document.getElementById('insuranceCost').value)||0;
     const rate = parseFloat(document.getElementById('exchangeRate').value)||1;
     const curr = document.getElementById('currency').value, origin = document.getElementById('originCountry').value, fta = document.getElementById('ftaSelect').value;
-    const hts = selectedHTS.code||document.getElementById('htsInput').value.trim();
+    const hts = htsCode || selectedHTS.code || document.getElementById('htsInput').value.trim();
     const ovr = document.getElementById('dutyOverride').value;
     const pUSD = pv*rate, sUSD = sh*rate, iUSD = ins*rate;
     if (pUSD <= 800 && pUSD > 0) { renderResults({ de_minimis:true, message:'Value is under the $800 de minimis threshold — no duties apply.', total_landed_usd:pUSD+sUSD+iUSD, currency:curr }); btn.classList.remove('btn-loading'); return; }
