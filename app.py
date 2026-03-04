@@ -29,8 +29,14 @@ if DATABASE_URL.startswith("postgres://"):
 
 # ── Database ──────────────────────────────────────────────
 def get_db():
+    if not DATABASE_URL:
+        return None
     if "db" not in g:
-        g.db = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+        try:
+            g.db = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+        except Exception as e:
+            logger.error(f"DB connection failed: {e}")
+            return None
     return g.db
 
 @app.teardown_appcontext
@@ -107,8 +113,12 @@ try:
     if DATABASE_URL:
         init_db()
         logger.info("PostgreSQL tables initialized")
+    else:
+        logger.warning("DATABASE_URL not set — running without database")
 except Exception as e:
     logger.warning(f"DB init skipped: {e}")
+
+logger.info(f"iDuties app starting, DB configured: {bool(DATABASE_URL)}")
 
 
 # ── Auth helpers ──────────────────────────────────────────
@@ -127,6 +137,8 @@ def get_current_user():
     if not uid:
         return None
     db = get_db()
+    if not db:
+        return None
     cur = db.cursor()
     cur.execute("SELECT * FROM users WHERE id = %s", (uid,))
     user = cur.fetchone()
@@ -343,6 +355,8 @@ def signup():
     if len(password) < 8:
         return render_template("signup.html", error="Password must be at least 8 characters.", email=email, company=company)
     db = get_db()
+    if not db:
+        return render_template("signup.html", error="Database temporarily unavailable. Please try again.", email=email, company=company)
     cur = db.cursor()
     cur.execute("SELECT id FROM users WHERE email = %s", (email,))
     existing = cur.fetchone()
@@ -370,6 +384,8 @@ def signin():
     if not email or not password:
         return render_template("signin.html", error="Email and password are required.")
     db = get_db()
+    if not db:
+        return render_template("signin.html", error="Database temporarily unavailable. Please try again.", email=email)
     cur = db.cursor()
     cur.execute("SELECT * FROM users WHERE email = %s", (email,))
     user = cur.fetchone()
