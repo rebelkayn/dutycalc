@@ -19,6 +19,17 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ── Global error handlers (prevent worker death) ─────────
+@app.errorhandler(500)
+def internal_error(e):
+    logger.error(f"500 error: {e}")
+    return "Internal server error", 500
+
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    logger.error(f"Unhandled exception: {e}", exc_info=True)
+    return "Internal server error", 500
+
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
@@ -330,13 +341,21 @@ FTA_RATES = {
 # ── Routes ─────────────────────────────────────────────────
 @app.route("/")
 def landing():
-    user = get_current_user()
-    return render_template("landing.html", user=user)
+    try:
+        user = get_current_user()
+        return render_template("landing.html", user=user)
+    except Exception as e:
+        logger.error(f"Landing route error: {e}", exc_info=True)
+        return f"Error: {e}", 500
 
 @app.route("/calculator")
 def calculator():
-    user = get_current_user()
-    return render_template("index.html", user=user)
+    try:
+        user = get_current_user()
+        return render_template("index.html", user=user)
+    except Exception as e:
+        logger.error(f"Calculator route error: {e}", exc_info=True)
+        return f"Error: {e}", 500
 
 @app.route("/refund-guide.html")
 def refund_guide():
@@ -412,23 +431,26 @@ def signout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    user = get_current_user()
-    db = get_db()
-    if not db or not user:
-        return redirect(url_for("landing"))
-    cur = db.cursor()
-    cur.execute("SELECT * FROM calculations WHERE user_id = %s ORDER BY created_at DESC LIMIT 50", (user["id"],))
-    calcs = cur.fetchall()
-    cur.execute("SELECT * FROM refund_entries WHERE user_id = %s ORDER BY created_at DESC", (user["id"],))
-    refunds = cur.fetchall()
-    cur.execute("SELECT * FROM scan_results WHERE user_id = %s ORDER BY created_at DESC", (user["id"],))
-    scans = cur.fetchall()
-    cur.close()
-    # Pre-compute stats for template
-    total_refund = sum(float(r.get("ieepa_amount", 0) or 0) for r in refunds)
-    pending_count = sum(1 for r in refunds if r.get("filing_status") == "pending")
-    return render_template("dashboard.html", user=user, calcs=calcs, refunds=refunds, scans=scans,
-                           total_refund=total_refund, pending_count=pending_count)
+    try:
+        user = get_current_user()
+        db = get_db()
+        if not db or not user:
+            return redirect(url_for("landing"))
+        cur = db.cursor()
+        cur.execute("SELECT * FROM calculations WHERE user_id = %s ORDER BY created_at DESC LIMIT 50", (user["id"],))
+        calcs = cur.fetchall()
+        cur.execute("SELECT * FROM refund_entries WHERE user_id = %s ORDER BY created_at DESC", (user["id"],))
+        refunds = cur.fetchall()
+        cur.execute("SELECT * FROM scan_results WHERE user_id = %s ORDER BY created_at DESC", (user["id"],))
+        scans = cur.fetchall()
+        cur.close()
+        total_refund = sum(float(r.get("ieepa_amount", 0) or 0) for r in refunds)
+        pending_count = sum(1 for r in refunds if r.get("filing_status") == "pending")
+        return render_template("dashboard.html", user=user, calcs=calcs, refunds=refunds, scans=scans,
+                               total_refund=total_refund, pending_count=pending_count)
+    except Exception as e:
+        logger.error(f"Dashboard error: {e}", exc_info=True)
+        return f"Dashboard error: {e}", 500
 
 
 # ── API: Save Calculation ─────────────────────────────────
