@@ -362,6 +362,16 @@ def refund_guide():
     user = get_current_user()
     return render_template("refund-guide.html", user=user)
 
+@app.route("/terms")
+def terms():
+    user = get_current_user()
+    return render_template("terms.html", user=user)
+
+@app.route("/privacy")
+def privacy():
+    user = get_current_user()
+    return render_template("privacy.html", user=user)
+
 
 # ── Auth Routes ───────────────────────────────────────────
 @app.route("/signup", methods=["GET", "POST"])

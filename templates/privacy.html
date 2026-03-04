@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy — iDuties</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --bg: #f5f5f0; --surface: #fff; --surface2: #eeeee8;
+  --border: #e0dfd8; --border2: #cccbc4;
+  --ink: #1a1917; --ink2: #3a3935; --muted: #7c7b72; --dim: #a3a299;
+  --blue: #0055ff; --blue-hover: #0044cc;
+  --radius-xs: 6px; --radius-sm: 10px; --radius: 14px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { overflow-y: scroll; scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245,245,240,0.82);
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 56px;
+  display: flex; align-items: center; gap: 16px;
+}
+.nav-brand {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-decoration: none;
+}
+.nav-brand svg { color: var(--blue); }
+.nav-dot { color: var(--blue); }
+.nav-spacer { flex: 1; }
+.nav-links { display: flex; gap: 2px; }
+.nav-link {
+  font-size: 0.8rem; font-weight: 500; color: var(--muted);
+  padding: 6px 12px; border-radius: var(--radius-xs);
+  border: 1px solid transparent; cursor: pointer;
+  text-decoration: none; white-space: nowrap; transition: all 0.15s;
+}
+.nav-link:hover { color: var(--ink); background: var(--surface2); }
+
+.legal-wrap {
+  max-width: 720px; margin: 0 auto; padding: 48px 20px 80px;
+}
+.legal-h { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 6px; }
+.legal-updated { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; }
+.legal-effective { font-size: 0.78rem; color: var(--muted); margin-bottom: 32px; font-style: italic; }
+.legal-section { margin-bottom: 30px; }
+.legal-section h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--ink2); }
+.legal-section h3 { font-size: 0.88rem; font-weight: 600; margin: 14px 0 6px; color: var(--ink); }
+.legal-section p { font-size: 0.84rem; color: var(--ink2); line-height: 1.75; margin-bottom: 10px; }
+.legal-section ol, .legal-section ul { font-size: 0.84rem; color: var(--ink2); line-height: 1.75; margin: 0 0 10px 20px; }
+.legal-section li { margin-bottom: 6px; }
+.legal-toc { margin-bottom: 32px; padding: 20px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.legal-toc-h { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 10px; }
+.legal-toc a { font-size: 0.82rem; color: var(--blue); text-decoration: none; display: block; padding: 3px 0; }
+.legal-toc a:hover { text-decoration: underline; }
+.legal-table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 0.82rem; }
+.legal-table th { text-align: left; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+.legal-table td { padding: 10px 12px; border: 1px solid var(--border); color: var(--ink2); vertical-align: top; line-height: 1.6; }
+
+.footer {
+  max-width: 720px; margin: 0 auto; padding: 20px;
+  font-size: 0.72rem; color: var(--dim); border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 8px;
+}
+.footer-links { display: flex; align-items: center; gap: 6px; }
+.footer-sep { color: var(--border2); }
+.footer a { color: var(--muted); text-decoration: none; }
+.footer a:hover { color: var(--ink); }
+
+@media (max-width: 500px) {
+  .nav { padding: 0 10px; height: 52px; gap: 8px; }
+  .nav-link { font-size: 0.72rem; padding: 4px 7px; }
+  .nav-brand { font-size: 0.95rem; gap: 5px; }
+  .nav-brand svg { width: 16px; height: 16px; }
+  .legal-wrap { padding: 32px 16px 60px; }
+  .legal-table { font-size: 0.76rem; }
+  .legal-table th, .legal-table td { padding: 8px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-brand" href="/">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    <span>iDuties<span class="nav-dot">.ai</span></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="/calculator">Calculator</a>
+    <a class="nav-link" href="/refund-guide.html">Refund</a>
+    {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
+  </div>
+  <div class="nav-spacer"></div>
+</nav>
+
+<div class="legal-wrap">
+  <h1 class="legal-h">Privacy Policy</h1>
+  <p class="legal-updated">Last Updated: March 4, 2026</p>
+  <p class="legal-effective">Effective Date: March 4, 2026</p>
+
+  <div class="legal-toc">
+    <div class="legal-toc-h">Table of Contents</div>
+    <a href="#p1">1. Introduction and Scope</a>
+    <a href="#p2">2. Information We Collect</a>
+    <a href="#p3">3. How We Use Your Information</a>
+    <a href="#p4">4. Legal Bases for Processing (EEA/UK Users)</a>
+    <a href="#p5">5. Information Sharing and Disclosure</a>
+    <a href="#p6">6. Third-Party Service Providers and Sub-Processors</a>
+    <a href="#p7">7. Data Retention</a>
+    <a href="#p8">8. Data Security</a>
+    <a href="#p9">9. International Data Transfers</a>
+    <a href="#p10">10. Your Rights and Choices</a>
+    <a href="#p11">11. California Privacy Rights (CCPA/CPRA)</a>
+    <a href="#p12">12. European Economic Area, United Kingdom, and Swiss Users (GDPR)</a>
+    <a href="#p13">13. Cookies and Tracking Technologies</a>
+    <a href="#p14">14. Children's Privacy</a>
+    <a href="#p15">15. Do Not Track Signals</a>
+    <a href="#p16">16. Data Breach Notification</a>
+    <a href="#p17">17. Changes to This Privacy Policy</a>
+    <a href="#p18">18. Contact Information and Data Protection Officer</a>
+  </div>
+
+  <div class="legal-section" id="p1">
+    <h2>1. Introduction and Scope</h2>
+    <p>iDuties LLC ("iDuties," "Company," "we," "us," or "our") is committed to protecting the privacy and security of your personal information. This Privacy Policy describes the types of information we collect from and about you when you access or use the iDuties platform, including the website located at iduties.ai and all associated applications, tools, and services (the "Service"). It also explains how we use, disclose, and safeguard that information, and the choices available to you regarding our use of your information.</p>
+    <p>This Privacy Policy applies to all Users of the Service, regardless of geographic location. Certain sections of this Policy provide additional information and rights applicable to residents of specific jurisdictions, including California (Section 11) and the European Economic Area, United Kingdom, and Switzerland (Section 12).</p>
+    <p>By using the Service, you acknowledge that you have read and understood this Privacy Policy and consent to the collection, use, and disclosure of your information as described herein. This Privacy Policy should be read in conjunction with our <a href="/terms" style="color:var(--blue)">Terms of Service</a>.</p>
+  </div>
+
+  <div class="legal-section" id="p2">
+    <h2>2. Information We Collect</h2>
+    <h3>2.1 Information You Provide Directly</h3>
+    <p>We collect information that you voluntarily provide when using the Service, including:</p>
+    <table class="legal-table">
+      <tr><th>Category</th><th>Data Elements</th><th>When Collected</th></tr>
+      <tr><td><strong>Account Information</strong></td><td>Email address, password (stored as a salted cryptographic hash), company name (optional)</td><td>Account registration, profile updates</td></tr>
+      <tr><td><strong>Product and Trade Data</strong></td><td>Product descriptions, HTS codes, declared values, countries of origin, destination countries, invoice data, shipping costs, FTA selections</td><td>Calculator usage, classification requests</td></tr>
+      <tr><td><strong>Uploaded Documents</strong></td><td>Commercial invoices, CBP 7501 entry summaries, packing lists, bills of lading, and other trade documents in image or PDF format</td><td>AI classification, recovery scan feature</td></tr>
+      <tr><td><strong>Refund Data</strong></td><td>Import values, entry dates, entry status, HTS codes, origin countries, estimated refund amounts</td><td>IEEPA Refund Estimator usage</td></tr>
+      <tr><td><strong>Saved Records</strong></td><td>Calculation results, refund estimates, filing statuses, notes, and history</td><td>Dashboard save actions</td></tr>
+      <tr><td><strong>Communications</strong></td><td>Email content, support inquiries, feedback</td><td>When you contact us</td></tr>
+    </table>
+
+    <h3>2.2 Information Collected Automatically</h3>
+    <p>When you access or use the Service, we automatically collect certain technical and usage information, including:</p>
+    <table class="legal-table">
+      <tr><th>Category</th><th>Data Elements</th><th>Purpose</th></tr>
+      <tr><td><strong>Device Information</strong></td><td>Browser type and version, operating system, device type, screen resolution</td><td>Service optimization and compatibility</td></tr>
+      <tr><td><strong>Log Data</strong></td><td>IP address, access timestamps, pages viewed, referring URL, HTTP status codes</td><td>Security, diagnostics, abuse prevention</td></tr>
+      <tr><td><strong>Usage Data</strong></td><td>Features accessed, calculation frequency, session duration, interaction patterns</td><td>Service improvement and analytics</td></tr>
+      <tr><td><strong>Session Data</strong></td><td>Session identifiers (cookies), authentication tokens</td><td>Maintaining login state</td></tr>
+    </table>
+
+    <h3>2.3 Information from Third-Party Sources</h3>
+    <p>We may receive information from third-party services that you use in connection with the Service, including authentication providers (if single sign-on is implemented in the future) and publicly available tariff data from the U.S. International Trade Commission and other government sources.</p>
+  </div>
+
+  <div class="legal-section" id="p3">
+    <h2>3. How We Use Your Information</h2>
+    <p>We use the information we collect for the following purposes:</p>
+    <table class="legal-table">
+      <tr><th>Purpose</th><th>Description</th><th>Legal Basis (GDPR)</th></tr>
+      <tr><td><strong>Service Delivery</strong></td><td>Providing tariff classification, duty calculation, refund estimation, and document analysis services</td><td>Performance of contract</td></tr>
+      <tr><td><strong>Account Management</strong></td><td>Creating and maintaining your account, authenticating access, processing your saved data</td><td>Performance of contract</td></tr>
+      <tr><td><strong>AI Classification</strong></td><td>Transmitting product descriptions and document images to AI models for HTS classification. Document content is sent to Google's Gemini API for processing.</td><td>Performance of contract</td></tr>
+      <tr><td><strong>Service Improvement</strong></td><td>Analyzing usage patterns to improve accuracy, performance, and user experience. This may include aggregate analysis of classification accuracy and common error patterns.</td><td>Legitimate interest</td></tr>
+      <tr><td><strong>Security</strong></td><td>Detecting, preventing, and responding to fraud, abuse, security incidents, and technical issues</td><td>Legitimate interest</td></tr>
+      <tr><td><strong>Communications</strong></td><td>Sending service-related notifications (e.g., deadline reminders, policy change alerts, account security notices). We do not send marketing emails without your express consent.</td><td>Legitimate interest / Consent</td></tr>
+      <tr><td><strong>Legal Compliance</strong></td><td>Complying with applicable laws, regulations, legal processes, or enforceable governmental requests</td><td>Legal obligation</td></tr>
+      <tr><td><strong>Anonymized Analytics</strong></td><td>Creating aggregate, de-identified datasets for trend analysis, research, and public reporting on trade policy impacts (e.g., "average effective tariff rate on Chinese imports"). No individual User can be identified from this data.</td><td>Legitimate interest</td></tr>
+    </table>
+  </div>
+
+  <div class="legal-section" id="p4">
+    <h2>4. Legal Bases for Processing (EEA/UK Users)</h2>
+    <p>If you are located in the European Economic Area, United Kingdom, or Switzerland, we process your personal data only when we have a valid legal basis to do so. The applicable legal bases are identified in the table above and include:</p>
+    <ol type="a">
+      <li><strong>Performance of Contract:</strong> Processing necessary to provide the Service as described in our Terms of Service;</li>
+      <li><strong>Legitimate Interest:</strong> Processing necessary for our legitimate business interests, such as improving the Service, ensuring security, and performing analytics, provided such interests are not overridden by your data protection rights;</li>
+      <li><strong>Legal Obligation:</strong> Processing necessary to comply with a legal obligation to which we are subject;</li>
+      <li><strong>Consent:</strong> Where we have obtained your explicit consent for a specific processing activity (e.g., optional marketing communications). You may withdraw consent at any time.</li>
+    </ol>
+  </div>
+
+  <div class="legal-section" id="p5">
+    <h2>5. Information Sharing and Disclosure</h2>
+    <h3>5.1 We Do Not Sell Your Data</h3>
+    <p>iDuties does not sell, rent, lease, or trade your personal information or User Content to any third party for monetary or other valuable consideration. We have not sold personal information in the preceding twelve (12) months.</p>
+    <h3>5.2 Limited Disclosure</h3>
+    <p>We may disclose your information only in the following limited circumstances:</p>
+    <ol type="a">
+      <li><strong>Service Providers and Sub-Processors:</strong> We share data with third-party service providers who assist in operating the Service, subject to contractual obligations to protect your data and use it only as directed by us (see Section 6);</li>
+      <li><strong>Legal Requirements:</strong> We may disclose information if required to do so by law, subpoena, court order, or other legal process, or if we believe in good faith that such disclosure is reasonably necessary to comply with applicable law, protect the rights or safety of any person, or prevent fraud;</li>
+      <li><strong>Business Transfers:</strong> In the event of a merger, acquisition, reorganization, bankruptcy, or sale of all or a portion of our assets, your information may be transferred as part of that transaction. We will notify you via email and/or a prominent notice on the Service of any change in ownership or uses of your personal information;</li>
+      <li><strong>With Your Consent:</strong> We may share your information with third parties when you have given us explicit consent to do so;</li>
+      <li><strong>Aggregate or De-Identified Data:</strong> We may share aggregate or de-identified information that cannot reasonably be used to identify you, without restriction.</li>
+    </ol>
+  </div>
+
+  <div class="legal-section" id="p6">
+    <h2>6. Third-Party Service Providers and Sub-Processors</h2>
+    <p>The Service relies on the following categories of third-party service providers. Each provider processes data only as necessary to perform their designated function and is bound by contractual data protection obligations:</p>
+    <table class="legal-table">
+      <tr><th>Provider Category</th><th>Provider</th><th>Data Processed</th><th>Purpose</th></tr>
+      <tr><td><strong>AI Classification</strong></td><td>Google Cloud (Gemini API)</td><td>Product descriptions, document images</td><td>Automated HTS classification and document data extraction</td></tr>
+      <tr><td><strong>Cloud Hosting</strong></td><td>Render Inc.</td><td>All Service data (encrypted at rest and in transit)</td><td>Application hosting, database storage</td></tr>
+      <tr><td><strong>Currency Data</strong></td><td>Exchange rate API providers</td><td>No personal data; only currency pair requests</td><td>Real-time currency conversion</td></tr>
+      <tr><td><strong>DNS and CDN</strong></td><td>Domain registrar and CDN provider</td><td>IP addresses, request metadata</td><td>Domain resolution and content delivery</td></tr>
+    </table>
+    <p>We maintain a current list of sub-processors and will update this section as providers change. We conduct due diligence on all sub-processors to ensure adequate data protection standards.</p>
+
+    <h3>6.1 AI Classification — Special Considerations</h3>
+    <p>When you use the AI classification feature (uploading documents or submitting product descriptions), the content is transmitted to Google's Gemini API for processing. Google processes this data pursuant to its Cloud API Terms of Service and Data Processing Addendum. We recommend that you do not include sensitive personal information (such as Social Security numbers, financial account numbers, or personal health information) in uploaded documents. If your commercial invoices contain such information, please redact it before uploading.</p>
+  </div>
+
+  <div class="legal-section" id="p7">
+    <h2>7. Data Retention</h2>
+    <h3>7.1 Retention Periods</h3>
+    <table class="legal-table">
+      <tr><th>Data Category</th><th>Retention Period</th><th>Rationale</th></tr>
+      <tr><td><strong>Account Information</strong></td><td>Duration of account plus 30 days after deletion request</td><td>Service delivery; grace period for account recovery</td></tr>
+      <tr><td><strong>Saved Calculations and Refund Estimates</strong></td><td>Duration of account</td><td>User-requested storage for compliance records</td></tr>
+      <tr><td><strong>Uploaded Documents</strong></td><td>Processed in real-time; not stored on our servers after classification is complete. Document images are retained in memory only during the classification API call.</td><td>Minimization principle</td></tr>
+      <tr><td><strong>Server Logs</strong></td><td>90 days</td><td>Security monitoring and debugging</td></tr>
+      <tr><td><strong>Anonymized Analytics</strong></td><td>Indefinitely</td><td>Aggregate trend analysis; no personal data</td></tr>
+    </table>
+
+    <h3>7.2 Deletion</h3>
+    <p>Upon account deletion, we will delete or anonymize your personal information within thirty (30) days, except where retention is required by law (e.g., tax records, anti-fraud obligations) or for the establishment, exercise, or defense of legal claims.</p>
+  </div>
+
+  <div class="legal-section" id="p8">
+    <h2>8. Data Security</h2>
+    <p>We implement and maintain reasonable administrative, technical, and physical security measures designed to protect your information from unauthorized access, disclosure, alteration, and destruction. These measures include:</p>
+    <ol type="a">
+      <li><strong>Encryption in Transit:</strong> All data transmitted between your device and our servers is encrypted using TLS 1.2 or higher (HTTPS);</li>
+      <li><strong>Encryption at Rest:</strong> Database contents and stored files are encrypted at rest using AES-256 encryption;</li>
+      <li><strong>Password Security:</strong> User passwords are hashed using industry-standard cryptographic algorithms with unique salts. We never store passwords in plaintext;</li>
+      <li><strong>Access Controls:</strong> Access to production systems and user data is restricted to authorized personnel on a need-to-know basis;</li>
+      <li><strong>Infrastructure Security:</strong> Our hosting provider (Render Inc.) maintains SOC 2 Type II compliance and implements physical, network, and application-level security controls.</li>
+    </ol>
+    <p>No method of transmission over the Internet or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your personal information, we cannot guarantee its absolute security. In the event of a security incident, we will comply with applicable breach notification laws (see Section 16).</p>
+  </div>
+
+  <div class="legal-section" id="p9">
+    <h2>9. International Data Transfers</h2>
+    <p>The Service is hosted in the United States. If you access the Service from outside the United States, your information will be transferred to, stored, and processed in the United States, where data protection laws may differ from those in your jurisdiction.</p>
+    <p>For Users in the European Economic Area, United Kingdom, or Switzerland, we rely on the following transfer mechanisms to ensure adequate protection of your personal data:</p>
+    <ol type="a">
+      <li>The EU-U.S. Data Privacy Framework (DPF) and UK Extension, where applicable to our sub-processors;</li>
+      <li>Standard Contractual Clauses (SCCs) approved by the European Commission (Decision 2021/914) incorporated into our data processing agreements with sub-processors;</li>
+      <li>Your explicit consent to the transfer, provided at the time of account registration.</li>
+    </ol>
+    <p>You may request a copy of the applicable transfer safeguards by contacting us at the address provided in Section 18.</p>
+  </div>
+
+  <div class="legal-section" id="p10">
+    <h2>10. Your Rights and Choices</h2>
+    <p>Depending on your jurisdiction, you may have some or all of the following rights with respect to your personal information:</p>
+    <table class="legal-table">
+      <tr><th>Right</th><th>Description</th></tr>
+      <tr><td><strong>Access</strong></td><td>Request a copy of the personal data we hold about you</td></tr>
+      <tr><td><strong>Rectification</strong></td><td>Request correction of inaccurate or incomplete personal data</td></tr>
+      <tr><td><strong>Erasure ("Right to be Forgotten")</strong></td><td>Request deletion of your personal data, subject to legal retention obligations</td></tr>
+      <tr><td><strong>Restriction of Processing</strong></td><td>Request that we limit the processing of your data in certain circumstances</td></tr>
+      <tr><td><strong>Data Portability</strong></td><td>Request your data in a structured, commonly used, machine-readable format (JSON or CSV)</td></tr>
+      <tr><td><strong>Objection</strong></td><td>Object to processing based on legitimate interests</td></tr>
+      <tr><td><strong>Withdraw Consent</strong></td><td>Withdraw previously given consent at any time, without affecting the lawfulness of prior processing</td></tr>
+      <tr><td><strong>Lodge a Complaint</strong></td><td>File a complaint with your local data protection supervisory authority</td></tr>
+    </table>
+    <p>To exercise any of these rights, contact us at <a href="mailto:privacy@iduties.ai" style="color:var(--blue)">privacy@iduties.ai</a>. We will respond to verified requests within thirty (30) days, or within the timeframe required by applicable law. We may require you to verify your identity before processing your request.</p>
+  </div>
+
+  <div class="legal-section" id="p11">
+    <h2>11. California Privacy Rights (CCPA/CPRA)</h2>
+    <h3>11.1 Applicability</h3>
+    <p>This section applies to California residents and supplements the information provided elsewhere in this Privacy Policy, as required by the California Consumer Privacy Act of 2018, as amended by the California Privacy Rights Act of 2020 (collectively, "CCPA").</p>
+
+    <h3>11.2 Categories of Personal Information Collected</h3>
+    <p>In the preceding twelve (12) months, we have collected the following categories of personal information as defined by the CCPA:</p>
+    <ol type="a">
+      <li><strong>Identifiers:</strong> Email addresses, IP addresses, account names;</li>
+      <li><strong>Commercial Information:</strong> Records of products researched (product descriptions, HTS codes, declared values), calculation history;</li>
+      <li><strong>Internet or Electronic Network Activity:</strong> Browsing history on the Service, interaction with features, log data;</li>
+      <li><strong>Professional or Employment-Related Information:</strong> Company name (if provided);</li>
+      <li><strong>Inferences:</strong> Inferences drawn from the above to create a profile reflecting preferences and characteristics (e.g., frequently imported product categories).</li>
+    </ol>
+
+    <h3>11.3 Your California Rights</h3>
+    <p>As a California resident, you have the following rights under the CCPA:</p>
+    <ol type="a">
+      <li><strong>Right to Know:</strong> You may request that we disclose the categories and specific pieces of personal information we have collected, the categories of sources, the business purpose for collecting the information, and the categories of third parties with whom we share the information;</li>
+      <li><strong>Right to Delete:</strong> You may request deletion of your personal information, subject to certain exceptions;</li>
+      <li><strong>Right to Correct:</strong> You may request correction of inaccurate personal information;</li>
+      <li><strong>Right to Opt-Out of Sale or Sharing:</strong> We do not sell or share (as defined by the CCPA) your personal information. Accordingly, no opt-out mechanism is required;</li>
+      <li><strong>Right to Non-Discrimination:</strong> We will not discriminate against you for exercising any of your CCPA rights.</li>
+    </ol>
+    <p>To exercise these rights, contact us at <a href="mailto:privacy@iduties.ai" style="color:var(--blue)">privacy@iduties.ai</a> or write to us at the address in Section 18. We will verify your identity using your account email before processing your request. You may also designate an authorized agent to submit a request on your behalf.</p>
+
+    <h3>11.4 Financial Incentive Disclosure</h3>
+    <p>We do not offer financial incentives or price or service differences related to the collection, retention, or sale of personal information.</p>
+  </div>
+
+  <div class="legal-section" id="p12">
+    <h2>12. European Economic Area, United Kingdom, and Swiss Users (GDPR)</h2>
+    <h3>12.1 Data Controller</h3>
+    <p>For purposes of the General Data Protection Regulation (EU) 2016/679 ("GDPR") and the UK GDPR, the data controller is:</p>
+    <p>iDuties LLC<br>Email: <a href="mailto:privacy@iduties.ai" style="color:var(--blue)">privacy@iduties.ai</a></p>
+
+    <h3>12.2 Legal Bases for Processing</h3>
+    <p>See Section 4 above for the legal bases upon which we process your personal data.</p>
+
+    <h3>12.3 Data Protection Rights</h3>
+    <p>In addition to the rights described in Section 10, EEA/UK/Swiss users have the right to lodge a complaint with their local supervisory authority. A list of EU data protection authorities is available at <a href="https://edpb.europa.eu/about-edpb/about-edpb/members_en" style="color:var(--blue)" target="_blank" rel="noopener">edpb.europa.eu</a>. UK residents may contact the Information Commissioner's Office (ICO) at <a href="https://ico.org.uk" style="color:var(--blue)" target="_blank" rel="noopener">ico.org.uk</a>.</p>
+
+    <h3>12.4 Data Protection Impact Assessments</h3>
+    <p>We conduct data protection impact assessments where required by the GDPR, including in connection with our use of AI-powered classification tools that process User Content.</p>
+
+    <h3>12.5 Representative</h3>
+    <p>If required under Article 27 of the GDPR, we will appoint a representative in the European Union. Contact details will be published here when applicable.</p>
+  </div>
+
+  <div class="legal-section" id="p13">
+    <h2>13. Cookies and Tracking Technologies</h2>
+    <h3>13.1 Cookies We Use</h3>
+    <table class="legal-table">
+      <tr><th>Cookie Name</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
+      <tr><td><strong>session</strong></td><td>Strictly necessary</td><td>Maintains your authenticated login state</td><td>Session (cleared on browser close) or up to 30 days</td></tr>
+    </table>
+
+    <h3>13.2 What We Do Not Use</h3>
+    <p>We do not use:</p>
+    <ol type="a">
+      <li>Third-party advertising or remarketing cookies;</li>
+      <li>Cross-site tracking pixels or web beacons;</li>
+      <li>Social media tracking plugins;</li>
+      <li>Analytics platforms that track individual user behavior across websites (e.g., Google Analytics, Facebook Pixel, or similar services).</li>
+    </ol>
+
+    <h3>13.3 Your Cookie Choices</h3>
+    <p>Because we use only strictly necessary session cookies required for the Service to function, no cookie consent banner is required. You may configure your browser to refuse cookies, but doing so may prevent you from using authenticated features of the Service.</p>
+  </div>
+
+  <div class="legal-section" id="p14">
+    <h2>14. Children's Privacy</h2>
+    <p>The Service is not directed to, and we do not knowingly collect personal information from, children under the age of 13 (or the applicable age of digital consent in your jurisdiction). If we become aware that we have collected personal information from a child under the applicable age, we will take steps to delete such information promptly. If you believe a child has provided us with personal information, please contact us at <a href="mailto:privacy@iduties.ai" style="color:var(--blue)">privacy@iduties.ai</a>.</p>
+  </div>
+
+  <div class="legal-section" id="p15">
+    <h2>15. Do Not Track Signals</h2>
+    <p>Some browsers transmit "Do Not Track" (DNT) signals to websites. Because there is no universally accepted standard for how to respond to DNT signals, we do not currently respond to them. However, as stated in Section 13, we do not engage in cross-site tracking of our users.</p>
+  </div>
+
+  <div class="legal-section" id="p16">
+    <h2>16. Data Breach Notification</h2>
+    <p>In the event of a security breach that results in the unauthorized access, disclosure, or acquisition of your personal information, we will:</p>
+    <ol type="a">
+      <li>Investigate the breach and take reasonable steps to contain and remediate it;</li>
+      <li>Notify affected Users via email within seventy-two (72) hours of becoming aware of the breach, or as otherwise required by applicable law;</li>
+      <li>Notify the relevant supervisory authority (for EEA/UK users) within seventy-two (72) hours as required by Article 33 of the GDPR;</li>
+      <li>Provide information about the nature of the breach, the types of data affected, the likely consequences, and the measures taken or proposed to address the breach;</li>
+      <li>Where required by state law (including the California Civil Code § 1798.82), post a notice on the Service if the breach affects more than 500 residents of a single state.</li>
+    </ol>
+  </div>
+
+  <div class="legal-section" id="p17">
+    <h2>17. Changes to This Privacy Policy</h2>
+    <p>We may update this Privacy Policy from time to time to reflect changes in our practices, legal requirements, or the Service. When we make material changes, we will:</p>
+    <ol type="a">
+      <li>Update the "Last Updated" date at the top of this page;</li>
+      <li>Notify registered Users via email at least thirty (30) days before the changes take effect;</li>
+      <li>Post a prominent notice on the Service.</li>
+    </ol>
+    <p>We encourage you to review this Privacy Policy periodically. Your continued use of the Service after the effective date of a revised Privacy Policy constitutes your acceptance of the changes.</p>
+  </div>
+
+  <div class="legal-section" id="p18">
+    <h2>18. Contact Information and Data Protection Officer</h2>
+    <p>For questions, concerns, or requests related to this Privacy Policy or your personal data, please contact:</p>
+    <p>
+      <strong>iDuties LLC</strong><br>
+      Privacy Inquiries: <a href="mailto:privacy@iduties.ai" style="color:var(--blue)">privacy@iduties.ai</a><br>
+      Legal Inquiries: <a href="mailto:legal@iduties.ai" style="color:var(--blue)">legal@iduties.ai</a><br>
+      General Support: <a href="mailto:support@iduties.ai" style="color:var(--blue)">support@iduties.ai</a>
+    </p>
+    <p>If we appoint a Data Protection Officer (DPO) as required by applicable law, their contact details will be published here.</p>
+    <p>If you are not satisfied with our response to a privacy concern, you have the right to lodge a complaint with the applicable data protection supervisory authority in your jurisdiction.</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <span>&copy; 2026 iDuties LLC</span>
+  <div class="footer-links">
+    <a href="/terms">Terms</a>
+    <span class="footer-sep">&middot;</span>
+    <a href="/privacy">Privacy</a>
+    <span class="footer-sep">&middot;</span>
+    <a href="mailto:support@iduties.ai">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>
