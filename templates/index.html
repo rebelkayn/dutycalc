@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DutyCalc — US Import Duty Calculator</title>
+<title>iDuties — US Import Duty Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -45,24 +45,45 @@ body {
 /* ─── Layout ────────────────────────────────────────── */
 .nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(245,245,247,0.85);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  height: 52px;
+  padding: 0 28px;
+  height: 56px;
   display: flex; align-items: center; justify-content: space-between;
 }
 .nav-brand {
-  font-size: 1.05rem; font-weight: 600;
-  color: var(--ink); letter-spacing: -0.02em;
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--ink); letter-spacing: -0.03em;
+  display: flex; align-items: center; gap: 8px;
 }
-.nav-brand span { color: var(--blue); }
-.nav-badge {
-  font-size: 0.65rem; font-weight: 500;
-  background: var(--blue-soft); color: var(--blue);
-  padding: 3px 9px; border-radius: 20px;
-  letter-spacing: 0.02em;
+.nav-brand-i { color: var(--blue); }
+.nav-divider { width: 1px; height: 18px; background: var(--border2); }
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-link {
+  font-size: 0.8rem; font-weight: 500; color: var(--muted);
+  padding: 5px 11px; border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer; transition: all 0.15s; letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.nav-link:hover { color: var(--ink); background: var(--surface2); border-color: var(--border); }
+.nav-link-active {
+  color: var(--ink); background: var(--surface2);
+  border-color: var(--border2);
+}
+.nav-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 500; color: var(--muted);
+  padding: 4px 10px; border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+}
+.nav-status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.2);
 }
 
 .hero {
@@ -386,8 +407,21 @@ body {
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-brand">Duty<span>Calc</span></div>
-  <span class="nav-badge">US Importer · Beta</span>
+  <div class="nav-brand">
+    iDuties
+    <div class="nav-divider"></div>
+    <span style="font-size:0.75rem;font-weight:400;color:var(--muted);letter-spacing:0">US Import Calculator</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link nav-link-active" href="#">Calculator</a>
+    <a class="nav-link" href="#">History</a>
+    <a class="nav-link" href="#">HTS Lookup</a>
+    <div style="width:8px"></div>
+    <div class="nav-status">
+      <div class="nav-status-dot"></div>
+      Live Rates
+    </div>
+  </div>
 </nav>
 
 <!-- HERO -->
