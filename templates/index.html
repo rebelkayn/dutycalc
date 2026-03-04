@@ -565,9 +565,20 @@ body {
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
 ::placeholder { color: var(--dim); }
+/* ═══════ EMBED MODE (dashboard drawers) ═══════ */
+body.embed { background: #fff; }
+body.embed .nav,
+body.embed .footer { display: none !important; }
+body.embed-calc .ieepa-banner,
+body.embed-calc .refund-drawer { display: none !important; }
+body.embed-calc .main { padding-top: 12px; }
+body.embed-refund .ieepa-banner,
+body.embed-refund .main,
+body.embed-refund .footer { display: none !important; }
+body.embed-refund .refund-drawer { max-height: none !important; overflow: visible !important; padding: 0; }
 </style>
 </head>
-<body>
+<body class="{% if embed %}embed embed-{{ embed }}{% endif %}">
 
 <!-- ═══════ NAV ═══════ -->
 <nav class="nav">
@@ -1905,4 +1916,10 @@ async function saveRefundResult(btn) {
 if (window.location.hash === '#ieepa') {
   setTimeout(() => {
     const banner = document.getElementById('ieepa');
-  
+    if (banner) banner.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => toggleRefundDrawer(), 400);
+  }, 300);
+}
+</script>
+</body>
+</html>

@@ -352,7 +352,8 @@ def landing():
 def calculator():
     try:
         user = get_current_user()
-        return render_template("index.html", user=user)
+        embed = request.args.get("embed", "")
+        return render_template("index.html", user=user, embed=embed)
     except Exception as e:
         logger.error(f"Calculator route error: {e}", exc_info=True)
         return f"Error: {e}", 500

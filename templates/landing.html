@@ -84,6 +84,7 @@ body {
   .nav-brand { font-size: 0.95rem; gap: 5px; }
   .nav-brand svg { width: 16px; height: 16px; }
   .nav-auth-btn { padding: 5px 10px; font-size: 0.7rem; max-width: 110px; }
+  .ieepa-btn { padding: 9px 14px; font-size: 0.76rem; }
 }
 
 /* ═══════ IEEPA BANNER ═══════ */
@@ -114,11 +115,12 @@ body {
 .ieepa-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
 .ieepa-stat-val { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: #fff; }
 .ieepa-stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
-.ieepa-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.ieepa-actions { display: flex; gap: 10px; flex-wrap: nowrap; }
 .ieepa-btn {
-  padding: 10px 20px; border-radius: var(--radius-sm);
-  font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+  padding: 10px 18px; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.82rem; font-weight: 600;
   cursor: pointer; transition: all 0.15s; border: none; letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 .ieepa-btn-primary { background: #fff; color: var(--ink); text-decoration: none; }
 .ieepa-btn-primary:hover { background: #F0F0F0; }
@@ -349,8 +351,8 @@ body {
       <div><div class="ieepa-stat-val">180 days</div><div class="ieepa-stat-label">Protest Window</div></div>
     </div>
     <div class="ieepa-actions">
-      <a class="ieepa-btn ieepa-btn-ghost" href="/refund-guide.html">How Refunds Work →</a>
       <a class="ieepa-btn ieepa-btn-primary" href="/calculator#ieepa">Check Refund Eligibility →</a>
+      <a class="ieepa-btn ieepa-btn-ghost" href="/refund-guide.html">How Refunds Work →</a>
     </div>
   </div>
 </section>
