@@ -405,7 +405,7 @@ def signin():
 @app.route("/signout")
 def signout():
     session.clear()
-    return redirect(url_for("index"))
+    return redirect(url_for("landing"))
 
 
 # ── Dashboard ─────────────────────────────────────────────
@@ -414,6 +414,8 @@ def signout():
 def dashboard():
     user = get_current_user()
     db = get_db()
+    if not db or not user:
+        return redirect(url_for("landing"))
     cur = db.cursor()
     cur.execute("SELECT * FROM calculations WHERE user_id = %s ORDER BY created_at DESC LIMIT 50", (user["id"],))
     calcs = cur.fetchall()
