@@ -1116,6 +1116,7 @@ async function searchHTS(val) {
   // Auto-detect valid HTS code as user types
   if (val.match(/^\d{4}\.\d{2}\.\d{2}/)) {
     handleManualHTS();
+    return;
   }
   clearTimeout(htsTimer);
   htsTimer = setTimeout(async () => {
