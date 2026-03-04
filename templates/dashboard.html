@@ -252,7 +252,7 @@ body {
     <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
   <div class="nav-links">
-    <a class="nav-link" href="/">Calculator</a>
+    <a class="nav-link" href="/calculator">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund</a>
     <a class="nav-link active" href="/dashboard">Dashboard</a>
   </div>
@@ -476,7 +476,7 @@ let activeDrawer = null;
 function openDrawer(type) {
   const panel = type === 'calc' ? document.getElementById('drawerCalc') : document.getElementById('drawerRefund');
   const body = type === 'calc' ? document.getElementById('drawerCalcBody') : document.getElementById('drawerRefundBody');
-  const src = type === 'calc' ? '/?embed=calc' : '/?embed=refund';
+  const src = type === 'calc' ? '/calculator?embed=calc' : '/calculator?embed=refund';
   // Lazy-load iframe
   if (!body.querySelector('iframe')) {
     body.innerHTML = `<iframe src="${src}" title="${type === 'calc' ? 'Calculator' : 'Estimator'}"></iframe>`;

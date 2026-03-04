@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>iDuties.ai — Agentic Trade Intelligence for US Importers</title>
+<meta name="description" content="Stop guessing on duties. iDuties.ai uses AI to classify, calculate, and defend every import — with built-in IEEPA refund recovery, audit-ready rationale memos, and real-time tariff monitoring.">
+<meta name="keywords" content="import duty calculator, IEEPA refund, HTS classification, customs audit, Section 301, Section 122, landed cost, trade compliance">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #F5F5F0; --surface: #FFFFFF; --surface2: #F0F0EB;
+  --border: rgba(0,0,0,0.06); --border2: rgba(0,0,0,0.10);
+  --ink: #1A1A1A; --ink2: #3D3D3D; --muted: #7A7A7A; --dim: #ACACAC;
+  --blue: #0055FF; --blue-hover: #003FCC; --blue-soft: rgba(0,85,255,0.06);
+  --green: #0F7B3F; --green-bg: rgba(15,123,63,0.06);
+  --amber: #9A6700; --amber-bg: rgba(154,103,0,0.06);
+  --radius: 14px; --radius-sm: 10px; --radius-xs: 7px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.03);
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --mono: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+}
+html { scroll-behavior: smooth; overflow-y: scroll; }
+body {
+  font-family: var(--font); background: var(--bg); color: var(--ink);
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════ NAV ═══════ */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245,245,240,0.82);
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 56px;
+  display: flex; align-items: center; gap: 16px;
+}
+.nav-brand {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-decoration: none;
+}
+.nav-brand svg { color: var(--blue); }
+.nav-dot { color: var(--blue); }
+.nav-spacer { flex: 1; }
+.nav-links { display: flex; gap: 2px; }
+.nav-link {
+  font-size: 0.8rem; font-weight: 500; color: var(--muted);
+  padding: 6px 12px; border-radius: var(--radius-xs);
+  border: 1px solid transparent; cursor: pointer;
+  text-decoration: none; white-space: nowrap; transition: all 0.15s;
+}
+.nav-link:hover { color: var(--ink); background: var(--surface2); }
+.nav-link.active { color: var(--ink); background: var(--surface); border-color: var(--border2); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.nav-ticker {
+  display: none; align-items: center;
+  border: 1px solid var(--border); border-radius: var(--radius-xs);
+  background: var(--surface); overflow: hidden;
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; font-size: 0.72rem; font-weight: 500;
+  border-right: 1px solid var(--border); white-space: nowrap;
+}
+.ticker-item:last-child { border: none; }
+.ticker-label { color: var(--muted); }
+.ticker-value { color: var(--ink); font-variant-numeric: tabular-nums; }
+.ticker-dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+.s301-active { color: var(--amber); }
+@media (min-width: 860px) { .nav-ticker { display: flex; } }
+.nav-auth-btn {
+  padding: 6px 14px; border-radius: var(--radius-xs);
+  font-size: 0.78rem; font-weight: 600; color: var(--blue);
+  border: 1.5px solid var(--blue); text-decoration: none;
+  transition: all 0.15s; flex-shrink: 0; white-space: nowrap;
+}
+.nav-auth-btn:hover { background: var(--blue); color: white; }
+@media (max-width: 500px) {
+  .nav { padding: 0 16px; height: 52px; }
+  .nav-link { font-size: 0.75rem; padding: 5px 9px; }
+}
+
+/* ═══════ IEEPA BANNER ═══════ */
+.ieepa-banner {
+  background: linear-gradient(135deg, #0C1D2E 0%, #162B44 50%, #1A3350 100%);
+  color: #fff; overflow: hidden; position: relative;
+}
+.ieepa-banner::before {
+  content: ''; position: absolute; top: -50%; right: -20%; width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(0,85,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ieepa-inner {
+  max-width: 800px; margin: 0 auto; padding: 28px 20px;
+  position: relative; z-index: 1;
+}
+.ieepa-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 4px 12px 4px 8px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 14px;
+}
+.ieepa-eyebrow-dot { width: 6px; height: 6px; border-radius: 3px; background: #4ADE80; flex-shrink: 0; }
+.ieepa-h { font-size: clamp(1.3rem, 3.5vw, 1.75rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 10px; }
+.ieepa-h span { color: #60A5FA; }
+.ieepa-p { font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.55; margin-bottom: 18px; max-width: 560px; }
+.ieepa-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
+.ieepa-stat-val { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: #fff; }
+.ieepa-stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.ieepa-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.ieepa-btn {
+  padding: 10px 20px; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; border: none; letter-spacing: -0.01em;
+}
+.ieepa-btn-primary { background: #fff; color: var(--ink); text-decoration: none; }
+.ieepa-btn-primary:hover { background: #F0F0F0; }
+.ieepa-btn-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.15); text-decoration: none; }
+.ieepa-btn-ghost:hover { background: rgba(255,255,255,0.14); }
+
+/* ═══════ HERO CTA ═══════ */
+.hero-cta {
+  text-align: center; padding: 56px 20px 48px;
+}
+.hero-tagline {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 700;
+  letter-spacing: -0.04em; line-height: 1.15; color: var(--ink);
+  max-width: 680px; margin: 0 auto 16px;
+}
+.hero-tagline em { font-style: normal; color: var(--blue); }
+.hero-sub {
+  font-size: 1rem; color: var(--muted); line-height: 1.6;
+  max-width: 520px; margin: 0 auto 28px;
+}
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-hero {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.92rem; font-weight: 700;
+  text-decoration: none; transition: all 0.2s; letter-spacing: -0.01em;
+}
+.btn-hero-primary { background: var(--blue); color: #fff; }
+.btn-hero-primary:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,85,255,0.25); }
+.btn-hero-secondary { background: var(--surface); color: var(--ink); border: 1.5px solid var(--border2); }
+.btn-hero-secondary:hover { background: var(--surface2); border-color: var(--ink); }
+
+/* ═══════ SOCIAL PROOF ═══════ */
+.proof {
+  padding: 0 20px 40px; text-align: center;
+}
+.proof-text {
+  font-size: 0.78rem; color: var(--dim); letter-spacing: 0.04em;
+  text-transform: uppercase; font-weight: 600;
+}
+
+/* ═══════ FEATURES ═══════ */
+.features-section {
+  max-width: 860px; margin: 0 auto; padding: 40px 20px 60px;
+}
+.features-section-label {
+  font-size: 0.7rem; font-weight: 700; color: var(--blue);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+}
+.features-section-h {
+  font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1.25; margin-bottom: 8px;
+}
+.features-section-sub {
+  font-size: 0.9rem; color: var(--muted); line-height: 1.55; margin-bottom: 36px;
+  max-width: 540px;
+}
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .feature-grid { grid-template-columns: 1fr; } }
+.feature-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; position: relative;
+  box-shadow: var(--shadow); transition: all 0.2s;
+}
+.feature-card:hover { border-color: var(--border2); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.feature-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; margin-bottom: 14px;
+}
+.fi-blue { background: rgba(0,85,255,0.08); }
+.fi-green { background: rgba(15,123,63,0.08); }
+.fi-amber { background: rgba(154,103,0,0.08); }
+.fi-red { background: rgba(214,40,40,0.06); }
+.feature-card h3 {
+  font-size: 0.92rem; font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 6px; line-height: 1.3;
+}
+.feature-card p {
+  font-size: 0.82rem; color: var(--muted); line-height: 1.55;
+}
+.feature-badge {
+  position: absolute; top: 14px; right: 14px;
+  font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px;
+}
+.fb-green { background: var(--green-bg); color: var(--green); }
+.fb-amber { background: var(--amber-bg); color: var(--amber); }
+.fb-blue { background: var(--blue-soft); color: var(--blue); }
+
+/* ═══════ COMPARISON TABLE ═══════ */
+.compare-section {
+  max-width: 860px; margin: 0 auto; padding: 20px 20px 60px;
+}
+.compare-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.compare-table th, .compare-table td {
+  padding: 14px 18px; text-align: left; font-size: 0.82rem;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table th {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--muted);
+}
+.compare-table th:first-child { color: var(--ink); }
+.compare-table th:last-child { color: var(--blue); }
+.compare-table td { color: var(--ink2); }
+.compare-table td:first-child { font-weight: 600; color: var(--ink); }
+.compare-table td:nth-child(2) { color: var(--dim); }
+.compare-table td:last-child { color: var(--ink); font-weight: 500; }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table .check { color: var(--green); font-weight: 700; }
+.compare-table .x { color: var(--dim); }
+@media (max-width: 600px) {
+  .compare-table th, .compare-table td { padding: 10px 12px; font-size: 0.75rem; }
+}
+
+/* ═══════ LEGAL CALLOUT ═══════ */
+.legal-section {
+  max-width: 860px; margin: 0 auto; padding: 0 20px 60px;
+}
+.legal-card {
+  background: linear-gradient(135deg, #0C1D2E 0%, #162B44 100%);
+  color: #fff; border-radius: var(--radius); padding: 36px 32px;
+  position: relative; overflow: hidden;
+}
+.legal-card::before {
+  content: ''; position: absolute; top: -30%; right: -10%;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(0,85,255,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.legal-eyebrow {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: rgba(255,255,255,0.5); margin-bottom: 12px;
+}
+.legal-h {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem); font-weight: 700;
+  letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 14px;
+  max-width: 500px;
+}
+.legal-p {
+  font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.6;
+  max-width: 560px; margin-bottom: 22px;
+}
+.legal-facts { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 24px; }
+.legal-fact-val {
+  font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 2px;
+}
+.legal-fact-label {
+  font-size: 0.66rem; color: rgba(255,255,255,0.4); text-transform: uppercase;
+  letter-spacing: 0.04em; font-weight: 600;
+}
+.legal-cta {
+  display: inline-flex; padding: 10px 20px; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+  background: #fff; color: var(--ink); text-decoration: none;
+  transition: all 0.15s;
+}
+.legal-cta:hover { background: #F0F0F0; }
+
+/* ═══════ BOTTOM CTA ═══════ */
+.bottom-cta {
+  text-align: center; padding: 40px 20px 80px;
+}
+.bottom-cta h2 {
+  font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 700;
+  letter-spacing: -0.03em; margin-bottom: 8px;
+}
+.bottom-cta p {
+  font-size: 0.9rem; color: var(--muted); margin-bottom: 24px;
+}
+
+/* ═══════ FOOTER ═══════ */
+.footer {
+  border-top: 1px solid var(--border);
+  max-width: 800px; margin: 0 auto; padding: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.72rem; color: var(--dim);
+}
+.footer a { color: var(--muted); text-decoration: none; }
+.footer a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- ═══════ NAV ═══════ -->
+<nav class="nav">
+  <a class="nav-brand" href="/">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    <span>iDuties<span class="nav-dot">.ai</span></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="/calculator">Calculator</a>
+    <a class="nav-link" href="/refund-guide.html">Refund</a>
+    {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="nav-ticker">
+    <div class="ticker-item"><div class="ticker-dot"></div><span class="ticker-label">S.301</span><span class="ticker-value s301-active">Active</span></div>
+    <div class="ticker-item"><span class="ticker-label">De Min</span><span class="ticker-value">$800</span></div>
+  </div>
+  {% if user %}
+    <a href="/signout" class="nav-auth-btn" title="Sign out">{{ user.email[:20] }}</a>
+  {% else %}
+    <a href="/signin" class="nav-auth-btn">Sign In</a>
+  {% endif %}
+</nav>
+
+<!-- ═══════ IEEPA BANNER ═══════ -->
+<section class="ieepa-banner">
+  <div class="ieepa-inner">
+    <div class="ieepa-eyebrow"><span class="ieepa-eyebrow-dot"></span>Supreme Court Ruling · Feb 20, 2026</div>
+    <h2 class="ieepa-h">IEEPA tariffs ruled <span>unlawful.</span><br>You may be owed a refund.</h2>
+    <p class="ieepa-p">The Supreme Court held 6–3 that IEEPA does not authorize presidential tariffs. Over $175 billion in duties were collected under this authority. Importers of record have 180 days from liquidation to file a protest and claim a refund from CBP.</p>
+    <div class="ieepa-stats">
+      <div><div class="ieepa-stat-val">$175B</div><div class="ieepa-stat-label">IEEPA Duties Collected</div></div>
+      <div><div class="ieepa-stat-val">301K+</div><div class="ieepa-stat-label">Importers Affected</div></div>
+      <div><div class="ieepa-stat-val">180 days</div><div class="ieepa-stat-label">Protest Window</div></div>
+    </div>
+    <div class="ieepa-actions">
+      <a class="ieepa-btn ieepa-btn-primary" href="/calculator#ieepa">Check Your Refund Eligibility →</a>
+      <a class="ieepa-btn ieepa-btn-ghost" href="/refund-guide.html">How Refunds Work →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ HERO CTA ═══════ -->
+<section class="hero-cta">
+  <h1 class="hero-tagline">Your broker is guessing.<br><em>We're verifying.</em></h1>
+  <p class="hero-sub">Upload an invoice, get a classification, a landed cost, and a legal rationale — in 15 seconds. iDuties.ai is agentic trade intelligence for the post-IEEPA era.</p>
+  <div class="hero-actions">
+    <a class="btn-hero btn-hero-primary" href="/calculator">Open Calculator →</a>
+    <a class="btn-hero btn-hero-secondary" href="#features">See How It Works</a>
+  </div>
+</section>
+
+<!-- ═══════ SOCIAL PROOF ═══════ -->
+<div class="proof">
+  <div class="proof-text">Built for importers, freight brokers, and trade attorneys</div>
+</div>
+
+<!-- ═══════ FEATURES ═══════ -->
+<section class="features-section" id="features">
+  <div class="features-section-label">Capabilities</div>
+  <h2 class="features-section-h">Beyond calculation. Defense-grade trade intelligence.</h2>
+  <p class="features-section-sub">Legacy tools give you a number. iDuties.ai gives you a legal rationale, a refund strategy, and real-time risk monitoring.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span class="feature-badge fb-green">Immediate ROI</span>
+      <div class="feature-icon fi-green">💰</div>
+      <h3>Refund Hunter</h3>
+      <p>Retroactive audit of your ACE reports to identify every dollar paid under now-illegal IEEPA tariffs. You're not spending $500/mo — you're investing it to recover six or seven figures in refunds.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-blue">🛡️</div>
+      <h3>Audit-Armor Engine</h3>
+      <p>For every HTS classification, the AI generates a Rationale Memo citing specific CBP CROSS rulings and General Rules of Interpretation. If Customs asks why — download the defense packet, no lawyer needed.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-badge fb-amber">Section 122</span>
+      <div class="feature-icon fi-amber">⏱️</div>
+      <h3>Section 122 Clock</h3>
+      <p>The 15% surcharge expires ~July 24. Our Inventory Duty Forecaster predicts total landed cost for July 20th (under S.122) vs July 28th — so your CFO knows exactly when to pull the trigger on inventory.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-blue">📡</div>
+      <h3>Self-Correcting Supply Chain</h3>
+      <p>If a new Section 301 investigation launches on Tuesday, iDuties.ai flags every affected SKU in your catalog by Wednesday morning. Proactive risk management, not border surprises.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-green">📄</div>
+      <h3>Multimodal Classification</h3>
+      <p>Upload an invoice photo, a scanned PDF, even handwritten notes — our Vision AI reads the actual document and assigns a 10-digit HTS code. Time-to-entry drops from 15 minutes to 15 seconds.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-badge fb-blue">Coming Soon</span>
+      <div class="feature-icon fi-amber">🔍</div>
+      <h3>Exclusion Hunter</h3>
+      <p>Our AI scrapes the Federal Register daily. When your specific HTS code gets a Section 301 exclusion, we notify you: "Your last 3 shipments are now eligible for a 25% credit."</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ COMPARISON TABLE ═══════ -->
+<section class="compare-section">
+  <div class="features-section-label">Why switch</div>
+  <h2 class="features-section-h" style="margin-bottom:24px">Legacy software records data. iDuties.ai defends it.</h2>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Capability</th>
+        <th>Legacy Trade Software</th>
+        <th>iDuties.ai (Agentic)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>HTS Classification</td>
+        <td class="x">Manual search / keyword</td>
+        <td class="check">Contextual Vision — reads the invoice</td>
+      </tr>
+      <tr>
+        <td>Audit Defense</td>
+        <td class="x">Call an expensive consultant</td>
+        <td class="check">Automated rationale memos included</td>
+      </tr>
+      <tr>
+        <td>Data Ingestion</td>
+        <td class="x">Manual entry / clean CSVs only</td>
+        <td class="check">PDFs, scans, handwritten notes</td>
+      </tr>
+      <tr>
+        <td>Refund Recovery</td>
+        <td class="x">None</td>
+        <td class="check">Live IEEPA / Section 301 tracking</td>
+      </tr>
+      <tr>
+        <td>2026 Rules</td>
+        <td class="x">Requires manual update</td>
+        <td class="check">Live regulatory stream — real-time</td>
+      </tr>
+      <tr>
+        <td>Section 122 Forecasting</td>
+        <td class="x">Not available</td>
+        <td class="check">Inventory timing optimization</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════ LEGAL CALLOUT ═══════ -->
+<section class="legal-section">
+  <div class="legal-card">
+    <div class="legal-eyebrow">The Legal Reality</div>
+    <h2 class="legal-h">"My broker told me to pay that" is not a valid legal defense.</h2>
+    <p class="legal-p">Under the Customs Modernization Act, the Importer of Record — not the broker — is legally responsible for classification accuracy. CBP expects you to audit your own filings. "Reasonable care" is a specific legal standard.</p>
+    <div class="legal-facts">
+      <div>
+        <div class="legal-fact-val">Importer of Record</div>
+        <div class="legal-fact-label">Legally responsible</div>
+      </div>
+      <div>
+        <div class="legal-fact-val">Reasonable Care</div>
+        <div class="legal-fact-label">Legal standard required</div>
+      </div>
+      <div>
+        <div class="legal-fact-val">You Know Your Product</div>
+        <div class="legal-fact-label">CBP's position</div>
+      </div>
+    </div>
+    <a class="legal-cta" href="/calculator">Verify Your Classifications →</a>
+  </div>
+</section>
+
+<!-- ═══════ BOTTOM CTA ═══════ -->
+<section class="bottom-cta">
+  <h2>You upload the file. We find the money.</h2>
+  <p>Customs is no longer a tax problem — it's a data problem. Turn your messy logistics paperwork into a bulletproof legal defense and a revenue recovery engine.</p>
+  <div class="hero-actions">
+    <a class="btn-hero btn-hero-primary" href="/calculator">Start Free →</a>
+    <a class="btn-hero btn-hero-secondary" href="/refund-guide.html">Read the IEEPA Guide</a>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer class="footer">
+  <span>© 2026 iDuties.ai — a PH Studio product</span>
+  <a href="/refund-guide.html">Refund Guide</a>
+</footer>
+
+</body>
+</html>

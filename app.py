@@ -329,7 +329,12 @@ FTA_RATES = {
 
 # ── Routes ─────────────────────────────────────────────────
 @app.route("/")
-def index():
+def landing():
+    user = get_current_user()
+    return render_template("landing.html", user=user)
+
+@app.route("/calculator")
+def calculator():
     user = get_current_user()
     return render_template("index.html", user=user)
 
