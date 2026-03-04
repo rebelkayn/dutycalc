@@ -136,11 +136,23 @@ body {
 .ieepa-btn-ghost:hover { background: rgba(255,255,255,0.14); }
 
 /* ═══════ REFUND ESTIMATOR ═══════ */
-.refund-section {
-  background: var(--surface); border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border); padding: 0;
+.refund-drawer {
+  max-height: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+  background: var(--surface); border-bottom: 1px solid var(--border);
 }
-.refund-inner { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+.refund-drawer.open { max-height: 2200px; }
+.refund-inner { max-width: 800px; margin: 0 auto; padding: 32px 20px 36px; }
+.refund-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; }
+.refund-tab {
+  flex: 1; padding: 10px 16px; border-radius: var(--radius-xs);
+  font-family: var(--font); font-size: 0.82rem; font-weight: 600;
+  color: var(--muted); background: none; border: none; cursor: pointer;
+  transition: all 0.15s; text-align: center;
+}
+.refund-tab.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.refund-tab:hover:not(.active) { color: var(--ink2); }
+.refund-tab-panel { display: none; }
+.refund-tab-panel.active { display: block; animation: fadeUp 0.2s ease; }
 .refund-eyebrow {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--green-bg); border: 1px solid rgba(15,123,63,0.12);
@@ -218,6 +230,49 @@ body {
   margin-top: 16px; font-size: 0.73rem; color: var(--dim);
   line-height: 1.5; padding-top: 12px; border-top: 1px solid var(--border);
 }
+
+/* ── Recovery Scan ── */
+.scan-intro { font-size: 0.88rem; color: var(--muted); line-height: 1.55; margin-bottom: 20px; max-width: 560px; }
+.scan-upload-zone {
+  border: 2px dashed var(--border2); border-radius: var(--radius);
+  padding: 36px 24px; cursor: pointer; transition: all 0.2s;
+  position: relative; text-align: center; background: var(--bg);
+}
+.scan-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.scan-upload-zone:hover { border-color: var(--blue); background: var(--blue-soft); }
+.scan-upload-zone.has-file { border-style: solid; border-color: var(--green); background: var(--green-bg); }
+.scan-upload-icon { font-size: 2.2rem; margin-bottom: 10px; opacity: 0.6; }
+.scan-upload-title { font-size: 0.92rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.scan-upload-hint { font-size: 0.78rem; color: var(--muted); }
+.scan-upload-formats { font-size: 0.72rem; color: var(--dim); margin-top: 8px; }
+.scan-file-list { margin-top: 12px; }
+.scan-file-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid rgba(15,123,63,0.2); border-radius: 20px;
+  padding: 5px 12px; font-size: 0.78rem; font-weight: 500; color: var(--green); margin: 3px;
+}
+.scan-file-x { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 0.78rem; padding: 0 2px; }
+.scan-btn {
+  width: 100%; margin-top: 16px; padding: 14px;
+  border-radius: var(--radius-sm); background: var(--ink); color: white;
+  border: none; font-size: 0.88rem; font-weight: 600; font-family: var(--font);
+  cursor: pointer; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.scan-btn:hover:not(:disabled) { background: #333; }
+.scan-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.scan-features {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;
+}
+@media (max-width: 500px) { .scan-features { grid-template-columns: 1fr; } }
+.scan-feature {
+  padding: 14px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.scan-feature-icon { font-size: 1.1rem; margin-bottom: 6px; }
+.scan-feature-title { font-size: 0.82rem; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.scan-feature-desc { font-size: 0.76rem; color: var(--muted); line-height: 1.45; }
+.scan-coming { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; background: var(--amber-bg); color: var(--amber); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-left: 6px; }
 
 /* ═══════ HERO ═══════ */
 .hero { text-align: center; padding: 40px 20px 28px; max-width: 580px; margin: 0 auto; }
@@ -531,11 +586,135 @@ body {
       <div><div class="ieepa-stat-val">180 days</div><div class="ieepa-stat-label">Protest Window</div></div>
     </div>
     <div class="ieepa-actions">
-      <button class="ieepa-btn ieepa-btn-primary" onclick="document.getElementById('refundEstimator').scrollIntoView({behavior:'smooth'})">Check Your Refund Eligibility</button>
+      <button class="ieepa-btn ieepa-btn-primary" onclick="toggleRefundDrawer()">Check Your Refund Eligibility ↓</button>
       <a class="ieepa-btn ieepa-btn-ghost" href="/refund-guide.html" style="text-decoration:none">How Refunds Work →</a>
     </div>
   </div>
 </section>
+
+<!-- ═══════ REFUND DRAWER (expands from banner) ═══════ -->
+<div class="refund-drawer" id="refundDrawer">
+  <div class="refund-inner">
+
+    <div class="refund-tabs">
+      <button class="refund-tab active" onclick="switchRefundTab('estimate',this)">Quick Estimate</button>
+      <button class="refund-tab" onclick="switchRefundTab('scan',this)">Recovery Scan <span class="scan-coming">Upload</span></button>
+    </div>
+
+    <!-- TAB 1: Quick Estimate -->
+    <div class="refund-tab-panel active" id="tab-estimate">
+      <h2 class="refund-h">How much could you claim back?</h2>
+      <p class="refund-sub">Enter your import details to estimate the IEEPA-refundable portion. Section 232 and 301 tariffs remain — only the IEEPA portion is refundable.</p>
+
+      <div class="refund-grid">
+        <div class="refund-field">
+          <label>Origin Country</label>
+          <select id="refundOrigin">
+            <option value="">Select…</option>
+            <option value="CN">🇨🇳 China</option>
+            <option value="CA">🇨🇦 Canada</option>
+            <option value="MX">🇲🇽 Mexico</option>
+            <option value="EU">🇪🇺 European Union</option>
+            <option value="VN">🇻🇳 Vietnam</option>
+            <option value="IN">🇮🇳 India</option>
+            <option value="JP">🇯🇵 Japan</option>
+            <option value="KR">🇰🇷 South Korea</option>
+            <option value="TW">🇹🇼 Taiwan</option>
+            <option value="TH">🇹🇭 Thailand</option>
+            <option value="ID">🇮🇩 Indonesia</option>
+            <option value="BD">🇧🇩 Bangladesh</option>
+            <option value="GB">🇬🇧 United Kingdom</option>
+            <option value="OTHER">🌐 Other Country</option>
+          </select>
+        </div>
+        <div class="refund-field">
+          <label>Total Product Value (USD)</label>
+          <input type="number" id="refundValue" placeholder="e.g. 250000" min="0" step="0.01">
+        </div>
+        <div class="refund-field">
+          <label>Approximate Entry Date</label>
+          <select id="refundEntryDate">
+            <option value="">Select period…</option>
+            <option value="2025-02">Feb 2025 (China fentanyl tariffs begin)</option>
+            <option value="2025-03">Mar 2025 (Canada/Mexico added)</option>
+            <option value="2025-04">Apr 2025 (Liberation Day — reciprocal)</option>
+            <option value="2025-05">May – Jun 2025</option>
+            <option value="2025-07">Jul – Sep 2025</option>
+            <option value="2025-10">Oct – Dec 2025</option>
+            <option value="2026-01">Jan – Feb 2026</option>
+          </select>
+        </div>
+        <div class="refund-field">
+          <label>Entry Status</label>
+          <select id="refundStatus">
+            <option value="">Not sure</option>
+            <option value="unliquidated">Unliquidated (open)</option>
+            <option value="liquidated">Already liquidated</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="refund-calc-btn" onclick="estimateRefund()">Estimate My Refund →</button>
+
+      <div class="refund-result" id="refundResult">
+        <div class="refund-result-h">Estimated Refund Breakdown</div>
+        <div id="refundBreakdown"></div>
+        <div class="refund-deadline" id="refundDeadline"></div>
+        <div class="refund-next-steps" id="refundSteps"></div>
+        <div class="refund-disclaimer">
+          This is an estimate based on publicly available IEEPA tariff rates. Actual refund amounts depend on your specific entry data, HTS classifications, and any exclusions that applied. Not legal advice. <a href="/refund-guide.html" style="color:var(--blue);font-weight:500;text-decoration:none">Read the full refund guide →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Recovery Scan -->
+    <div class="refund-tab-panel" id="tab-scan">
+      <h2 class="refund-h">IEEPA Recovery Scan</h2>
+      <p class="scan-intro">Upload your CBP entry summaries (Form 7501) or ACE export data. Our AI will identify every IEEPA-specific tariff heading, calculate your total refundable amount, and generate a filing-ready worksheet.</p>
+
+      <div class="scan-upload-zone" id="scanUploadZone">
+        <input type="file" id="scanFileInput" accept=".pdf,.csv,.xlsx,.xls" multiple onchange="handleScanFiles(this)">
+        <div class="scan-upload-icon">📋</div>
+        <div class="scan-upload-title">Drop CBP 7501 forms or ACE exports here</div>
+        <div class="scan-upload-hint">Upload entry summaries from your broker or ACE portal</div>
+        <div class="scan-upload-formats">PDF · CSV · XLSX — Multiple files supported</div>
+      </div>
+
+      <div class="scan-file-list" id="scanFileList"></div>
+
+      <button class="scan-btn" id="scanBtn" onclick="runRecoveryScan()" disabled>
+        <div class="spinner"></div>
+        <span class="btn-text">Scan for IEEPA Refunds →</span>
+      </button>
+
+      <div class="scan-features">
+        <div class="scan-feature">
+          <div class="scan-feature-icon">🔍</div>
+          <div class="scan-feature-title">Chapter 99 Detection</div>
+          <div class="scan-feature-desc">AI identifies 9903.01.xx IEEPA headings and separates them from Section 232, 301, and MFN duties.</div>
+        </div>
+        <div class="scan-feature">
+          <div class="scan-feature-icon">📊</div>
+          <div class="scan-feature-title">Per-Entry Breakdown</div>
+          <div class="scan-feature-desc">See the refundable amount for every entry, grouped by liquidation status and deadline urgency.</div>
+        </div>
+        <div class="scan-feature">
+          <div class="scan-feature-icon">📅</div>
+          <div class="scan-feature-title">Deadline Tracker</div>
+          <div class="scan-feature-desc">Flags entries nearing their 180-day protest window so you know which to file first.</div>
+        </div>
+        <div class="scan-feature">
+          <div class="scan-feature-icon">📄</div>
+          <div class="scan-feature-title">Filing Worksheets</div>
+          <div class="scan-feature-desc">Generates PSC and protest worksheets ready for your broker's review. Not a legal filing — a head start.</div>
+        </div>
+      </div>
+
+      <div id="scanResult"></div>
+    </div>
+
+  </div>
+</div>
 
 <!-- ═══════ HERO ═══════ -->
 <div class="hero">
@@ -769,75 +948,6 @@ body {
 
   </div>
 </div>
-
-<!-- ═══════ REFUND ESTIMATOR ═══════ -->
-<section class="refund-section" id="refundEstimator">
-  <div class="refund-inner">
-    <div class="refund-eyebrow">💰 IEEPA Refund Estimator</div>
-    <h2 class="refund-h">How much could you claim back?</h2>
-    <p class="refund-sub">Enter your import details to estimate the IEEPA-refundable portion of duties paid. Section 232 and Section 301 tariffs remain in effect — only the IEEPA portion is refundable.</p>
-
-    <div class="refund-grid">
-      <div class="refund-field">
-        <label>Origin Country</label>
-        <select id="refundOrigin">
-          <option value="">Select…</option>
-          <option value="CN">🇨🇳 China</option>
-          <option value="CA">🇨🇦 Canada</option>
-          <option value="MX">🇲🇽 Mexico</option>
-          <option value="EU">🇪🇺 European Union</option>
-          <option value="VN">🇻🇳 Vietnam</option>
-          <option value="IN">🇮🇳 India</option>
-          <option value="JP">🇯🇵 Japan</option>
-          <option value="KR">🇰🇷 South Korea</option>
-          <option value="TW">🇹🇼 Taiwan</option>
-          <option value="TH">🇹🇭 Thailand</option>
-          <option value="ID">🇮🇩 Indonesia</option>
-          <option value="BD">🇧🇩 Bangladesh</option>
-          <option value="GB">🇬🇧 United Kingdom</option>
-          <option value="OTHER">🌐 Other Country</option>
-        </select>
-      </div>
-      <div class="refund-field">
-        <label>Total Product Value (USD)</label>
-        <input type="number" id="refundValue" placeholder="e.g. 250000" min="0" step="0.01">
-      </div>
-      <div class="refund-field">
-        <label>Approximate Entry Date</label>
-        <select id="refundEntryDate">
-          <option value="">Select period…</option>
-          <option value="2025-02">Feb 2025 (China fentanyl tariffs begin)</option>
-          <option value="2025-03">Mar 2025 (Canada/Mexico added)</option>
-          <option value="2025-04">Apr 2025 (Liberation Day — reciprocal)</option>
-          <option value="2025-05">May – Jun 2025</option>
-          <option value="2025-07">Jul – Sep 2025</option>
-          <option value="2025-10">Oct – Dec 2025</option>
-          <option value="2026-01">Jan – Feb 2026</option>
-        </select>
-      </div>
-      <div class="refund-field">
-        <label>Entry Status</label>
-        <select id="refundStatus">
-          <option value="">Not sure</option>
-          <option value="unliquidated">Unliquidated (open)</option>
-          <option value="liquidated">Already liquidated</option>
-        </select>
-      </div>
-    </div>
-
-    <button class="refund-calc-btn" onclick="estimateRefund()">Estimate My Refund →</button>
-
-    <div class="refund-result" id="refundResult">
-      <div class="refund-result-h">Estimated Refund Breakdown</div>
-      <div id="refundBreakdown"></div>
-      <div class="refund-deadline" id="refundDeadline"></div>
-      <div class="refund-next-steps" id="refundSteps"></div>
-      <div class="refund-disclaimer">
-        This is an estimate based on publicly available IEEPA tariff rates. Actual refund amounts depend on your specific entry data, HTS classifications, and any exclusions or exceptions that applied. This is not legal or financial advice. Consult a licensed customs broker or trade attorney for binding guidance. <a href="/refund-guide.html" style="color:var(--blue);font-weight:500;text-decoration:none">Read the full refund guide →</a>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ═══════ FOOTER ═══════ -->
 <footer class="footer">
@@ -1263,6 +1373,105 @@ const zone = document.getElementById('uploadZone');
 ['dragleave','drop'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.remove('drag-over');}));
 zone.addEventListener('drop',ev=>{const f=ev.dataTransfer.files[0];if(f){const dt=new DataTransfer();dt.items.add(f);document.getElementById('fileInput').files=dt.files;handleFile(document.getElementById('fileInput'));}});
 
+// ── Refund Drawer Toggle ──────────────────────────────────
+function toggleRefundDrawer() {
+  const drawer = document.getElementById('refundDrawer');
+  const btn = document.querySelector('.ieepa-btn-primary');
+  drawer.classList.toggle('open');
+  if (drawer.classList.contains('open')) {
+    btn.textContent = 'Close Estimator ↑';
+    setTimeout(() => drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  } else {
+    btn.textContent = 'Check Your Refund Eligibility ↓';
+  }
+}
+
+// ── Refund Tab Switching ──────────────────────────────────
+function switchRefundTab(tab, el) {
+  document.querySelectorAll('.refund-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.refund-tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ── Recovery Scan File Handling ───────────────────────────
+let scanFiles = [];
+function handleScanFiles(input) {
+  const newFiles = Array.from(input.files);
+  scanFiles = scanFiles.concat(newFiles);
+  renderScanFiles();
+  document.getElementById('scanBtn').disabled = scanFiles.length === 0;
+  document.getElementById('scanUploadZone').classList.toggle('has-file', scanFiles.length > 0);
+}
+function removeScanFile(idx) {
+  scanFiles.splice(idx, 1);
+  renderScanFiles();
+  document.getElementById('scanBtn').disabled = scanFiles.length === 0;
+  document.getElementById('scanUploadZone').classList.toggle('has-file', scanFiles.length > 0);
+}
+function renderScanFiles() {
+  const list = document.getElementById('scanFileList');
+  if (!scanFiles.length) { list.innerHTML = ''; return; }
+  list.innerHTML = scanFiles.map((f, i) => {
+    const name = f.name.length > 28 ? f.name.slice(0,25)+'…' : f.name;
+    return `<span class="scan-file-pill">📎 ${name} <button class="scan-file-x" onclick="removeScanFile(${i})">✕</button></span>`;
+  }).join('');
+}
+async function runRecoveryScan() {
+  if (!scanFiles.length) return;
+  const btn = document.getElementById('scanBtn');
+  btn.classList.add('btn-loading'); btn.disabled = true;
+  try {
+    // For now, show what this feature will do — backend integration coming
+    const totalFiles = scanFiles.length;
+    const result = document.getElementById('scanResult');
+    result.innerHTML = `
+      <div style="margin-top:24px;padding:24px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);animation:fadeUp 0.25s ease">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);margin-bottom:14px">Recovery Scan — Preview</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:1.6rem">📋</span>
+          <div>
+            <div style="font-weight:700;font-size:0.92rem">${totalFiles} file${totalFiles>1?'s':''} received</div>
+            <div style="font-size:0.78rem;color:var(--muted)">AI scan will process CBP 7501 forms and ACE exports</div>
+          </div>
+        </div>
+        <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.84rem;line-height:1.6;color:var(--ink2)">
+          <strong style="color:var(--ink)">What the scan will identify:</strong><br>
+          • All entries with Chapter 99 IEEPA headings (9903.01.xx)<br>
+          • IEEPA duty amount vs. surviving Section 232/301/MFN duties per entry<br>
+          • Liquidation status and protest deadline for each entry<br>
+          • Total refundable amount across all entries<br>
+          • PSC or protest worksheet for your broker
+        </div>
+        <div style="margin-top:14px;padding:12px 16px;background:var(--amber-bg);border:1px solid rgba(154,103,0,0.12);border-radius:var(--radius-sm);font-size:0.82rem;color:var(--amber)">
+          <strong>Coming soon</strong> — This feature is being built. Leave your email with the files and we'll notify you when the full scan is ready, or <a href="/refund-guide.html" style="color:inherit;font-weight:600">read the manual process guide</a>.
+        </div>
+        <div style="margin-top:14px">
+          <div style="display:flex;gap:10px">
+            <input type="email" id="scanEmail" placeholder="your@company.com" style="flex:1;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:0.86rem;font-family:var(--font);outline:none">
+            <button onclick="submitScanWaitlist()" style="padding:10px 20px;border-radius:var(--radius-sm);background:var(--blue);color:#fff;font-family:var(--font);font-size:0.84rem;font-weight:600;border:none;cursor:pointer;white-space:nowrap">Notify Me</button>
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {}
+  btn.classList.remove('btn-loading'); btn.disabled = false;
+}
+function submitScanWaitlist() {
+  const email = document.getElementById('scanEmail').value;
+  if (!email) return;
+  const btn = event.target;
+  btn.textContent = 'Added ✓';
+  btn.style.background = 'var(--green)';
+  setTimeout(() => { btn.textContent = 'Notify Me'; btn.style.background = 'var(--blue)'; }, 3000);
+}
+// Drag & drop for scan zone
+const scanZone = document.getElementById('scanUploadZone');
+if (scanZone) {
+  ['dragenter','dragover'].forEach(e=>scanZone.addEventListener(e,ev=>{ev.preventDefault();scanZone.style.borderColor='var(--blue)';scanZone.style.background='var(--blue-soft)';}));
+  ['dragleave','drop'].forEach(e=>scanZone.addEventListener(e,ev=>{ev.preventDefault();scanZone.style.borderColor='';scanZone.style.background='';}));
+  scanZone.addEventListener('drop',ev=>{const files=ev.dataTransfer.files;if(files.length){const dt=new DataTransfer();Array.from(files).forEach(f=>dt.items.add(f));document.getElementById('scanFileInput').files=dt.files;handleScanFiles(document.getElementById('scanFileInput'));}});
+}
+
 // ── IEEPA Refund Estimator ────────────────────────────────
 // IEEPA rates by origin and period. These are the IEEPA-only surcharges
 // that were stacked on top of existing Section 232, 301, and MFN duties.
@@ -1379,7 +1588,7 @@ function estimateRefund() {
   // Show results
   const el = document.getElementById('refundResult');
   el.classList.add('show');
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
 }
 </script>
 </body>
