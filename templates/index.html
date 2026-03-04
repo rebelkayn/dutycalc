@@ -2,363 +2,507 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iDuties — Global Duty Assessment</title>
-<meta name="description" content="Instant global import duty calculator. Enter a product, origin country, and destination — get an accurate landed cost breakdown including tariffs, MPF, and Section 301 surcharges.">
-<meta name="keywords" content="import duty calculator, landed cost, HTS code, tariff calculator, customs duty, Section 301, global trade">
-<meta property="og:title" content="iDuties — Global Duty Assessment">
-<meta property="og:description" content="Instant import duty and landed cost calculator for global trade. Powered by USITC HTS data.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>iDuties — Import Duty Calculator</title>
+<meta name="description" content="Instant US import duty calculator. Upload an invoice or describe your product — get an accurate landed cost breakdown including tariffs, MPF, and Section 301 surcharges.">
+<meta name="keywords" content="import duty calculator, landed cost, HTS code, tariff calculator, customs duty, Section 301, IEEPA refund">
+<meta property="og:title" content="iDuties — Import Duty Calculator">
+<meta property="og:description" content="Instant import duty and landed cost calculator. Powered by USITC HTS data.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://iduties.ai">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="iDuties — Global Duty Assessment">
-<meta name="twitter:description" content="Instant import duty and landed cost calculator for global trade.">`
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:        #f4f4f6;
-  --surface:   #ffffff;
-  --surface2:  #f4f4f6;
-  --border:    rgba(0,0,0,0.07);
-  --border2:   rgba(0,0,0,0.11);
-  --ink:       #111112;
-  --muted:     #6b7280;
-  --blue:      #2563eb;
-  --blue-dark: #1d4ed8;
-  --blue-soft: rgba(37,99,235,0.08);
-  --green:     #15803d;
-  --green-bg:  rgba(21,128,61,0.07);
-  --green-dot: #22c55e;
-  --red:       #b91c1c;
-  --red-bg:    rgba(185,28,28,0.07);
-  --amber:     #92400e;
-  --amber-bg:  rgba(146,64,14,0.07);
-  --radius:    12px;
-  --radius-sm: 8px;
-  --radius-xs: 6px;
-  --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
-  --font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --bg:        #F5F5F0;
+  --surface:   #FFFFFF;
+  --surface2:  #F0F0EB;
+  --border:    rgba(0,0,0,0.06);
+  --border2:   rgba(0,0,0,0.10);
+  --ink:       #1A1A1A;
+  --ink2:      #3D3D3D;
+  --muted:     #7A7A7A;
+  --dim:       #ACACAC;
+  --blue:      #0055FF;
+  --blue-hover:#003FCC;
+  --blue-soft: rgba(0,85,255,0.06);
+  --green:     #0F7B3F;
+  --green-bg:  rgba(15,123,63,0.06);
+  --red:       #D62828;
+  --red-bg:    rgba(214,40,40,0.05);
+  --amber:     #9A6700;
+  --amber-bg:  rgba(154,103,0,0.06);
+  --gold:      #B8860B;
+  --radius:    14px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
+  --shadow:    0 1px 2px rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.03);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --mono: 'SF Mono', 'Fira Code', 'Menlo', monospace;
 }
-body { font-family: var(--font); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font); background: var(--bg); color: var(--ink);
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-/* ── NAV ──────────────────────────────────────────────── */
+/* ═══════ NAV ═══════ */
 .nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(255,255,255,0.94);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(245,245,240,0.82);
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--border);
-  height: 54px; display: flex; align-items: center; padding: 0 20px; gap: 0;
+  padding: 0 20px; height: 56px;
+  display: flex; align-items: center; gap: 16px;
 }
-.nav-brand { font-size: 1.05rem; font-weight: 700; color: var(--ink); letter-spacing: -0.03em; margin-right: 20px; flex-shrink: 0; }
-.nav-sep { width: 1px; height: 20px; background: var(--border2); margin-right: 12px; flex-shrink: 0; }
-.nav-links { display: flex; align-items: center; gap: 2px; flex: 1; }
-.nav-link { font-size: 0.78rem; font-weight: 500; color: var(--muted); padding: 5px 10px; border-radius: var(--radius-xs); border: 1px solid transparent; cursor: pointer; transition: all 0.12s; text-decoration: none; white-space: nowrap; }
-.nav-link:hover { color: var(--ink); background: var(--surface2); border-color: var(--border); }
-.nav-link.active { color: var(--ink); background: var(--surface2); border-color: var(--border2); }
-.nav-ticker { display: flex; align-items: center; margin-left: auto; border: 1px solid var(--border); border-radius: var(--radius-xs); background: var(--surface2); flex-shrink: 0; overflow: hidden; }
-.ticker-item { display: flex; align-items: center; gap: 5px; padding: 4px 10px; font-size: 0.72rem; font-weight: 500; border-right: 1px solid var(--border); white-space: nowrap; }
-.ticker-item:last-child { border-right: none; }
+.nav-brand {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.nav-brand svg { color: var(--blue); }
+.nav-dot { color: var(--blue); }
+.nav-spacer { flex: 1; }
+.nav-links { display: flex; gap: 2px; }
+.nav-link {
+  font-size: 0.8rem; font-weight: 500; color: var(--muted);
+  padding: 6px 12px; border-radius: var(--radius-xs);
+  border: 1px solid transparent; cursor: pointer;
+  text-decoration: none; white-space: nowrap; transition: all 0.15s;
+}
+.nav-link:hover { color: var(--ink); background: var(--surface2); }
+.nav-link.active { color: var(--ink); background: var(--surface); border-color: var(--border2); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.nav-ticker {
+  display: none; align-items: center;
+  border: 1px solid var(--border); border-radius: var(--radius-xs);
+  background: var(--surface); overflow: hidden;
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; font-size: 0.72rem; font-weight: 500;
+  border-right: 1px solid var(--border); white-space: nowrap;
+}
+.ticker-item:last-child { border: none; }
 .ticker-label { color: var(--muted); }
 .ticker-value { color: var(--ink); font-variant-numeric: tabular-nums; }
-.ticker-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green-dot); flex-shrink: 0; }
-.s301-active { color: #92400e; }
+.ticker-dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+.s301-active { color: var(--amber); }
 
-/* ── DEMO BAR ─────────────────────────────────────────── */
-.demo-bar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 9px 18px; background: #fefce8; border: 1px solid rgba(202,138,4,0.22); border-radius: var(--radius); margin-bottom: 14px; font-size: 0.75rem; color: #92400e; }
-.demo-btn { padding: 4px 13px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer; border: none; font-family: var(--font); transition: all 0.12s; }
-.demo-btn-fill  { background: var(--blue); color: white; }
-.demo-btn-fill:hover { background: var(--blue-dark); }
-.demo-btn-clear { background: white; color: var(--ink); border: 1px solid var(--border2); }
-.demo-btn-clear:hover { background: var(--surface2); }
+@media (min-width: 860px) { .nav-ticker { display: flex; } }
+@media (max-width: 500px) {
+  .nav { padding: 0 16px; height: 52px; }
+  .nav-link { font-size: 0.75rem; padding: 5px 9px; }
+}
 
-/* ── HERO ─────────────────────────────────────────────── */
-.hero { text-align: center; padding: 52px 24px 36px; max-width: 560px; margin: 0 auto; }
-.hero h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1.08; color: var(--ink); margin-bottom: 12px; }
-.hero p { font-size: 0.97rem; color: var(--muted); line-height: 1.65; }
+/* ═══════ IEEPA BANNER ═══════ */
+.ieepa-banner {
+  background: linear-gradient(135deg, #0C1D2E 0%, #162B44 50%, #1A3350 100%);
+  color: #fff; overflow: hidden; position: relative;
+}
+.ieepa-banner::before {
+  content: ''; position: absolute; top: -50%; right: -20%; width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(0,85,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ieepa-inner {
+  max-width: 800px; margin: 0 auto; padding: 28px 20px;
+  position: relative; z-index: 1;
+}
+.ieepa-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 4px 12px 4px 8px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 14px;
+}
+.ieepa-eyebrow-dot { width: 6px; height: 6px; border-radius: 3px; background: #4ADE80; flex-shrink: 0; }
+.ieepa-h { font-size: clamp(1.3rem, 3.5vw, 1.75rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 10px; }
+.ieepa-h span { color: #60A5FA; }
+.ieepa-p { font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.55; margin-bottom: 18px; max-width: 560px; }
+.ieepa-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
+.ieepa-stat-val { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: #fff; }
+.ieepa-stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.ieepa-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.ieepa-btn {
+  padding: 10px 20px; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; border: none; letter-spacing: -0.01em;
+}
+.ieepa-btn-primary { background: #fff; color: var(--ink); }
+.ieepa-btn-primary:hover { background: #F0F0F0; }
+.ieepa-btn-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.15); }
+.ieepa-btn-ghost:hover { background: rgba(255,255,255,0.14); }
 
-/* ── LAYOUT ───────────────────────────────────────────── */
-.main { max-width: 980px; margin: 0 auto; padding: 0 18px 80px; }
-.layout { display: grid; grid-template-columns: 1fr 360px; gap: 14px; align-items: start; }
-.sticky-col { position: sticky; top: 68px; }
-@media (max-width: 780px) { .layout { grid-template-columns: 1fr; } .sticky-col { position: static; } }
+/* ═══════ HERO ═══════ */
+.hero { text-align: center; padding: 40px 20px 28px; max-width: 580px; margin: 0 auto; }
+.hero h1 {
+  font-size: clamp(1.7rem, 5vw, 2.5rem); font-weight: 700;
+  letter-spacing: -0.04em; line-height: 1.08; color: var(--ink); margin-bottom: 12px;
+}
+.hero p { font-size: 0.95rem; color: var(--muted); line-height: 1.6; max-width: 440px; margin: 0 auto; }
+@media (max-width: 500px) { .hero { padding: 28px 16px 20px; } }
 
-/* ── CARD ─────────────────────────────────────────────── */
-.card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 14px; }
-.card-header { padding: 15px 20px 13px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-.card-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
+/* ═══════ MAIN ═══════ */
+.main { max-width: 900px; margin: 0 auto; padding: 0 16px 80px; }
+@media (min-width: 600px) { .main { padding: 0 20px 80px; } }
+
+/* ═══════ DEMO BAR ═══════ */
+.demo-bar {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 10px 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 16px;
+  font-size: 0.78rem; color: var(--muted);
+}
+.demo-btn {
+  padding: 5px 14px; border-radius: var(--radius-xs); font-size: 0.75rem;
+  font-weight: 600; cursor: pointer; border: none; font-family: var(--font); transition: all 0.12s;
+}
+.demo-btn-fill { background: var(--blue); color: #fff; }
+.demo-btn-fill:hover { background: var(--blue-hover); }
+.demo-btn-clear { background: var(--surface2); color: var(--ink); border: 1px solid var(--border2); }
+
+/* ═══════ LAYOUT ═══════ */
+.layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 760px) {
+  .layout { grid-template-columns: 1fr 340px; align-items: start; }
+  .sticky-col { position: sticky; top: 72px; }
+}
+
+/* ═══════ CARD ═══════ */
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+  overflow: hidden; margin-bottom: 16px;
+}
+.card-header {
+  padding: 16px 20px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.card-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
 .icon-blue  { background: var(--blue-soft); }
 .icon-green { background: var(--green-bg); }
 .icon-amber { background: var(--amber-bg); }
-.card-title { font-size: 0.88rem; font-weight: 600; letter-spacing: -0.01em; }
-.card-sub   { font-size: 0.73rem; color: var(--muted); margin-top: 1px; }
+.card-title { font-size: 0.9rem; font-weight: 650; letter-spacing: -0.01em; }
+.card-sub   { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
 .card-body  { padding: 20px; }
+@media (max-width: 500px) { .card-header { padding: 14px 16px 12px; } .card-body { padding: 16px; } }
 
-/* ── SPLIT PANEL ──────────────────────────────────────── */
-.split-panel { display: grid; grid-template-columns: 1fr 32px 1fr; align-items: stretch; min-height: 260px; }
-.split-left, .split-right { padding: 20px; }
-.split-divider { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px 0; }
-.split-divider-line { flex: 1; width: 1px; background: var(--border); }
-.split-divider-or { font-size: 0.65rem; font-weight: 700; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 3px 6px; letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0; }
-
-/* ── MOBILE ───────────────────────────────────────────── */
-@media (max-width: 680px) {
-  /* Nav */
-  .nav { padding: 0 14px; height: 48px; }
-  .nav-ticker { display: none; }
-  .nav-links { gap: 0; }
-  .nav-link { padding: 4px 8px; font-size: 0.75rem; }
-  /* Hero */
-  .hero { padding: 24px 16px 18px; }
-  .hero h1 { font-size: 1.65rem; }
-  /* Main */
-  .main { padding: 0 10px 60px; }
-  /* Demo bar */
-  .demo-bar { flex-wrap: wrap; gap: 8px; padding: 9px 12px; text-align: center; }
-  /* Cards */
-  .card-header { padding: 12px 14px 10px; }
-  .card-body { padding: 14px; }
-  /* Split panel — stack vertically */
-  .split-panel { grid-template-columns: 1fr; min-height: auto; }
-  .split-left { padding: 14px 14px 0; }
-  .split-right { padding: 0 14px 14px; }
-  .split-divider { flex-direction: row; padding: 8px 14px; height: auto; }
-  .split-divider-line { flex: 1; height: 1px; width: auto; }
-  /* Upload zone — shorter on mobile */
-  .upload-zone { padding: 10px 12px; }
-  .upload-icon { font-size: 1.4rem; }
-  /* Rate preview — scrollable */
-  .rate-preview { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .rp-desc { display: none; }
-  /* Fields */
-  .field-row, .field-row-3 { grid-template-columns: 1fr; }
-}
-@media (max-width: 400px) {
-  .nav-brand { font-size: 0.92rem; }
-  .hero h1 { font-size: 1.4rem; }
-}
-.split-left { display: flex; flex-direction: column; }
-#uploadCollapse { display: flex; flex-direction: column; flex: 1; }
+/* ═══════ UPLOAD ═══════ */
+.upload-section { padding: 20px; }
 .upload-zone {
-  border: 1.5px dashed var(--border2); border-radius: var(--radius-sm);
-  padding: 12px 14px; cursor: pointer; transition: all 0.18s;
-  position: relative; display: flex; align-items: center; gap: 12px;
-  flex: 1; min-height: 120px;
+  border: 2px dashed var(--border2); border-radius: var(--radius);
+  padding: 28px 20px; cursor: pointer; transition: all 0.2s;
+  position: relative; text-align: center;
 }
 .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-soft); }
 .upload-zone.has-file { border-style: solid; border-color: var(--green); background: var(--green-bg); }
-.upload-zone.upload-hidden { display: none; }
-.upload-icon  { font-size: 1.25rem; line-height: 1; flex-shrink: 0; }
-.upload-text  { flex: 1; min-width: 0; }
-.upload-title { font-size: 0.82rem; font-weight: 500; color: var(--ink); }
-.upload-hint  { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
-.file-pill { display: none; align-items: center; gap: 5px; background: white; border: 1px solid rgba(21,128,61,0.2); border-radius: 20px; padding: 3px 10px; font-size: 0.75rem; font-weight: 500; color: var(--green); }
-.file-pill.show { display: flex; }
-.file-pill-x { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 0.75rem; padding: 0 2px; line-height: 1; }
-.extract-btn { width: 100%; margin-top: 10px; padding: 9px; border-radius: var(--radius-sm); background: var(--blue); color: white; border: none; font-size: 0.82rem; font-weight: 500; font-family: var(--font); cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-.extract-btn:hover:not(:disabled) { background: var(--blue-dark); }
-.extract-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.upload-icon { font-size: 2rem; margin-bottom: 10px; opacity: 0.7; }
+.upload-title { font-size: 0.88rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.upload-hint { font-size: 0.75rem; color: var(--muted); }
+.file-pill {
+  display: none; align-items: center; justify-content: center; gap: 6px;
+  background: white; border: 1px solid rgba(15,123,63,0.2); border-radius: 20px;
+  padding: 4px 12px; font-size: 0.78rem; font-weight: 500; color: var(--green);
+  margin-top: 10px;
+}
+.file-pill.show { display: inline-flex; }
+.file-pill-x { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 0.78rem; padding: 0 2px; }
+.extract-btn {
+  width: 100%; margin-top: 14px; padding: 12px;
+  border-radius: var(--radius-sm); background: var(--blue); color: white;
+  border: none; font-size: 0.86rem; font-weight: 600; font-family: var(--font);
+  cursor: pointer; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.extract-btn:hover:not(:disabled) { background: var(--blue-hover); }
+.extract-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-/* ── EXTRACTED ────────────────────────────────────────── */
-.extracted-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--green-bg); color: var(--green); border: 1px solid rgba(21,128,61,0.18); border-radius: 20px; padding: 3px 10px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
+/* ── Divider ── */
+.or-divider {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 20px; color: var(--dim); font-size: 0.68rem;
+  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* ── FORM ─────────────────────────────────────────────── */
-.field { margin-bottom: 10px; }
-.field label { display: block; font-size: 0.68rem; font-weight: 700; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
-.field input, .field select, .field textarea { width: 100%; padding: 8px 10px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); font-size: 0.86rem; font-family: var(--font); color: var(--ink); outline: none; transition: border-color 0.12s, box-shadow 0.12s; appearance: none; -webkit-appearance: none; }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
-.field textarea { min-height: 62px; resize: none; line-height: 1.5; font-size: 0.82rem; }
-.field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+/* ═══════ EXTRACTED ═══════ */
+.extracted-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--green-bg); color: var(--green);
+  border: 1px solid rgba(15,123,63,0.15); border-radius: 20px;
+  padding: 3px 10px; font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px;
+}
+
+/* ═══════ FORM FIELDS ═══════ */
+.form-section { padding: 20px; }
+.field { margin-bottom: 12px; }
+.field label {
+  display: block; font-size: 0.7rem; font-weight: 700; color: var(--muted);
+  margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 12px;
+  background: var(--surface); border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font);
+  color: var(--ink); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none; appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft);
+}
+.field textarea { min-height: 68px; resize: none; line-height: 1.5; font-size: 0.86rem; }
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A7A7A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; cursor: pointer;
+}
 .field-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .field-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; }
+@media (max-width: 500px) {
+  .field-row-3 { grid-template-columns: 1fr; }
+}
 
-/* ── HTS SEARCH ───────────────────────────────────────── */
+/* ═══════ HTS SEARCH ═══════ */
 .hts-wrap { position: relative; }
-.hts-dropdown { position: absolute; top: calc(100% + 3px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); z-index: 50; display: none; overflow: hidden; }
+.hts-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+  z-index: 50; display: none; overflow: hidden; max-height: 280px; overflow-y: auto;
+}
 .hts-dropdown.show { display: block; }
-.hts-opt { padding: 8px 11px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.hts-opt { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.1s; }
 .hts-opt:last-child { border: none; }
 .hts-opt:hover { background: var(--surface2); }
-.hts-opt-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.71rem; color: var(--blue); font-weight: 700; }
-.hts-opt-desc { font-size: 0.77rem; color: var(--ink); margin-top: 1px; }
-.hts-opt-rate { font-size: 0.66rem; color: var(--muted); margin-top: 2px; }
+.hts-opt-code { font-family: var(--mono); font-size: 0.74rem; color: var(--blue); font-weight: 700; }
+.hts-opt-desc { font-size: 0.8rem; color: var(--ink); margin-top: 2px; line-height: 1.3; }
+.hts-opt-rate { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
 
-/* ── CLASSIFY BOX ─────────────────────────────────────── */
-.classify-box { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 0.77rem; margin-top: 6px; margin-bottom: 8px; }
-.classify-box-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.classify-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.83rem; font-weight: 700; color: var(--blue); }
-.confidence { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 20px; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+/* ═══════ CLASSIFY ═══════ */
+.classify-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.8rem;
+  margin-top: 8px; margin-bottom: 10px;
+}
+.classify-box-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.classify-code { font-family: var(--mono); font-size: 0.86rem; font-weight: 700; color: var(--blue); }
+.confidence {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: 20px; font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
 .conf-high   { background: var(--green-bg); color: var(--green); }
 .conf-medium { background: var(--amber-bg); color: var(--amber); }
 .conf-low    { background: var(--red-bg);   color: var(--red); }
 
-/* ── BUTTONS ──────────────────────────────────────────── */
-.btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 0.86rem; font-weight: 500; font-family: var(--font); cursor: pointer; border: none; transition: all 0.13s; width: 100%; letter-spacing: -0.01em; }
-.btn-primary { background: var(--blue); color: white; }
-.btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
-.btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--border2); margin-top: 8px; }
-.btn-secondary:hover { background: var(--surface2); }
-.btn-ghost { background: none; border: none; color: var(--blue); font-size: 0.77rem; padding: 5px 0; margin-bottom: 6px; justify-content: flex-start; width: auto; cursor: pointer; font-family: var(--font); font-weight: 500; }
-.btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn-loading { pointer-events: none; }
-.spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.55s linear infinite; display: none; }
-.btn-loading .spinner { display: block; }
-.btn-loading .btn-text { opacity: 0.65; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── FLAGS ────────────────────────────────────────────── */
-.flag { display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; line-height: 1.5; margin-bottom: 7px; }
-.flag-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(21,128,61,0.12); }
-.flag-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(146,64,14,0.12); }
-.flag-red   { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(185,28,28,0.12); }
-.flag-icon  { flex-shrink: 0; font-size: 0.88rem; margin-top: 1px; }
-
-/* ── HTS CHIP ─────────────────────────────────────────── */
-.hts-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; gap: 10px; margin-bottom: 11px; }
-.hts-chip-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.83rem; color: var(--blue); font-weight: 700; flex-shrink: 0; padding-top: 1px; }
-.hts-chip-desc { font-size: 0.77rem; color: var(--ink); line-height: 1.4; }
-.hts-chip-rate { font-size: 0.66rem; color: var(--muted); margin-top: 3px; }
-
-/* ── RATE PREVIEW ─────────────────────────────────────── */
-.rate-preview { display: none; align-items: center; gap: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 6px; font-size: 0.72rem; }
-.rate-preview.show { display: flex; }
-.rp-code { font-family: "Menlo","SF Mono",monospace; font-size: 0.7rem; font-weight: 700; color: var(--blue); padding: 6px 10px; border-right: 1px solid var(--border); white-space: nowrap; background: var(--blue-soft); }
-.rp-desc { color: var(--muted); padding: 6px 10px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); }
-.rp-rates { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
-.rp-rate { padding: 6px 9px; border-right: 1px solid var(--border); white-space: nowrap; }
+/* ═══════ RATE PREVIEW ═══════ */
+.rate-preview {
+  display: none; align-items: center; gap: 0;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); overflow: hidden; margin-top: 8px; font-size: 0.74rem;
+}
+.rate-preview.show { display: flex; flex-wrap: wrap; }
+.rp-code { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; color: var(--blue); padding: 7px 10px; border-right: 1px solid var(--border); white-space: nowrap; background: var(--blue-soft); }
+.rp-desc { color: var(--muted); padding: 7px 10px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); }
+.rp-rates { display: flex; align-items: center; flex-shrink: 0; }
+.rp-rate { padding: 7px 10px; border-right: 1px solid var(--border); white-space: nowrap; }
 .rp-rate:last-child { border: none; }
 .rp-rate .rl { color: var(--muted); font-size: 0.65rem; display: block; }
-.rp-rate .rv { font-weight: 700; color: var(--ink); font-size: 0.75rem; }
+.rp-rate .rv { font-weight: 700; color: var(--ink); font-size: 0.78rem; }
 .rp-rate.eff .rv { color: var(--blue); }
-.rp-rate.s301 .rv { color: #92400e; }
+.rp-rate.s301 .rv { color: var(--amber); }
+@media (max-width: 500px) { .rp-desc { display: none; } }
 
-/* ── BREAKDOWN ────────────────────────────────────────── */
+/* ═══════ BUTTONS ═══════ */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 20px; border-radius: var(--radius-sm);
+  font-size: 0.9rem; font-weight: 600; font-family: var(--font);
+  cursor: pointer; border: none; transition: all 0.15s; width: 100%;
+  letter-spacing: -0.01em;
+}
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover:not(:disabled) { background: var(--blue-hover); }
+.btn-secondary { background: var(--surface); color: var(--ink); border: 1.5px solid var(--border2); margin-top: 8px; }
+.btn-secondary:hover { background: var(--surface2); }
+.btn-ghost {
+  background: none; border: none; color: var(--blue); font-size: 0.8rem;
+  padding: 6px 0; justify-content: flex-start; width: auto;
+  cursor: pointer; font-family: var(--font); font-weight: 600;
+}
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-loading { pointer-events: none; }
+.spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.55s linear infinite; display: none; }
+.btn-loading .spinner { display: block; }
+.btn-loading .btn-text { opacity: 0.6; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════ FLAGS / ALERTS ═══════ */
+.flag {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 0.8rem; line-height: 1.5; margin-bottom: 8px;
+}
+.flag-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(15,123,63,0.1); }
+.flag-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(154,103,0,0.1); }
+.flag-red   { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(214,40,40,0.1); }
+.flag-icon  { flex-shrink: 0; font-size: 0.9rem; margin-top: 1px; }
+
+/* ═══════ HTS CHIP ═══════ */
+.hts-chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  display: flex; gap: 12px; margin-bottom: 12px;
+}
+.hts-chip-code { font-family: var(--mono); font-size: 0.86rem; color: var(--blue); font-weight: 700; flex-shrink: 0; padding-top: 1px; }
+.hts-chip-desc { font-size: 0.8rem; color: var(--ink); line-height: 1.4; }
+.hts-chip-rate { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+
+/* ═══════ BREAKDOWN ═══════ */
 .breakdown { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 10px; }
-.br-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; border-bottom: 1px solid var(--border); font-size: 0.81rem; transition: background 0.09s; }
+.br-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  font-size: 0.84rem; transition: background 0.09s;
+}
 .br-row:last-child { border: none; }
 .br-row:hover { background: var(--surface2); }
 .br-row .lbl { color: var(--muted); }
-.br-row .val { font-family: "Menlo","SF Mono",monospace; font-size: 0.77rem; color: var(--ink); }
+.br-row .val { font-family: var(--mono); font-size: 0.8rem; color: var(--ink); }
 .br-row.sub .lbl { color: var(--ink); font-weight: 600; }
 .br-row.sub .val { color: var(--blue); font-weight: 600; }
-.br-total { display: flex; justify-content: space-between; align-items: center; padding: 13px 12px; background: var(--ink); color: white; }
-.br-total .lbl { font-size: 0.86rem; font-weight: 500; }
-.br-total .val { font-family: "Menlo","SF Mono",monospace; font-size: 0.9rem; font-weight: 700; }
+.br-total {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px; background: var(--ink); color: white;
+}
+.br-total .lbl { font-size: 0.88rem; font-weight: 500; }
+.br-total .val { font-family: var(--mono); font-size: 0.95rem; font-weight: 700; }
 
-/* ── RESULT PLACEHOLDER ───────────────────────────────── */
-.result-placeholder { padding: 46px 20px; text-align: center; color: var(--muted); }
-.result-placeholder-icon { font-size: 2.2rem; margin-bottom: 10px; opacity: 0.28; }
-.result-placeholder p { font-size: 0.82rem; line-height: 1.6; max-width: 200px; margin: 0 auto; }
+/* ═══════ RESULT PLACEHOLDER ═══════ */
+.result-placeholder { padding: 48px 20px; text-align: center; color: var(--muted); }
+.result-placeholder-icon { font-size: 2.4rem; margin-bottom: 12px; opacity: 0.2; }
+.result-placeholder p { font-size: 0.84rem; line-height: 1.6; max-width: 210px; margin: 0 auto; }
 
-/* ── MISC ─────────────────────────────────────────────── */
+/* ═══════ MISC ═══════ */
 #deMinWarning { display: none; margin-top: 10px; }
-.divider { height: 1px; background: var(--border); margin: 13px 0; }
-.text-muted { color: var(--muted); font-size: 0.71rem; line-height: 1.5; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.text-muted { color: var(--muted); font-size: 0.73rem; line-height: 1.5; }
 .mt-10 { margin-top: 10px; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
-.result-anim { animation: fadeUp 0.26s ease; }
+.result-anim { animation: fadeUp 0.25s ease; }
+
+/* ═══════ FOOTER ═══════ */
+.footer {
+  max-width: 900px; margin: 0 auto; padding: 20px 16px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border);
+  flex-wrap: wrap; gap: 8px;
+}
+.footer a { color: var(--blue); text-decoration: none; font-weight: 500; }
+
+/* ═══════ SCROLLBAR ═══════ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+::placeholder { color: var(--dim); }
 </style>
 </head>
 <body>
 
+<!-- ═══════ NAV ═══════ -->
 <nav class="nav">
-  <div class="nav-brand">iDuties</div>
-  <div class="nav-sep"></div>
+  <div class="nav-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    iDuties<span class="nav-dot">.ai</span>
+  </div>
   <div class="nav-links">
     <a class="nav-link active" href="#">Calculator</a>
-    <a class="nav-link" href="#">HTS Lookup</a>
-    <a class="nav-link" href="#">History</a>
+    <a class="nav-link" href="#ieepa">Refund</a>
   </div>
+  <div class="nav-spacer"></div>
   <div class="nav-ticker">
-    <div class="ticker-item">
-      <div class="ticker-dot"></div>
-      <span class="ticker-label">S.301</span>
-      <span class="ticker-value s301-active">Active</span>
-    </div>
-    <div class="ticker-item">
-      <span class="ticker-label">De Min</span>
-      <span class="ticker-value">$800</span>
-    </div>
-    <div class="ticker-item">
-      <span class="ticker-label">EUR</span>
-      <span class="ticker-value" id="rate-EUR">—</span>
-    </div>
-    <div class="ticker-item">
-      <span class="ticker-label">CNY</span>
-      <span class="ticker-value" id="rate-CNY">—</span>
-    </div>
-    <div class="ticker-item">
-      <span class="ticker-label">PHP</span>
-      <span class="ticker-value" id="rate-PHP">—</span>
-    </div>
-
+    <div class="ticker-item"><div class="ticker-dot"></div><span class="ticker-label">S.301</span><span class="ticker-value s301-active">Active</span></div>
+    <div class="ticker-item"><span class="ticker-label">De Min</span><span class="ticker-value">$800</span></div>
+    <div class="ticker-item"><span class="ticker-label">EUR</span><span class="ticker-value" id="rate-EUR">—</span></div>
+    <div class="ticker-item"><span class="ticker-label">CNY</span><span class="ticker-value" id="rate-CNY">—</span></div>
+    <div class="ticker-item"><span class="ticker-label">PHP</span><span class="ticker-value" id="rate-PHP">—</span></div>
   </div>
 </nav>
 
+<!-- ═══════ IEEPA BANNER ═══════ -->
+<section class="ieepa-banner" id="ieepa">
+  <div class="ieepa-inner">
+    <div class="ieepa-eyebrow"><span class="ieepa-eyebrow-dot"></span>Supreme Court Ruling · Feb 20, 2026</div>
+    <h2 class="ieepa-h">IEEPA tariffs ruled <span>unlawful.</span><br>You may be owed a refund.</h2>
+    <p class="ieepa-p">The Supreme Court held 6–3 that IEEPA does not authorize presidential tariffs. Over $175 billion in duties were collected under this authority. Importers of record have 180 days from liquidation to file a protest and claim a refund from CBP.</p>
+    <div class="ieepa-stats">
+      <div><div class="ieepa-stat-val">$175B</div><div class="ieepa-stat-label">IEEPA Duties Collected</div></div>
+      <div><div class="ieepa-stat-val">301K+</div><div class="ieepa-stat-label">Importers Affected</div></div>
+      <div><div class="ieepa-stat-val">180 days</div><div class="ieepa-stat-label">Protest Window</div></div>
+    </div>
+    <div class="ieepa-actions">
+      <button class="ieepa-btn ieepa-btn-primary" onclick="window.open('https://www.cbp.gov/trade/basic-import-export/refunds','_blank')">Check Your Refund Eligibility</button>
+      <button class="ieepa-btn ieepa-btn-ghost" onclick="window.open('https://www.avalara.com/blog/en/north-america/2026/02/how-to-request-tariff-refunds.html','_blank')">How Refunds Work →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ HERO ═══════ -->
 <div class="hero">
   <h1>Know your landed cost<br>before you order.</h1>
-  <p>The definitive tool for import duty intelligence. Upload an invoice or describe your product — get an exact landed cost breakdown across any trade lane, in seconds.</p>
+  <p>Upload an invoice or describe your product — get an exact landed cost breakdown in seconds.</p>
 </div>
 
 <div class="main">
 
   <div class="demo-bar">
-    ✦ Try a demo shipment —
+    <span>✦ Try a sample shipment</span>
     <button class="demo-btn demo-btn-fill" onclick="loadDemo()">Load Demo</button>
     <button class="demo-btn demo-btn-clear" onclick="resetAll()">Clear</button>
   </div>
 
-<div class="layout">
+  <div class="layout">
+    <div>
 
-  <div>
-
-    <!-- STEP 1 -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon icon-blue">📦</div>
-        <div>
-          <div class="card-title">Step 1 — Product Details</div>
-          <div class="card-sub">Upload an invoice for AI extraction, or enter product info manually</div>
+      <!-- ═══════ STEP 1 ═══════ -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-blue">📦</div>
+          <div><div class="card-title">Product Details</div><div class="card-sub">Upload an invoice or enter product info manually</div></div>
         </div>
-      </div>
 
-      <div class="split-panel">
-
-        <div class="split-left">
-          <div id="uploadCollapse">
-            <div class="upload-zone" id="uploadZone">
-              <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFile(this)">
-              <div class="upload-icon">📄</div>
-              <div class="upload-text">
-                <div class="upload-title">Drop invoice here or click to browse</div>
-                <div class="upload-hint">JPG · PNG · PDF · WEBP · Phone photos work great</div>
-              </div>
-              <div class="file-pill" id="filePill">
-                <span id="filePillName"></span>
-                <button class="file-pill-x" onclick="clearFile(event)">✕</button>
-              </div>
+        <!-- Upload Zone -->
+        <div class="upload-section" id="uploadCollapse">
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFile(this)">
+            <div class="upload-icon">📄</div>
+            <div class="upload-title">Drop a commercial invoice here</div>
+            <div class="upload-hint">JPG · PNG · PDF · WEBP — phone photos work great</div>
+            <div class="file-pill" id="filePill">
+              <span id="filePillName"></span>
+              <button class="file-pill-x" onclick="clearFile(event)">✕</button>
             </div>
-
-            <div id="extractedSection" style="display:none;margin-top:10px">
-              <div class="extracted-badge">✦ AI Extracted</div>
-              <div id="extractedContent"></div>
-            </div>
-
-            <button class="extract-btn" id="extractBtn" onclick="extractInvoice()" disabled>
-              <div class="spinner"></div>
-              <span class="btn-text">Extract with AI</span>
-            </button>
           </div>
+          <div id="extractedSection" style="display:none;margin-top:12px">
+            <div class="extracted-badge">✦ AI Extracted</div>
+            <div id="extractedContent"></div>
+          </div>
+          <button class="extract-btn" id="extractBtn" onclick="extractInvoice()" disabled>
+            <div class="spinner"></div>
+            <span class="btn-text">Extract with AI</span>
+          </button>
         </div>
 
-        <div class="split-divider" id="uploadDivider">
-          <div class="split-divider-line"></div>
-          <div class="split-divider-or">or</div>
-          <div class="split-divider-line"></div>
-        </div>
+        <div class="or-divider" id="uploadDivider"><span>or enter manually</span></div>
 
-        <div class="split-right">
+        <!-- Manual Fields -->
+        <div class="form-section">
           <div class="field">
             <label>Product Description</label>
             <textarea id="productDesc" placeholder="e.g. Men's 100% cotton T-shirt, crew neck, short sleeve"></textarea>
@@ -366,7 +510,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
           <div class="field">
             <label>HTS Code</label>
             <div class="hts-wrap">
-              <input type="text" id="htsInput" placeholder="Search or type…" oninput="searchHTS(this.value)" autocomplete="off">
+              <input type="text" id="htsInput" placeholder="Search or type code…" oninput="searchHTS(this.value)" autocomplete="off">
               <div class="hts-dropdown" id="htsDropdown"></div>
             </div>
             <div class="rate-preview" id="ratePreview">
@@ -379,184 +523,182 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
               </div>
             </div>
           </div>
-          <div class="field">
-            <label>Country of Origin</label>
-            <select id="originCountry" onchange="updateRatePreview()">
-              <option value="">Select…</option>
-              <option value="CN">🇨🇳 China</option>
-              <option value="VN">🇻🇳 Vietnam</option>
-              <option value="IN">🇮🇳 India</option>
-              <option value="BD">🇧🇩 Bangladesh</option>
-              <option value="MX">🇲🇽 Mexico</option>
-              <option value="CA">🇨🇦 Canada</option>
-              <option value="KR">🇰🇷 South Korea</option>
-              <option value="JP">🇯🇵 Japan</option>
-              <option value="DE">🇩🇪 Germany</option>
-              <option value="IT">🇮🇹 Italy</option>
-              <option value="TR">🇹🇷 Turkey</option>
-              <option value="PH">🇵🇭 Philippines</option>
-              <option value="ID">🇮🇩 Indonesia</option>
-              <option value="TH">🇹🇭 Thailand</option>
-              <option value="MY">🇲🇾 Malaysia</option>
-              <option value="PK">🇵🇰 Pakistan</option>
-              <option value="TW">🇹🇼 Taiwan</option>
-              <option value="US">🇺🇸 United States</option>
-              <option value="GB">🇬🇧 United Kingdom</option>
-              <option value="Other">🌐 Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Destination Country</label>
-            <select id="destCountry">
-              <option value="US" selected>🇺🇸 United States</option>
-              <option value="GB">🇬🇧 United Kingdom</option>
-              <option value="DE">🇩🇪 Germany</option>
-              <option value="FR">🇫🇷 France</option>
-              <option value="CA">🇨🇦 Canada</option>
-              <option value="AU">🇦🇺 Australia</option>
-              <option value="JP">🇯🇵 Japan</option>
-              <option value="NL">🇳🇱 Netherlands</option>
-              <option value="SG">🇸🇬 Singapore</option>
-              <option value="AE">🇦🇪 UAE</option>
-              <option value="MX">🇲🇽 Mexico</option>
-              <option value="BR">🇧🇷 Brazil</option>
-              <option value="KR">🇰🇷 South Korea</option>
-              <option value="IN">🇮🇳 India</option>
-              <option value="IT">🇮🇹 Italy</option>
-              <option value="ES">🇪🇸 Spain</option>
-              <option value="CH">🇨🇭 Switzerland</option>
-              <option value="SE">🇸🇪 Sweden</option>
-            </select>
+          <div class="field-row">
+            <div class="field">
+              <label>Country of Origin</label>
+              <select id="originCountry" onchange="updateRatePreview()">
+                <option value="">Select…</option>
+                <option value="CN">🇨🇳 China</option>
+                <option value="VN">🇻🇳 Vietnam</option>
+                <option value="IN">🇮🇳 India</option>
+                <option value="BD">🇧🇩 Bangladesh</option>
+                <option value="MX">🇲🇽 Mexico</option>
+                <option value="CA">🇨🇦 Canada</option>
+                <option value="KR">🇰🇷 South Korea</option>
+                <option value="JP">🇯🇵 Japan</option>
+                <option value="DE">🇩🇪 Germany</option>
+                <option value="IT">🇮🇹 Italy</option>
+                <option value="TR">🇹🇷 Turkey</option>
+                <option value="PH">🇵🇭 Philippines</option>
+                <option value="ID">🇮🇩 Indonesia</option>
+                <option value="TH">🇹🇭 Thailand</option>
+                <option value="MY">🇲🇾 Malaysia</option>
+                <option value="PK">🇵🇰 Pakistan</option>
+                <option value="TW">🇹🇼 Taiwan</option>
+                <option value="US">🇺🇸 United States</option>
+                <option value="GB">🇬🇧 United Kingdom</option>
+                <option value="Other">🌐 Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Destination</label>
+              <select id="destCountry">
+                <option value="US" selected>🇺🇸 United States</option>
+                <option value="GB">🇬🇧 United Kingdom</option>
+                <option value="DE">🇩🇪 Germany</option>
+                <option value="FR">🇫🇷 France</option>
+                <option value="CA">🇨🇦 Canada</option>
+                <option value="AU">🇦🇺 Australia</option>
+                <option value="JP">🇯🇵 Japan</option>
+                <option value="NL">🇳🇱 Netherlands</option>
+                <option value="SG">🇸🇬 Singapore</option>
+                <option value="AE">🇦🇪 UAE</option>
+                <option value="MX">🇲🇽 Mexico</option>
+                <option value="BR">🇧🇷 Brazil</option>
+                <option value="KR">🇰🇷 South Korea</option>
+                <option value="IN">🇮🇳 India</option>
+                <option value="IT">🇮🇹 Italy</option>
+                <option value="ES">🇪🇸 Spain</option>
+                <option value="CH">🇨🇭 Switzerland</option>
+                <option value="SE">🇸🇪 Sweden</option>
+              </select>
+            </div>
           </div>
           <button class="btn-ghost" onclick="classifyDescription()">
             <span class="btn-text">↳ AI Classify Description</span>
           </button>
           <div id="classifyResult" style="display:none"></div>
         </div>
-
       </div>
+
+      <!-- ═══════ STEP 2 ═══════ -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-green">💵</div>
+          <div><div class="card-title">Shipment Values</div><div class="card-sub">US customs uses FOB — shipping & insurance are not dutiable</div></div>
+        </div>
+        <div class="card-body">
+          <div class="field-row-3">
+            <div class="field">
+              <label>Product Value</label>
+              <input type="number" id="productValue" placeholder="0.00" min="0" step="0.01" oninput="checkDeMin()">
+            </div>
+            <div class="field">
+              <label>Currency</label>
+              <select id="currency" onchange="updateRate()">
+                <option value="USD" data-rate="1">USD</option>
+                <option value="EUR" data-rate="1.08">EUR</option>
+                <option value="GBP" data-rate="1.27">GBP</option>
+                <option value="CNY" data-rate="0.138">CNY</option>
+                <option value="JPY" data-rate="0.0067">JPY</option>
+                <option value="PHP" data-rate="0.0175">PHP</option>
+                <option value="AUD" data-rate="0.63">AUD</option>
+                <option value="CAD" data-rate="0.74">CAD</option>
+                <option value="KRW" data-rate="0.00074">KRW</option>
+                <option value="INR" data-rate="0.012">INR</option>
+                <option value="VND" data-rate="0.000040">VND</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>USD Rate</label>
+              <input type="number" id="exchangeRate" value="1.00" min="0.0001" step="0.0001">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Shipping Cost</label>
+              <input type="number" id="shippingCost" placeholder="0.00" min="0" step="0.01" value="0">
+            </div>
+            <div class="field">
+              <label>Insurance</label>
+              <input type="number" id="insuranceCost" placeholder="0.00" min="0" step="0.01" value="0">
+            </div>
+          </div>
+          <div class="field">
+            <label>Unit Quantity <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — for per-unit cost)</span></label>
+            <input type="number" id="unitQty" placeholder="e.g. 500" min="1" step="1">
+          </div>
+          <div class="flag flag-green" id="deMinWarning">
+            <span class="flag-icon">★</span>
+            <span>Value is below the <strong>$800 US de minimis</strong> threshold — no duties apply.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ STEP 3 ═══════ -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-amber">⚖️</div>
+          <div><div class="card-title">Trade Details & Calculate</div><div class="card-sub">FTA programs and manual overrides</div></div>
+        </div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>FTA / Special Program</label>
+              <select id="ftaSelect">
+                <option value="none">None — MFN Rate</option>
+                <option value="usmca">USMCA — Mexico / Canada</option>
+                <option value="korus">KORUS — South Korea</option>
+                <option value="singapore">US–Singapore FTA</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Duty Rate Override (%)</label>
+              <input type="number" id="dutyOverride" placeholder="Leave blank for auto" min="0" max="300" step="0.1">
+            </div>
+          </div>
+          <div class="divider"></div>
+          <button class="btn btn-primary" id="calcBtn" onclick="calculate()">
+            <div class="spinner"></div>
+            <span class="btn-text">Calculate Landed Cost →</span>
+          </button>
+          <button class="btn btn-secondary" onclick="resetAll()">Clear All</button>
+        </div>
+      </div>
+
     </div>
 
-    <!-- STEP 2 -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon icon-green">💵</div>
-        <div>
-          <div class="card-title">Step 2 — Shipment Values</div>
-          <div class="card-sub">US customs uses FOB valuation — shipping & insurance are not dutiable</div>
+    <!-- ═══════ RESULTS SIDEBAR ═══════ -->
+    <div class="sticky-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-blue">📊</div>
+          <div><div class="card-title">Landed Cost Breakdown</div><div class="card-sub">FOB valuation · MPF included</div></div>
         </div>
-      </div>
-      <div class="card-body">
-        <div class="field-row-3">
-          <div class="field">
-            <label>Product Value</label>
-            <input type="number" id="productValue" placeholder="0.00" min="0" step="0.01" oninput="checkDeMin()">
-          </div>
-          <div class="field">
-            <label>Currency</label>
-            <select id="currency" onchange="updateRate()">
-              <option value="USD" data-rate="1">USD</option>
-              <option value="EUR" data-rate="1.08">EUR</option>
-              <option value="GBP" data-rate="1.27">GBP</option>
-              <option value="CNY" data-rate="0.138">CNY</option>
-              <option value="JPY" data-rate="0.0067">JPY</option>
-              <option value="PHP" data-rate="0.0175">PHP</option>
-              <option value="AUD" data-rate="0.63">AUD</option>
-              <option value="CAD" data-rate="0.74">CAD</option>
-              <option value="KRW" data-rate="0.00074">KRW</option>
-              <option value="INR" data-rate="0.012">INR</option>
-              <option value="VND" data-rate="0.000040">VND</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>USD Rate</label>
-            <input type="number" id="exchangeRate" value="1.00" min="0.0001" step="0.0001">
-          </div>
+        <div id="resultPlaceholder" class="result-placeholder">
+          <div class="result-placeholder-icon">◎</div>
+          <p>Fill in product and shipment details, then calculate.</p>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Shipping Cost</label>
-            <input type="number" id="shippingCost" placeholder="0.00" min="0" step="0.01" value="0">
-          </div>
-          <div class="field">
-            <label>Insurance</label>
-            <input type="number" id="insuranceCost" placeholder="0.00" min="0" step="0.01" value="0">
-          </div>
-        </div>
-        <div class="field">
-          <label>Unit Quantity <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — for per-unit cost breakdown)</span></label>
-          <input type="number" id="unitQty" placeholder="e.g. 500" min="1" step="1">
-        </div>
-        <div class="flag flag-green" id="deMinWarning">
-          <span class="flag-icon">★</span>
-          <span>Value is below the <strong>$800 US de minimis</strong> threshold — no duties apply to this shipment.</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 3 -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon icon-amber">⚖️</div>
-        <div>
-          <div class="card-title">Step 3 — Trade Details</div>
-          <div class="card-sub">Free trade agreements and manual rate overrides</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="field-row">
-          <div class="field">
-            <label>FTA / Special Program</label>
-            <select id="ftaSelect">
-              <option value="none">None — Standard MFN Rate</option>
-              <option value="usmca">USMCA — Mexico / Canada (0%)</option>
-              <option value="korus">KORUS — South Korea</option>
-              <option value="singapore">US-Singapore FTA (0%)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Duty Rate Override (%)</label>
-            <input type="number" id="dutyOverride" placeholder="Leave blank for auto" min="0" max="300" step="0.1">
-          </div>
-        </div>
-        <div class="divider"></div>
-        <button class="btn btn-primary" id="calcBtn" onclick="calculate()">
-          <div class="spinner"></div>
-          <span class="btn-text">Calculate Landed Cost →</span>
-        </button>
-        <button class="btn btn-secondary" onclick="resetAll()">Clear All</button>
+        <div id="resultBody" class="card-body" style="display:none"></div>
       </div>
     </div>
 
   </div>
-
-  <!-- RESULTS -->
-  <div class="sticky-col">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon icon-blue">📊</div>
-        <div>
-          <div class="card-title">Landed Cost Breakdown</div>
-          <div class="card-sub">FOB valuation · MPF included · No federal VAT</div>
-        </div>
-      </div>
-      <div id="resultPlaceholder" class="result-placeholder">
-        <div class="result-placeholder-icon">◎</div>
-        <p>Fill in product and shipment details, then calculate.</p>
-      </div>
-      <div id="resultBody" class="card-body" style="display:none"></div>
-    </div>
-  </div>
-
-</div>
 </div>
 
+<!-- ═══════ FOOTER ═══════ -->
+<footer class="footer">
+  <span>iDuties.ai — Import duty intelligence</span>
+  <span>Not legal advice. Verify with a <a href="https://www.cbp.gov/trade/basic-import-export/importing-goods/us-customs-brokers" target="_blank">licensed customs broker</a>.</span>
+</footer>
+
+<!-- ═══════ JAVASCRIPT ═══════ -->
 <script>
 let fileB64 = null, fileMime = null;
 let selectedHTS = { code:'', rate:null, cn301:null, desc:'' };
 let htsTimer = null;
 
-// ── Local HTS DB (fallback when no backend) ────────────
+// ── Local HTS DB ──────────────────────────────────────────
 const HTS_DB = [
   { code:'6109.10.00', desc:'T-shirts, singlets and other vests, of cotton, knitted', rate:16.5, cn301:7.5 },
   { code:'6109.90.10', desc:'T-shirts, singlets and other vests, of man-made fibres', rate:32, cn301:7.5 },
@@ -572,10 +714,10 @@ const HTS_DB = [
   { code:'6204.62.40', desc:"Women's trousers and breeches, of cotton", rate:16.6, cn301:7.5 },
   { code:'8443.32.10', desc:'Inkjet printers', rate:0, cn301:0 },
   { code:'6301.40.00', desc:'Blankets and travelling rugs, of synthetic fibres', rate:8.5, cn301:7.5 },
-  { code:'3923.21.00', desc:'Sacks and bags of polymers of ethylene (plastic bags)', rate:3, cn301:25 },
+  { code:'3923.21.00', desc:'Sacks and bags of polymers of ethylene', rate:3, cn301:25 },
 ];
 
-// ── Live rates ─────────────────────────────────────────
+// ── Live rates ────────────────────────────────────────────
 async function loadRates() {
   try {
     const res = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -594,14 +736,14 @@ async function loadRates() {
 }
 loadRates();
 
-// File handling
+// ── File handling ─────────────────────────────────────────
 function handleFile(input) {
   const file = input.files[0];
   if (!file) return;
   document.getElementById('uploadZone').classList.add('has-file');
   const pill = document.getElementById('filePill');
   pill.classList.add('show');
-  document.getElementById('filePillName').textContent = file.name.length > 22 ? file.name.slice(0,20)+'…' : file.name;
+  document.getElementById('filePillName').textContent = file.name.length > 25 ? file.name.slice(0,22)+'…' : file.name;
   document.getElementById('extractBtn').disabled = false;
   const reader = new FileReader();
   reader.onload = e => { const p = e.target.result.split(','); fileB64 = p[1]; fileMime = file.type||'image/jpeg'; };
@@ -618,7 +760,7 @@ function clearFile(e) {
   document.getElementById('fileInput').value = '';
 }
 
-// Extract invoice
+// ── Extract invoice ───────────────────────────────────────
 async function extractInvoice() {
   if (!fileB64) return;
   const btn = document.getElementById('extractBtn');
@@ -631,19 +773,19 @@ async function extractInvoice() {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     if (data.product_description) document.getElementById('productDesc').value = data.product_description;
-    if (data.total_value)   document.getElementById('productValue').value = parseFloat(data.total_value)||'';
-    if (data.currency)      { document.getElementById('currency').value = data.currency; updateRate(); }
+    if (data.total_value) document.getElementById('productValue').value = parseFloat(data.total_value)||'';
+    if (data.currency) { document.getElementById('currency').value = data.currency; updateRate(); }
     if (data.shipping_cost) document.getElementById('shippingCost').value = parseFloat(data.shipping_cost)||0;
-    if (data.insurance)     document.getElementById('insuranceCost').value = parseFloat(data.insurance)||0;
+    if (data.insurance) document.getElementById('insuranceCost').value = parseFloat(data.insurance)||0;
     if (data.country_of_origin) document.getElementById('originCountry').value = data.country_of_origin;
     if (data.hts_code) { document.getElementById('htsInput').value = data.hts_code; selectedHTS = { code:data.hts_code, desc:data.hts_description||'', rate:data.base_rate, cn301:data.cn_301_rate }; }
     const sec = document.getElementById('extractedSection');
     sec.style.display = 'block';
     const conf = data.classification_confidence||'medium';
     document.getElementById('extractedContent').innerHTML = `
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:0.76rem;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.78rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-weight:600;font-size:0.77rem">Extracted Fields</span>
+          <span style="font-weight:600">Extracted Fields</span>
           <span class="confidence conf-${conf}">${conf}</span>
         </div>
         ${xrow('Product',data.product_description)}
@@ -654,7 +796,7 @@ async function extractInvoice() {
       </div>`;
     checkDeMin();
   } catch(e) {
-    // Fallback: load demo data when no backend available
+    // Fallback: load demo
     const demo = { product_description:"Men's 100% Cotton T-Shirts, short sleeve, assorted S–XL", total_value:15800, currency:'CNY', country_of_origin:'CN', hts_code:'6109.10.00', hts_description:'T-shirts, singlets and other vests, of cotton, knitted', incoterms:'FOB Shanghai', classification_confidence:'high' };
     document.getElementById('productDesc').value = demo.product_description;
     document.getElementById('productValue').value = demo.total_value;
@@ -665,9 +807,9 @@ async function extractInvoice() {
     const sec = document.getElementById('extractedSection');
     sec.style.display = 'block';
     document.getElementById('extractedContent').innerHTML = `
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:0.76rem;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.78rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-weight:600;font-size:0.77rem">Demo Extraction</span>
+          <span style="font-weight:600">Demo Extraction</span>
           <span class="confidence conf-high">high</span>
         </div>
         ${xrow('Product',demo.product_description)}
@@ -684,10 +826,10 @@ async function extractInvoice() {
 }
 
 function xrow(k,v) {
-  return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">${k}</span><span style="font-weight:500;max-width:155px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v||'—'}</span></div>`;
+  return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">${k}</span><span style="font-weight:500;max-width:180px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v||'—'}</span></div>`;
 }
 
-// HTS search — tries API first, falls back to local DB
+// ── HTS search ────────────────────────────────────────────
 async function searchHTS(val) {
   const dd = document.getElementById('htsDropdown');
   if (!val || val.length < 2) { dd.classList.remove('show'); return; }
@@ -699,7 +841,6 @@ async function searchHTS(val) {
       const res = await fetch(`/api/hts-search?q=${encodeURIComponent(val)}&dest=${dest}`);
       if (res.ok) results = await res.json();
     } catch(e) {}
-    // Fall back to local DB if API unavailable or returned nothing
     if (!results.length) {
       const q = val.toLowerCase();
       results = HTS_DB.filter(r => r.code.includes(q) || r.desc.toLowerCase().includes(q))
@@ -734,18 +875,14 @@ function updateRatePreview() {
   document.getElementById('rp-desc').textContent = selectedHTS.desc || '—';
   document.getElementById('rp-base').textContent = (selectedHTS.rate || 0).toFixed(1) + '%';
   const wrap301 = document.getElementById('rp-301-wrap');
-  if (s301 > 0) {
-    document.getElementById('rp-301').textContent = '+' + s301.toFixed(1) + '%';
-    wrap301.style.display = '';
-  } else {
-    wrap301.style.display = 'none';
-  }
+  if (s301 > 0) { document.getElementById('rp-301').textContent = '+' + s301.toFixed(1) + '%'; wrap301.style.display = ''; }
+  else { wrap301.style.display = 'none'; }
   document.getElementById('rp-eff').textContent = eff.toFixed(1) + '%';
   preview.classList.add('show');
 }
 document.addEventListener('click', e => { if (!e.target.closest('.hts-wrap')) document.getElementById('htsDropdown').classList.remove('show'); });
 
-// AI classify
+// ── AI classify ───────────────────────────────────────────
 async function classifyDescription() {
   const desc = document.getElementById('productDesc').value.trim();
   if (!desc) { alert('Enter a product description first.'); return; }
@@ -765,12 +902,11 @@ async function classifyDescription() {
     div.style.display = 'block';
     div.innerHTML = `<div class="classify-box">
       <div class="classify-box-head"><span class="classify-code">${data.hts_code||'—'}</span><span class="confidence conf-${conf}">${conf}</span></div>
-      <div style="color:var(--ink);font-size:0.78rem;margin-bottom:3px">${data.hts_description||''}</div>
-      ${data.base_rate!==undefined?`<div style="color:var(--muted);font-size:0.69rem">Base ${data.base_rate}%${data.cn_301_rate>0?` · Section 301 +${data.cn_301_rate}%`:''}</div>`:''}
-      ${data.classification_notes?`<div style="color:var(--muted);font-size:0.69rem;margin-top:2px">${data.classification_notes}</div>`:''}
+      <div style="color:var(--ink);font-size:0.8rem;margin-bottom:3px">${data.hts_description||''}</div>
+      ${data.base_rate!==undefined?`<div style="color:var(--muted);font-size:0.72rem">Base ${data.base_rate}%${data.cn_301_rate>0?` · Section 301 +${data.cn_301_rate}%`:''}</div>`:''}
+      ${data.classification_notes?`<div style="color:var(--muted);font-size:0.72rem;margin-top:2px">${data.classification_notes}</div>`:''}
     </div>`;
   } catch(e) {
-    // Fallback: match against local DB by keyword
     const q = desc.toLowerCase();
     const match = HTS_DB.find(r => r.desc.toLowerCase().split(' ').some(w => w.length > 4 && q.includes(w))) || HTS_DB[0];
     selectedHTS = { code:match.code, desc:match.desc, rate:match.rate, cn301:match.cn301 };
@@ -778,14 +914,14 @@ async function classifyDescription() {
     div.style.display = 'block';
     div.innerHTML = `<div class="classify-box">
       <div class="classify-box-head"><span class="classify-code">${match.code}</span><span class="confidence conf-medium">local</span></div>
-      <div style="color:var(--ink);font-size:0.78rem;margin-bottom:3px">${match.desc}</div>
-      <div style="color:var(--muted);font-size:0.69rem">Base ${match.rate}%${match.cn301>0?` · Section 301 +${match.cn301}%`:''} · Local match only — AI not available</div>
+      <div style="color:var(--ink);font-size:0.8rem;margin-bottom:3px">${match.desc}</div>
+      <div style="color:var(--muted);font-size:0.72rem">Base ${match.rate}%${match.cn301>0?` · Section 301 +${match.cn301}%`:''} · Local match — AI not available</div>
     </div>`;
   }
   if (btn.querySelector('.btn-text')) btn.querySelector('.btn-text').textContent = orig;
 }
 
-// Currency
+// ── Currency ──────────────────────────────────────────────
 function updateRate() {
   const sel = document.getElementById('currency');
   const opt = sel.options[sel.selectedIndex];
@@ -798,7 +934,7 @@ function checkDeMin() {
   document.getElementById('deMinWarning').style.display = v*r>0&&v*r<=800?'flex':'none';
 }
 
-// Calculate — tries API first, falls back to local math
+// ── Calculate ─────────────────────────────────────────────
 async function calculate() {
   const productVal = parseFloat(document.getElementById('productValue').value)||0;
   if (!productVal) { alert('Please enter the product value.'); return; }
@@ -824,7 +960,6 @@ async function calculate() {
     if (data.error) throw new Error(data.error);
     renderResults(data);
   } catch(e) {
-    // Fallback: calculate locally without backend
     const pv = productVal, sh = parseFloat(document.getElementById('shippingCost').value)||0, ins = parseFloat(document.getElementById('insuranceCost').value)||0;
     const rate = parseFloat(document.getElementById('exchangeRate').value)||1;
     const curr = document.getElementById('currency').value, origin = document.getElementById('originCountry').value, fta = document.getElementById('ftaSelect').value;
@@ -843,35 +978,7 @@ async function calculate() {
   btn.classList.remove('btn-loading');
 }
 
-// Load demo
-function loadDemo() {
-  // Collapse upload section — demo data is pre-filled, no need to upload
-  document.getElementById('uploadCollapse').style.display = 'none';
-  document.getElementById('uploadDivider').style.display = 'none';
-
-  document.getElementById('productDesc').value = "Men's 100% Cotton T-Shirts, crew neck, short sleeve, assorted S–XL";
-  document.getElementById('htsInput').value = '6109.10.00';
-  document.getElementById('originCountry').value = 'CN';
-  document.getElementById('productValue').value = 15800;
-  document.getElementById('currency').value = 'CNY';
-  document.getElementById('exchangeRate').value = '0.138';
-  document.getElementById('shippingCost').value = '320';
-  document.getElementById('insuranceCost').value = '0';
-  document.getElementById('ftaSelect').value = 'none';
-  document.getElementById('unitQty').value = '500';
-  selectedHTS = { code:'6109.10.00', desc:'T-shirts, singlets and other vests, of cotton, knitted', rate:16.5, cn301:7.5 };
-  updateRatePreview();
-  document.getElementById('classifyResult').style.display = 'block';
-  document.getElementById('classifyResult').innerHTML = `<div class="classify-box">
-    <div class="classify-box-head"><span class="classify-code">6109.10.00</span><span class="confidence conf-high">high</span></div>
-    <div style="color:var(--ink);font-size:0.78rem;margin-bottom:3px">T-shirts, singlets and other vests, of cotton, knitted</div>
-    <div style="color:var(--muted);font-size:0.69rem">Base 16.5% · Section 301 +7.5% · Effective 24.0% from CN</div>
-  </div>`;
-  checkDeMin();
-  calculate();
-}
-
-// Render results
+// ── Render results ────────────────────────────────────────
 function renderResults(d) {
   document.getElementById('resultPlaceholder').style.display = 'none';
   const body = document.getElementById('resultBody');
@@ -890,15 +997,15 @@ function renderResults(d) {
     h += '</div>'; body.innerHTML = h; window._lastResult = d; return;
   }
 
-  if (d.china_301_surcharge > 0) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>China origin — <strong>Section 301 +${d.china_301_surcharge}%</strong> added to base rate.</span></div>`;
+  if (d.china_301_surcharge > 0) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>China origin — <strong>Section 301 +${d.china_301_surcharge}%</strong> added.</span></div>`;
   if (d.fta_applied) h += `<div class="flag flag-green"><span class="flag-icon">✓</span><span><strong>${d.fta_name}</strong> — preferential rate applied.</span></div>`;
-  if (d.effective_duty_rate > 25 && !d.fta_applied) h += `<div class="flag flag-amber"><span class="flag-icon">!</span><span>High rate (${pct(d.effective_duty_rate)}). Consider verifying HTS classification.</span></div>`;
-  if (!d.db_match && d.hts_code) h += `<div class="flag flag-amber"><span class="flag-icon">i</span><span>Code <strong>${d.hts_code}</strong> not in verified DB — rate is estimated.</span></div>`;
+  if (d.effective_duty_rate > 25 && !d.fta_applied) h += `<div class="flag flag-amber"><span class="flag-icon">!</span><span>High rate (${pct(d.effective_duty_rate)}). Verify HTS classification.</span></div>`;
+  if (!d.db_match && d.hts_code) h += `<div class="flag flag-amber"><span class="flag-icon">i</span><span>Code <strong>${d.hts_code}</strong> not in verified DB — estimated rate.</span></div>`;
   const dest = document.getElementById('destCountry').value;
   const noDb = ['AE','IN','BR','KR','MX','CH'];
-  if (dest && dest !== 'US' && noDb.includes(dest)) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>Destination <strong>${dest}</strong> — estimated rates only. No official tariff DB loaded. Consult a local broker for binding figures.</span></div>`;
+  if (dest && dest !== 'US' && noDb.includes(dest)) h += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span><strong>${dest}</strong> — estimated rates. Consult a local broker.</span></div>`;
 
-  if (d.hts_code) h += `<div class="hts-chip"><div class="hts-chip-code">${d.hts_code}</div><div><div class="hts-chip-desc">${d.hts_desc||'Unverified code'}</div><div class="hts-chip-rate">Base ${pct(d.base_duty_rate)}${d.china_301_surcharge>0?` + ${pct(d.china_301_surcharge)} S.301`:''} = <strong>${pct(d.effective_duty_rate)}</strong> effective · FOB</div></div></div>`;
+  if (d.hts_code) h += `<div class="hts-chip"><div class="hts-chip-code">${d.hts_code}</div><div><div class="hts-chip-desc">${d.hts_desc||'Unverified code'}</div><div class="hts-chip-rate">Base ${pct(d.base_duty_rate)}${d.china_301_surcharge>0?` + ${pct(d.china_301_surcharge)} S.301`:''} = <strong>${pct(d.effective_duty_rate)}</strong> effective</div></div></div>`;
 
   const curr = d.currency!=='USD'?` (${d.currency})`:'';
   const valuationLabel = (d.valuation_method === 'CIF') ? 'CIF Taxable Base' : 'FOB Taxable Base';
@@ -912,11 +1019,10 @@ function renderResults(d) {
     ${vatAmount>0?`<div class="br-row"><span class="lbl">${vatName} (${vatRate}%)</span><span class="val">${fmt(vatAmount)}</span></div>`:''}
     <div class="br-row sub"><span class="lbl">Total Duties & Fees</span><span class="val">${fmt(d.duty_amount + mpf + vatAmount)}</span></div>
     <div class="br-total"><span class="lbl">Total Landed Cost</span><span class="val">${fmt(d.total_landed_usd)}</span></div>
-  </div>\`;
+  </div>`;
 
   h += `<p class="text-muted mt-10">${d.notes || (d.valuation_method+' valuation')}</p>`;
 
-  // Per-unit breakdown if quantity entered
   const qty = parseInt(document.getElementById('unitQty').value) || 0;
   if (qty > 0 && !d.de_minimis) {
     const perUnit = d.total_landed_usd / qty;
@@ -924,9 +1030,9 @@ function renderResults(d) {
     const prodPerUnit = d.product_value_usd / qty;
     h += `<div class="breakdown" style="margin-top:10px">
       <div class="br-row"><span class="lbl">Units</span><span class="val">${qty.toLocaleString()}</span></div>
-      <div class="br-row"><span class="lbl">Product cost / unit</span><span class="val">${fmt(prodPerUnit)}</span></div>
-      <div class="br-row"><span class="lbl">Duty + MPF / unit</span><span class="val">${fmt(dutyPerUnit)}</span></div>
-      <div class="br-total"><span class="lbl">Landed cost / unit</span><span class="val">${fmt(perUnit)}</span></div>
+      <div class="br-row"><span class="lbl">Product / unit</span><span class="val">${fmt(prodPerUnit)}</span></div>
+      <div class="br-row"><span class="lbl">Duty + fees / unit</span><span class="val">${fmt(dutyPerUnit)}</span></div>
+      <div class="br-total"><span class="lbl">Landed / unit</span><span class="val">${fmt(perUnit)}</span></div>
     </div>`;
   }
 
@@ -936,24 +1042,50 @@ function renderResults(d) {
   window._lastResult = d;
 }
 
-// Copy
+// ── Copy ──────────────────────────────────────────────────
 function copyResults() {
   const d = window._lastResult;
   if (!d) return;
   const fmt = n => '$'+Number(n).toFixed(2);
   const mpf = Math.min(614.35,Math.max(32.71,d.taxable_base_usd*0.003464));
+  const vatAmount = d.vat_amount ?? 0;
+  const vatName = d.vat_name || 'VAT';
   const text = `iDUTIES — LANDED COST\nDestination: ${d.dest_name||''}\nHTS: ${d.hts_code} — ${d.hts_desc}\nDuty: ${d.effective_duty_rate}% = ${fmt(d.duty_amount)}${mpf>0?' · MPF: '+fmt(mpf):''}${vatAmount>0?' · '+vatName+': '+fmt(vatAmount):''}\n────────────────\nTotal Landed: ${fmt(d.total_landed_usd)}\n(${d.notes||''})`;
   navigator.clipboard.writeText(text).then(() => { const b=event.target; b.textContent='Copied ✓'; setTimeout(()=>b.textContent='Copy Summary',2000); });
 }
 
-// Reset
+// ── Demo ──────────────────────────────────────────────────
+function loadDemo() {
+  document.getElementById('uploadCollapse').style.display = 'none';
+  document.getElementById('uploadDivider').style.display = 'none';
+  document.getElementById('productDesc').value = "Men's 100% Cotton T-Shirts, crew neck, short sleeve, assorted S–XL";
+  document.getElementById('htsInput').value = '6109.10.00';
+  document.getElementById('originCountry').value = 'CN';
+  document.getElementById('productValue').value = 15800;
+  document.getElementById('currency').value = 'CNY';
+  document.getElementById('exchangeRate').value = '0.138';
+  document.getElementById('shippingCost').value = '320';
+  document.getElementById('insuranceCost').value = '0';
+  document.getElementById('ftaSelect').value = 'none';
+  document.getElementById('unitQty').value = '2000';
+  selectedHTS = { code:'6109.10.00', desc:'T-shirts, singlets and other vests, of cotton, knitted', rate:16.5, cn301:7.5 };
+  updateRatePreview();
+  document.getElementById('classifyResult').style.display = 'block';
+  document.getElementById('classifyResult').innerHTML = `<div class="classify-box">
+    <div class="classify-box-head"><span class="classify-code">6109.10.00</span><span class="confidence conf-high">high</span></div>
+    <div style="color:var(--ink);font-size:0.8rem;margin-bottom:3px">T-shirts, singlets and other vests, of cotton, knitted</div>
+    <div style="color:var(--muted);font-size:0.72rem">Base 16.5% · Section 301 +7.5% · Effective 24.0% from CN</div>
+  </div>`;
+  checkDeMin();
+  calculate();
+}
+
+// ── Reset ─────────────────────────────────────────────────
 function resetAll() {
-  // Restore upload section if hidden by demo
   document.getElementById('uploadCollapse').style.display = '';
   document.getElementById('uploadDivider').style.display = '';
-
   ['productDesc','htsInput','productValue','dutyOverride','unitQty'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('ratePreview').classList.remove('show');;
+  document.getElementById('ratePreview').classList.remove('show');
   document.getElementById('shippingCost').value='0';
   document.getElementById('insuranceCost').value='0';
   document.getElementById('originCountry').value='';
@@ -972,7 +1104,7 @@ function resetAll() {
   eb.style.background = ''; eb.querySelector('.btn-text').textContent = 'Extract with AI';
 }
 
-// Drag & drop
+// ── Drag & drop ───────────────────────────────────────────
 const zone = document.getElementById('uploadZone');
 ['dragenter','dragover'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.add('drag-over');}));
 ['dragleave','drop'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.remove('drag-over');}));
