@@ -785,7 +785,7 @@ body {
           <div class="field">
             <label>HTS Code</label>
             <div class="hts-wrap">
-              <input type="text" id="htsInput" placeholder="Search or type code…" oninput="searchHTS(this.value)" autocomplete="off">
+              <input type="text" id="htsInput" placeholder="Search or type code…" oninput="searchHTS(this.value)" onblur="handleManualHTS()" autocomplete="off">
               <div class="hts-dropdown" id="htsDropdown"></div>
             </div>
             <div class="rate-preview" id="ratePreview">
@@ -1155,6 +1155,22 @@ function selectHTS(code,desc,rate,cn301) {
   updateRatePreview();
 }
 
+function handleManualHTS() {
+  const val = document.getElementById('htsInput').value.trim();
+  if (!val || val.length < 7) return;
+  // If user already selected from dropdown, don't override
+  if (selectedHTS.code === val) return;
+  // Check local DB first
+  const local = HTS_DB.find(r => r.code === val);
+  if (local) {
+    selectedHTS = { code:local.code, desc:local.desc, rate:local.rate, cn301:local.cn301 };
+  } else if (val.match(/^\d{4}\.\d{2}/)) {
+    // Valid HTS format but not in local DB — allow it with 0 rate (API will resolve)
+    selectedHTS = { code:val, desc:'', rate:0, cn301:0, manual:true };
+  }
+  updateRatePreview();
+}
+
 function updateRatePreview() {
   const preview = document.getElementById('ratePreview');
   if (!selectedHTS.code || selectedHTS.rate === null) { preview.classList.remove('show'); return; }
@@ -1223,29 +1239,51 @@ async function classifyDescription() {
       ${data.classification_notes?`<div style="color:var(--muted);font-size:0.72rem;margin-top:2px">${data.classification_notes}</div>`:''}
     </div>`;
   } catch(e) {
-    const q = desc.toLowerCase();
-    const match = HTS_DB.find(r => r.desc.toLowerCase().split(' ').some(w => w.length > 4 && q.includes(w))) || HTS_DB[0];
-    selectedHTS = { code:match.code, desc:match.desc, rate:match.rate, cn301:match.cn301 };
-    document.getElementById('htsInput').value = match.code;
-    div.style.display = 'block';
-    div.innerHTML = `<div class="classify-box">
-      <div class="classify-box-head"><span class="classify-code">${match.code}</span><span class="confidence conf-medium">local</span></div>
-      <div style="color:var(--ink);font-size:0.8rem;margin-bottom:3px">${match.desc}</div>
-      <div style="color:var(--muted);font-size:0.72rem">${(()=>{
-        const o=document.getElementById('originCountry').value;
-        const s301=match.cn301>0&&o==='CN'?match.cn301:0;
-        const ch=parseInt(match.code.replace(/\./g,'').substring(0,2))||0;
-        const s232=(ch===72||ch===73||ch===76)?25:0;
-        const s122=15;
-        const eff=match.rate+s301+s232+s122;
-        let t='Base '+match.rate+'%';
-        if(s301>0)t+=' · S.301 +'+s301+'%';
-        if(s232>0)t+=' · S.232 +'+s232+'%';
-        t+=' · S.122 +'+s122+'%';
-        t+=' · Eff. '+eff.toFixed(1)+'%';
-        return t+' · Local match';
-      })()}</div>
-    </div>`;
+    // Only do local fallback if user hasn't manually entered an HTS code
+    const existingHts = document.getElementById('htsInput').value.trim();
+    if (existingHts && existingHts.match(/^\d{4}\.\d{2}/)) {
+      // User already typed a valid HTS code — don't override it
+      const localEntry = HTS_DB.find(r => r.code === existingHts);
+      if (localEntry) {
+        selectedHTS = { code:localEntry.code, desc:localEntry.desc, rate:localEntry.rate, cn301:localEntry.cn301 };
+      } else {
+        selectedHTS = { code:existingHts, desc:desc||'Custom classification', rate:0, cn301:0, manual:true };
+      }
+      div.style.display = 'block';
+      div.innerHTML = `<div class="classify-box">
+        <div class="classify-box-head"><span class="classify-code">${existingHts}</span><span class="confidence conf-medium">${localEntry?'local':'manual'}</span></div>
+        <div style="color:var(--muted);font-size:0.72rem">HTS code kept — enter a duty rate override below if needed, or use AI classify for auto-lookup.</div>
+      </div>`;
+    } else {
+      const q = desc.toLowerCase();
+      const match = HTS_DB.find(r => r.desc.toLowerCase().split(' ').some(w => w.length > 4 && q.includes(w)));
+      if (match) {
+        selectedHTS = { code:match.code, desc:match.desc, rate:match.rate, cn301:match.cn301 };
+        document.getElementById('htsInput').value = match.code;
+        div.style.display = 'block';
+        div.innerHTML = `<div class="classify-box">
+          <div class="classify-box-head"><span class="classify-code">${match.code}</span><span class="confidence conf-medium">local</span></div>
+          <div style="color:var(--ink);font-size:0.8rem;margin-bottom:3px">${match.desc}</div>
+          <div style="color:var(--muted);font-size:0.72rem">${(()=>{
+            const o=document.getElementById('originCountry').value;
+            const s301=match.cn301>0&&o==='CN'?match.cn301:0;
+            const ch=parseInt(match.code.replace(/\./g,'').substring(0,2))||0;
+            const s232=(ch===72||ch===73||ch===76)?25:0;
+            const s122=15;
+            const eff=match.rate+s301+s232+s122;
+            let t='Base '+match.rate+'%';
+            if(s301>0)t+=' · S.301 +'+s301+'%';
+            if(s232>0)t+=' · S.232 +'+s232+'%';
+            t+=' · S.122 +'+s122+'%';
+            t+=' · Eff. '+eff.toFixed(1)+'%';
+            return t+' · Local match';
+          })()}</div>
+        </div>`;
+      } else {
+        div.style.display = 'block';
+        div.innerHTML = `<div class="classify-box"><div style="color:var(--muted);font-size:0.8rem">Could not classify — please enter an HTS code manually or try a more specific description.</div></div>`;
+      }
+    }
   }
   if (btn.querySelector('.btn-text')) btn.querySelector('.btn-text').textContent = orig;
 }
@@ -1296,7 +1334,7 @@ async function calculate() {
     const ovr = document.getElementById('dutyOverride').value;
     const pUSD = pv*rate, sUSD = sh*rate, iUSD = ins*rate;
     if (pUSD <= 800 && pUSD > 0) { renderResults({ de_minimis:true, message:'Value is under the $800 de minimis threshold — no duties apply.', total_landed_usd:pUSD+sUSD+iUSD, currency:curr }); btn.classList.remove('btn-loading'); return; }
-    const entry = HTS_DB.find(r=>r.code===hts) || { desc:'General merchandise', rate:6, cn301:0 };
+    const entry = HTS_DB.find(r=>r.code===hts) || (selectedHTS.code===hts ? {desc:selectedHTS.desc||'Custom classification',rate:selectedHTS.rate||0,cn301:selectedHTS.cn301||0} : { desc:'Unknown — use duty rate override', rate:0, cn301:0 });
     let base = ovr ? parseFloat(ovr) : entry.rate, cn301 = entry.cn301, ftaApplied=false, ftaName='';
     if (fta==='usmca'&&(origin==='MX'||origin==='CA')) { base=0; cn301=0; ftaApplied=true; ftaName='USMCA'; }
     if (fta==='singapore'&&origin==='SG') { base=0; cn301=0; ftaApplied=true; ftaName='US-Singapore FTA'; }
@@ -1435,7 +1473,7 @@ function resetAll() {
   document.getElementById('ratePreview').classList.remove('show');
   document.getElementById('shippingCost').value='0';
   document.getElementById('insuranceCost').value='0';
-  document.getElementById('originCountry').value='';
+  document.getElementById('originCountry').value='CN';
   document.getElementById('destCountry').value='US';
   document.getElementById('ftaSelect').value='none';
   document.getElementById('currency').value='USD';
