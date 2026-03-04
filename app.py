@@ -193,6 +193,10 @@ FTA_RATES = {
 def index():
     return render_template("index.html")
 
+@app.route("/refund-guide.html")
+def refund_guide():
+    return render_template("refund-guide.html")
+
 @app.route("/api/classify", methods=["POST"])
 def classify():
     data       = request.json or {}

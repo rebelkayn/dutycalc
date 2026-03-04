@@ -135,6 +135,90 @@ body {
 .ieepa-btn-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.15); }
 .ieepa-btn-ghost:hover { background: rgba(255,255,255,0.14); }
 
+/* ═══════ REFUND ESTIMATOR ═══════ */
+.refund-section {
+  background: var(--surface); border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border); padding: 0;
+}
+.refund-inner { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+.refund-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-bg); border: 1px solid rgba(15,123,63,0.12);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--green); margin-bottom: 14px;
+}
+.refund-h {
+  font-size: clamp(1.3rem, 3.5vw, 1.7rem); font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 8px; color: var(--ink);
+}
+.refund-sub { font-size: 0.88rem; color: var(--muted); line-height: 1.55; margin-bottom: 24px; max-width: 520px; }
+.refund-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+@media (max-width: 580px) { .refund-grid { grid-template-columns: 1fr; } }
+.refund-field label {
+  display: block; font-size: 0.7rem; font-weight: 700; color: var(--muted);
+  margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.refund-field input, .refund-field select {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font);
+  color: var(--ink); background: var(--bg); outline: none; transition: all 0.15s;
+  -webkit-appearance: none; appearance: none;
+}
+.refund-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A7A7A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; cursor: pointer;
+}
+.refund-field input:focus, .refund-field select:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); background: var(--surface);
+}
+.refund-calc-btn {
+  padding: 12px 28px; border-radius: var(--radius-sm); background: var(--ink);
+  color: #fff; font-family: var(--font); font-size: 0.88rem; font-weight: 600;
+  border: none; cursor: pointer; transition: background 0.15s; letter-spacing: -0.01em;
+}
+.refund-calc-btn:hover { background: #333; }
+.refund-result {
+  display: none; margin-top: 24px; padding: 24px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); animation: fadeUp 0.25s ease;
+}
+.refund-result.show { display: block; }
+.refund-result-h { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 16px; }
+.refund-big-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.refund-big-row:last-child { border: none; }
+.refund-big-label { font-size: 0.88rem; color: var(--ink2); }
+.refund-big-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--ink); }
+.refund-big-val.refundable { color: var(--green); }
+.refund-big-val.surviving { color: var(--amber); }
+.refund-deadline {
+  margin-top: 16px; padding: 14px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.refund-deadline-h { font-size: 0.78rem; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.refund-deadline-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 4px 0; }
+.refund-deadline-label { color: var(--muted); }
+.refund-deadline-val { font-weight: 600; color: var(--ink); }
+.refund-deadline-val.urgent { color: var(--red); }
+.refund-next-steps { margin-top: 16px; }
+.refund-step {
+  display: flex; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid var(--border); font-size: 0.84rem;
+}
+.refund-step:last-child { border: none; }
+.refund-step-num {
+  width: 24px; height: 24px; border-radius: 12px;
+  background: var(--blue-soft); color: var(--blue);
+  font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.refund-step-text { color: var(--ink2); line-height: 1.5; }
+.refund-step-text strong { color: var(--ink); }
+.refund-disclaimer {
+  margin-top: 16px; font-size: 0.73rem; color: var(--dim);
+  line-height: 1.5; padding-top: 12px; border-top: 1px solid var(--border);
+}
+
 /* ═══════ HERO ═══════ */
 .hero { text-align: center; padding: 40px 20px 28px; max-width: 580px; margin: 0 auto; }
 .hero h1 {
@@ -419,11 +503,11 @@ body {
 <nav class="nav">
   <div class="nav-brand">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-    iDuties<span class="nav-dot">.ai</span>
+    <span>iDuties<span class="nav-dot">.ai</span></span>
   </div>
   <div class="nav-links">
     <a class="nav-link active" href="#">Calculator</a>
-    <a class="nav-link" href="#ieepa">Refund</a>
+    <a class="nav-link" href="/refund-guide.html">Refund</a>
   </div>
   <div class="nav-spacer"></div>
   <div class="nav-ticker">
@@ -447,8 +531,8 @@ body {
       <div><div class="ieepa-stat-val">180 days</div><div class="ieepa-stat-label">Protest Window</div></div>
     </div>
     <div class="ieepa-actions">
-      <button class="ieepa-btn ieepa-btn-primary" onclick="window.open('https://www.cbp.gov/trade/basic-import-export/refunds','_blank')">Check Your Refund Eligibility</button>
-      <button class="ieepa-btn ieepa-btn-ghost" onclick="window.open('https://www.avalara.com/blog/en/north-america/2026/02/how-to-request-tariff-refunds.html','_blank')">How Refunds Work →</button>
+      <button class="ieepa-btn ieepa-btn-primary" onclick="document.getElementById('refundEstimator').scrollIntoView({behavior:'smooth'})">Check Your Refund Eligibility</button>
+      <a class="ieepa-btn ieepa-btn-ghost" href="/refund-guide.html" style="text-decoration:none">How Refunds Work →</a>
     </div>
   </div>
 </section>
@@ -685,6 +769,75 @@ body {
 
   </div>
 </div>
+
+<!-- ═══════ REFUND ESTIMATOR ═══════ -->
+<section class="refund-section" id="refundEstimator">
+  <div class="refund-inner">
+    <div class="refund-eyebrow">💰 IEEPA Refund Estimator</div>
+    <h2 class="refund-h">How much could you claim back?</h2>
+    <p class="refund-sub">Enter your import details to estimate the IEEPA-refundable portion of duties paid. Section 232 and Section 301 tariffs remain in effect — only the IEEPA portion is refundable.</p>
+
+    <div class="refund-grid">
+      <div class="refund-field">
+        <label>Origin Country</label>
+        <select id="refundOrigin">
+          <option value="">Select…</option>
+          <option value="CN">🇨🇳 China</option>
+          <option value="CA">🇨🇦 Canada</option>
+          <option value="MX">🇲🇽 Mexico</option>
+          <option value="EU">🇪🇺 European Union</option>
+          <option value="VN">🇻🇳 Vietnam</option>
+          <option value="IN">🇮🇳 India</option>
+          <option value="JP">🇯🇵 Japan</option>
+          <option value="KR">🇰🇷 South Korea</option>
+          <option value="TW">🇹🇼 Taiwan</option>
+          <option value="TH">🇹🇭 Thailand</option>
+          <option value="ID">🇮🇩 Indonesia</option>
+          <option value="BD">🇧🇩 Bangladesh</option>
+          <option value="GB">🇬🇧 United Kingdom</option>
+          <option value="OTHER">🌐 Other Country</option>
+        </select>
+      </div>
+      <div class="refund-field">
+        <label>Total Product Value (USD)</label>
+        <input type="number" id="refundValue" placeholder="e.g. 250000" min="0" step="0.01">
+      </div>
+      <div class="refund-field">
+        <label>Approximate Entry Date</label>
+        <select id="refundEntryDate">
+          <option value="">Select period…</option>
+          <option value="2025-02">Feb 2025 (China fentanyl tariffs begin)</option>
+          <option value="2025-03">Mar 2025 (Canada/Mexico added)</option>
+          <option value="2025-04">Apr 2025 (Liberation Day — reciprocal)</option>
+          <option value="2025-05">May – Jun 2025</option>
+          <option value="2025-07">Jul – Sep 2025</option>
+          <option value="2025-10">Oct – Dec 2025</option>
+          <option value="2026-01">Jan – Feb 2026</option>
+        </select>
+      </div>
+      <div class="refund-field">
+        <label>Entry Status</label>
+        <select id="refundStatus">
+          <option value="">Not sure</option>
+          <option value="unliquidated">Unliquidated (open)</option>
+          <option value="liquidated">Already liquidated</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="refund-calc-btn" onclick="estimateRefund()">Estimate My Refund →</button>
+
+    <div class="refund-result" id="refundResult">
+      <div class="refund-result-h">Estimated Refund Breakdown</div>
+      <div id="refundBreakdown"></div>
+      <div class="refund-deadline" id="refundDeadline"></div>
+      <div class="refund-next-steps" id="refundSteps"></div>
+      <div class="refund-disclaimer">
+        This is an estimate based on publicly available IEEPA tariff rates. Actual refund amounts depend on your specific entry data, HTS classifications, and any exclusions or exceptions that applied. This is not legal or financial advice. Consult a licensed customs broker or trade attorney for binding guidance. <a href="/refund-guide.html" style="color:var(--blue);font-weight:500;text-decoration:none">Read the full refund guide →</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ═══════ FOOTER ═══════ -->
 <footer class="footer">
@@ -1109,6 +1262,125 @@ const zone = document.getElementById('uploadZone');
 ['dragenter','dragover'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.add('drag-over');}));
 ['dragleave','drop'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.remove('drag-over');}));
 zone.addEventListener('drop',ev=>{const f=ev.dataTransfer.files[0];if(f){const dt=new DataTransfer();dt.items.add(f);document.getElementById('fileInput').files=dt.files;handleFile(document.getElementById('fileInput'));}});
+
+// ── IEEPA Refund Estimator ────────────────────────────────
+// IEEPA rates by origin and period. These are the IEEPA-only surcharges
+// that were stacked on top of existing Section 232, 301, and MFN duties.
+const IEEPA_RATES = {
+  // China: fentanyl tariffs started Feb 4, then escalated
+  CN: { '2025-02': 10, '2025-03': 20, '2025-04': 145, '2025-05': 145, '2025-07': 145, '2025-10': 145, '2026-01': 145, label: 'China (fentanyl + reciprocal)' },
+  // Canada/Mexico: fentanyl tariffs from Mar 4, then reciprocal added
+  CA: { '2025-02': 0, '2025-03': 25, '2025-04': 25, '2025-05': 25, '2025-07': 25, '2025-10': 25, '2026-01': 25, label: 'Canada (fentanyl)' },
+  MX: { '2025-02': 0, '2025-03': 25, '2025-04': 25, '2025-05': 25, '2025-07': 25, '2025-10': 25, '2026-01': 25, label: 'Mexico (fentanyl)' },
+  // EU: reciprocal tariffs from Liberation Day
+  EU: { '2025-02': 0, '2025-03': 0, '2025-04': 20, '2025-05': 20, '2025-07': 20, '2025-10': 20, '2026-01': 20, label: 'EU (reciprocal)' },
+  // Vietnam: reciprocal — one of the highest
+  VN: { '2025-02': 0, '2025-03': 0, '2025-04': 46, '2025-05': 46, '2025-07': 46, '2025-10': 46, '2026-01': 46, label: 'Vietnam (reciprocal)' },
+  // India: reciprocal
+  IN: { '2025-02': 0, '2025-03': 0, '2025-04': 26, '2025-05': 26, '2025-07': 26, '2025-10': 26, '2026-01': 26, label: 'India (reciprocal)' },
+  // Japan
+  JP: { '2025-02': 0, '2025-03': 0, '2025-04': 24, '2025-05': 24, '2025-07': 24, '2025-10': 24, '2026-01': 24, label: 'Japan (reciprocal)' },
+  // South Korea
+  KR: { '2025-02': 0, '2025-03': 0, '2025-04': 25, '2025-05': 25, '2025-07': 25, '2025-10': 25, '2026-01': 25, label: 'South Korea (reciprocal)' },
+  // Taiwan
+  TW: { '2025-02': 0, '2025-03': 0, '2025-04': 32, '2025-05': 32, '2025-07': 32, '2025-10': 32, '2026-01': 32, label: 'Taiwan (reciprocal)' },
+  // Thailand
+  TH: { '2025-02': 0, '2025-03': 0, '2025-04': 36, '2025-05': 36, '2025-07': 36, '2025-10': 36, '2026-01': 36, label: 'Thailand (reciprocal)' },
+  // Indonesia
+  ID: { '2025-02': 0, '2025-03': 0, '2025-04': 32, '2025-05': 32, '2025-07': 32, '2025-10': 32, '2026-01': 32, label: 'Indonesia (reciprocal)' },
+  // Bangladesh
+  BD: { '2025-02': 0, '2025-03': 0, '2025-04': 37, '2025-05': 37, '2025-07': 37, '2025-10': 37, '2026-01': 37, label: 'Bangladesh (reciprocal)' },
+  // UK
+  GB: { '2025-02': 0, '2025-03': 0, '2025-04': 10, '2025-05': 10, '2025-07': 10, '2025-10': 10, '2026-01': 10, label: 'United Kingdom (reciprocal)' },
+  // Default: baseline reciprocal
+  OTHER: { '2025-02': 0, '2025-03': 0, '2025-04': 10, '2025-05': 10, '2025-07': 10, '2025-10': 10, '2026-01': 10, label: 'Other (reciprocal baseline)' },
+};
+
+function estimateRefund() {
+  const origin = document.getElementById('refundOrigin').value;
+  const value = parseFloat(document.getElementById('refundValue').value) || 0;
+  const entryDate = document.getElementById('refundEntryDate').value;
+  const status = document.getElementById('refundStatus').value;
+
+  if (!origin || !value || !entryDate) {
+    alert('Please fill in origin country, product value, and entry date.');
+    return;
+  }
+
+  const rates = IEEPA_RATES[origin] || IEEPA_RATES.OTHER;
+  const ieepaRate = rates[entryDate] || 10;
+  const ieepaAmount = value * (ieepaRate / 100);
+
+  // Estimate surviving tariffs (Section 232, 301 remain)
+  let survivingNote = '';
+  let survivingEstimate = 0;
+  if (origin === 'CN') {
+    survivingEstimate = value * 0.075; // Avg S.301 for China
+    survivingNote = 'Section 301 tariffs (7.5–25%) remain in effect for China-origin goods.';
+  } else if (origin === 'CA' || origin === 'MX') {
+    survivingNote = 'USMCA-eligible goods may have 0% base duty. Section 232 steel/aluminum tariffs (25%) still apply.';
+  } else {
+    survivingNote = 'Standard MFN duty rates and any Section 232 (steel/aluminum) tariffs still apply.';
+  }
+
+  const totalDutyPaid = ieepaAmount + survivingEstimate;
+  const fmt = n => '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  // Liquidation timeline
+  const entryMonth = new Date(entryDate + '-15');
+  const liqDate = new Date(entryMonth);
+  liqDate.setDate(liqDate.getDate() + 314);
+  const protestDeadline = new Date(liqDate);
+  protestDeadline.setDate(protestDeadline.getDate() + 180);
+  const now = new Date();
+  const isLiquidated = status === 'liquidated' || liqDate < now;
+  const daysToProtest = isLiquidated ? Math.max(0, Math.ceil((protestDeadline - now) / 86400000)) : null;
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const fmtDate = d => `${monthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+
+  // Build breakdown
+  let bh = '';
+  bh += `<div class="refund-big-row"><span class="refund-big-label">Product value imported</span><span class="refund-big-val">${fmt(value)}</span></div>`;
+  bh += `<div class="refund-big-row"><span class="refund-big-label">IEEPA tariff rate (${rates.label})</span><span class="refund-big-val">${ieepaRate}%</span></div>`;
+  bh += `<div class="refund-big-row"><span class="refund-big-label">IEEPA duties paid <span style="font-size:0.72rem;color:var(--muted)">(potentially refundable)</span></span><span class="refund-big-val refundable">${fmt(ieepaAmount)}</span></div>`;
+  if (survivingEstimate > 0) {
+    bh += `<div class="refund-big-row"><span class="refund-big-label">Surviving tariffs (est.)</span><span class="refund-big-val surviving">${fmt(survivingEstimate)}</span></div>`;
+  }
+  document.getElementById('refundBreakdown').innerHTML = bh;
+
+  // Deadline section
+  let dh = `<div class="refund-deadline-h">Key Dates for Your Entry</div>`;
+  dh += `<div class="refund-deadline-row"><span class="refund-deadline-label">Entry period</span><span class="refund-deadline-val">${entryDate}</span></div>`;
+  dh += `<div class="refund-deadline-row"><span class="refund-deadline-label">Est. liquidation date</span><span class="refund-deadline-val">${fmtDate(liqDate)}</span></div>`;
+  if (isLiquidated && daysToProtest !== null) {
+    const urgClass = daysToProtest < 60 ? ' urgent' : '';
+    dh += `<div class="refund-deadline-row"><span class="refund-deadline-label">Protest deadline (180 days)</span><span class="refund-deadline-val${urgClass}">${fmtDate(protestDeadline)} — ${daysToProtest} days left</span></div>`;
+  } else {
+    dh += `<div class="refund-deadline-row"><span class="refund-deadline-label">Status</span><span class="refund-deadline-val" style="color:var(--green)">Likely still unliquidated — PSC filing available</span></div>`;
+  }
+  dh += `<div style="margin-top:8px;font-size:0.76rem;color:var(--muted);line-height:1.5">${survivingNote}</div>`;
+  document.getElementById('refundDeadline').innerHTML = dh;
+
+  // Next steps
+  let sh = '';
+  if (!isLiquidated || status === 'unliquidated') {
+    sh += `<div class="refund-step"><div class="refund-step-num">1</div><div class="refund-step-text"><strong>File a Post-Summary Correction (PSC)</strong> through the ACE portal to remove the IEEPA tariff component. This is the fastest path — no litigation needed.</div></div>`;
+    sh += `<div class="refund-step"><div class="refund-step-num">2</div><div class="refund-step-text"><strong>Verify your entry is still open.</strong> Log into ACE at <strong>ace.cbp.dhs.gov</strong> and confirm the entry hasn't been liquidated yet.</div></div>`;
+    sh += `<div class="refund-step"><div class="refund-step-num">3</div><div class="refund-step-text"><strong>Separate IEEPA from other tariffs.</strong> Your PSC should only remove the IEEPA portion — Section 232, 301, and MFN duties must remain.</div></div>`;
+    sh += `<div class="refund-step"><div class="refund-step-num">4</div><div class="refund-step-text"><strong>Enroll in ACH.</strong> CBP issues all refunds electronically since Feb 6, 2026. Register at <strong>pay.gov</strong> if you haven't already.</div></div>`;
+  } else {
+    sh += `<div class="refund-step"><div class="refund-step-num">1</div><div class="refund-step-text"><strong>File CBP Form 19 (protest)</strong> within 180 days of liquidation through the ACE protest module. Identify the IEEPA tariff HTS headings (9903.01.xx) being contested.</div></div>`;
+    sh += `<div class="refund-step"><div class="refund-step-num">2</div><div class="refund-step-text"><strong>Gather your entry package:</strong> CBP Form 7501, commercial invoice, packing list, bill of lading, and origin documentation.</div></div>`;
+    sh += `<div class="refund-step"><div class="refund-step-num">3</div><div class="refund-step-text"><strong>Consider protective CIT litigation.</strong> For larger amounts, filing at the Court of International Trade (~$400) preserves your claim if CBP denies the protest.</div></div>`;
+    sh += `<div class="refund-step"><div class="refund-step-num">4</div><div class="refund-step-text"><strong>Request accelerated disposition</strong> if CBP doesn't respond within a reasonable time. If they don't act within 30 days, the protest is deemed denied and you can escalate.</div></div>`;
+  }
+  document.getElementById('refundSteps').innerHTML = sh;
+
+  // Show results
+  const el = document.getElementById('refundResult');
+  el.classList.add('show');
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 </script>
 </body>
 </html>

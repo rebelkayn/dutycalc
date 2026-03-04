@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>IEEPA Tariff Refunds — How to Claim Back Duties | iDuties.ai</title>
+<meta name="description" content="Step-by-step guide to claiming IEEPA tariff refunds after the Supreme Court struck down presidential tariffs. Covers PSCs, protests, CIT litigation, and key deadlines.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #F5F5F0;
+  --surface:   #FFFFFF;
+  --surface2:  #F0F0EB;
+  --border:    rgba(0,0,0,0.06);
+  --border2:   rgba(0,0,0,0.10);
+  --ink:       #1A1A1A;
+  --ink2:      #3D3D3D;
+  --muted:     #7A7A7A;
+  --dim:       #ACACAC;
+  --blue:      #0055FF;
+  --blue-hover:#003FCC;
+  --blue-soft: rgba(0,85,255,0.06);
+  --green:     #0F7B3F;
+  --green-bg:  rgba(15,123,63,0.06);
+  --red:       #D62828;
+  --red-bg:    rgba(214,40,40,0.05);
+  --amber:     #9A6700;
+  --amber-bg:  rgba(154,103,0,0.06);
+  --radius:    14px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --mono: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font); background: var(--bg); color: var(--ink);
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+}
+
+/* Nav */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245,245,240,0.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 56px;
+  display: flex; align-items: center; gap: 16px;
+}
+.nav-brand {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; text-decoration: none;
+}
+.nav-brand svg { color: var(--blue); }
+.nav-dot { color: var(--blue); }
+.nav-spacer { flex: 1; }
+.nav-back {
+  font-size: 0.82rem; font-weight: 600; color: var(--blue); text-decoration: none;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* Hero */
+.guide-hero {
+  background: linear-gradient(135deg, #0C1D2E 0%, #162B44 50%, #1A3350 100%);
+  color: #fff; padding: 48px 20px 44px; position: relative; overflow: hidden;
+}
+.guide-hero::before {
+  content: ''; position: absolute; top: -40%; right: -15%; width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(0,85,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.guide-hero-inner { max-width: 680px; margin: 0 auto; position: relative; z-index: 1; }
+.guide-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 4px 12px 4px 8px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 16px;
+}
+.guide-eyebrow-dot { width: 6px; height: 6px; border-radius: 3px; background: #4ADE80; }
+.guide-hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700;
+  letter-spacing: -0.04em; line-height: 1.12; margin-bottom: 14px;
+}
+.guide-hero h1 span { color: #60A5FA; }
+.guide-hero p { font-size: 0.95rem; color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 540px; }
+.guide-updated { font-size: 0.73rem; color: rgba(255,255,255,0.35); margin-top: 14px; }
+
+/* Content */
+.guide-wrap { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
+
+/* TOC */
+.toc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; margin-bottom: 40px;
+}
+.toc-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; }
+.toc a {
+  display: block; font-size: 0.88rem; color: var(--blue); text-decoration: none;
+  padding: 6px 0; border-bottom: 1px solid var(--border); font-weight: 500;
+}
+.toc a:last-child { border: none; }
+.toc a:hover { color: var(--blue-hover); }
+
+/* Sections */
+.guide-section { margin-bottom: 40px; }
+.guide-section h2 {
+  font-size: 1.35rem; font-weight: 700; letter-spacing: -0.03em;
+  margin-bottom: 12px; padding-top: 8px; color: var(--ink);
+}
+.guide-section h3 {
+  font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em;
+  margin: 24px 0 10px; color: var(--ink);
+}
+.guide-section p {
+  font-size: 0.92rem; color: var(--ink2); line-height: 1.7; margin-bottom: 14px;
+}
+.guide-section a { color: var(--blue); text-decoration: none; font-weight: 500; }
+.guide-section a:hover { text-decoration: underline; }
+
+/* Callout boxes */
+.callout {
+  padding: 18px 20px; border-radius: var(--radius-sm);
+  margin: 18px 0; font-size: 0.88rem; line-height: 1.6;
+}
+.callout-blue { background: var(--blue-soft); border: 1px solid rgba(0,85,255,0.12); color: var(--ink2); }
+.callout-amber { background: var(--amber-bg); border: 1px solid rgba(154,103,0,0.12); color: var(--amber); }
+.callout-red { background: var(--red-bg); border: 1px solid rgba(214,40,40,0.12); color: var(--red); }
+.callout-green { background: var(--green-bg); border: 1px solid rgba(15,123,63,0.12); color: var(--green); }
+.callout strong { font-weight: 700; }
+
+/* Steps */
+.step-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px;
+  margin: 14px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 14px;
+  background: var(--blue-soft); color: var(--blue);
+  font-size: 0.76rem; font-weight: 700; margin-bottom: 10px;
+}
+.step-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
+.step-card p { font-size: 0.86rem; color: var(--ink2); line-height: 1.6; margin-bottom: 0; }
+
+/* Timeline */
+.timeline { margin: 20px 0; }
+.tl-row {
+  display: flex; gap: 16px; padding: 12px 0;
+  border-bottom: 1px solid var(--border); align-items: baseline;
+}
+.tl-row:last-child { border: none; }
+.tl-date { font-family: var(--mono); font-size: 0.78rem; font-weight: 700; color: var(--blue); width: 100px; flex-shrink: 0; }
+.tl-event { font-size: 0.86rem; color: var(--ink2); line-height: 1.5; }
+.tl-event strong { color: var(--ink); }
+
+/* Table */
+.rate-table {
+  width: 100%; border-collapse: collapse; margin: 18px 0;
+  font-size: 0.84rem;
+}
+.rate-table th {
+  text-align: left; padding: 10px 14px; background: var(--surface2);
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted); border-bottom: 1px solid var(--border2);
+}
+.rate-table td {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  color: var(--ink2);
+}
+.rate-table td:nth-child(2) { font-family: var(--mono); font-weight: 600; color: var(--ink); }
+.rate-table tr:hover td { background: var(--surface2); }
+
+/* Divider */
+.section-divider { height: 1px; background: var(--border2); margin: 40px 0; }
+
+/* CTA */
+.guide-cta {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px; text-align: center;
+  margin-top: 40px;
+}
+.guide-cta h3 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+.guide-cta p { font-size: 0.88rem; color: var(--muted); margin-bottom: 16px; }
+.guide-cta-btn {
+  display: inline-block; padding: 12px 28px; border-radius: var(--radius-sm);
+  background: var(--blue); color: #fff; font-family: var(--font);
+  font-size: 0.88rem; font-weight: 600; text-decoration: none;
+  transition: background 0.15s;
+}
+.guide-cta-btn:hover { background: var(--blue-hover); }
+
+/* Footer */
+.footer {
+  max-width: 680px; margin: 0 auto; padding: 20px;
+  font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border);
+  line-height: 1.6;
+}
+.footer a { color: var(--blue); text-decoration: none; }
+
+@media (max-width: 500px) {
+  .nav { padding: 0 16px; height: 52px; }
+  .guide-hero { padding: 32px 16px 28px; }
+  .guide-wrap { padding: 28px 16px 60px; }
+  .tl-row { flex-direction: column; gap: 4px; }
+  .tl-date { width: auto; }
+  .rate-table { font-size: 0.78rem; }
+  .rate-table th, .rate-table td { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-brand" href="/">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    iDuties<span class="nav-dot">.ai</span>
+  </a>
+  <div class="nav-spacer"></div>
+  <a class="nav-back" href="/">← Back to Calculator</a>
+</nav>
+
+<!-- Hero -->
+<header class="guide-hero">
+  <div class="guide-hero-inner">
+    <div class="guide-eyebrow"><span class="guide-eyebrow-dot"></span> IEEPA Tariff Guide</div>
+    <h1>How to claim back <span>IEEPA duties</span> after the Supreme Court ruling</h1>
+    <p>A practical guide for importers. What happened, who qualifies, what to file, and when — without the legal jargon.</p>
+    <div class="guide-updated">Last updated: March 4, 2026</div>
+  </div>
+</header>
+
+<div class="guide-wrap">
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#what-happened">What happened</a>
+    <a href="#who-qualifies">Who qualifies for a refund</a>
+    <a href="#how-much">How much you could recover</a>
+    <a href="#unliquidated">Path 1 — Unliquidated entries (PSC)</a>
+    <a href="#liquidated">Path 2 — Liquidated entries (Protest / CIT)</a>
+    <a href="#deadlines">Key deadlines</a>
+    <a href="#surviving-tariffs">What tariffs still remain</a>
+    <a href="#action-checklist">Action checklist</a>
+  </div>
+
+  <!-- 1. What happened -->
+  <section class="guide-section" id="what-happened">
+    <h2>What happened</h2>
+    <p>On February 20, 2026, the Supreme Court ruled 6–3 that the International Emergency Economic Powers Act (IEEPA) does not give the President authority to impose tariffs. The decision — authored by Chief Justice Roberts and joined by Justices Sotomayor, Kagan, Gorsuch, Barrett, and Jackson — immediately invalidated two categories of tariffs:</p>
+    <p><strong>Fentanyl/trafficking tariffs</strong> — imposed on China (starting Feb 2025), Canada and Mexico (from Mar 2025) — citing drug trafficking and immigration emergencies.</p>
+    <p><strong>Reciprocal tariffs</strong> — imposed on virtually all trading partners from "Liberation Day" (April 2025) onward, with rates ranging from 10% to 145%.</p>
+    <p>The Court held that while IEEPA grants power to "regulate importation," this does not encompass the power to tax. Congress never delegated tariff authority through IEEPA — unlike Section 232 or Section 301, which explicitly do.</p>
+
+    <div class="callout callout-blue">
+      <strong>Key distinction:</strong> Only IEEPA tariffs were struck down. Section 232 (steel/aluminum), Section 301 (China tech), and standard MFN tariffs remain fully in force. A new Section 122 temporary 15% global surcharge was also imposed the same day — valid for 150 days.
+    </div>
+  </section>
+
+  <!-- 2. Who qualifies -->
+  <section class="guide-section" id="who-qualifies">
+    <h2>Who qualifies for a refund</h2>
+    <p>Refunds go to the <strong>importer of record</strong> — the party that filed entry documents with CBP and paid the assessed duties. This is typically the U.S. company that imported the goods, not the foreign supplier.</p>
+    <p>If a customs broker or freight forwarder served as importer of record on your behalf, the refund technically goes to them first. You'll need to coordinate with your broker to ensure those funds are passed through to you.</p>
+    <p>More than 301,000 importers paid IEEPA duties through mid-December 2025 across approximately 34 million customs entries. Total collections reached an estimated $175 billion.</p>
+
+    <div class="callout callout-amber">
+      <strong>Important:</strong> The Supreme Court did not order refunds. It ruled the tariffs unlawful, which opens the door — but the mechanics of refunds are being determined by CBP, the Court of International Trade, and potentially Congress. The administration has indicated it may resist automatic refunds.
+    </div>
+  </section>
+
+  <!-- 3. How much -->
+  <section class="guide-section" id="how-much">
+    <h2>How much you could recover</h2>
+    <p>The refundable amount is specifically the IEEPA tariff component — not your entire duty payment. Here are the approximate IEEPA rates that were in effect by origin country:</p>
+
+    <table class="rate-table">
+      <thead>
+        <tr><th>Origin</th><th>IEEPA Rate</th><th>Type</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>🇨🇳 China</td><td>up to 145%</td><td>Fentanyl + Reciprocal (stacked)</td></tr>
+        <tr><td>🇨🇦 Canada</td><td>25%</td><td>Fentanyl / trafficking</td></tr>
+        <tr><td>🇲🇽 Mexico</td><td>25%</td><td>Fentanyl / trafficking</td></tr>
+        <tr><td>🇻🇳 Vietnam</td><td>46%</td><td>Reciprocal</td></tr>
+        <tr><td>🇧🇩 Bangladesh</td><td>37%</td><td>Reciprocal</td></tr>
+        <tr><td>🇹🇭 Thailand</td><td>36%</td><td>Reciprocal</td></tr>
+        <tr><td>🇮🇩 Indonesia</td><td>32%</td><td>Reciprocal</td></tr>
+        <tr><td>🇹🇼 Taiwan</td><td>32%</td><td>Reciprocal</td></tr>
+        <tr><td>🇮🇳 India</td><td>26%</td><td>Reciprocal</td></tr>
+        <tr><td>🇰🇷 South Korea</td><td>25%</td><td>Reciprocal</td></tr>
+        <tr><td>🇯🇵 Japan</td><td>24%</td><td>Reciprocal</td></tr>
+        <tr><td>🇪🇺 EU</td><td>20%</td><td>Reciprocal</td></tr>
+        <tr><td>🇬🇧 United Kingdom</td><td>10%</td><td>Reciprocal</td></tr>
+        <tr><td>🌐 Most others</td><td>10%</td><td>Reciprocal (baseline)</td></tr>
+      </tbody>
+    </table>
+
+    <p>Rates varied over time and by product — the China rate escalated from 10% in February 2025 to 145% after Liberation Day. Your actual refund depends on the specific entry date, HTS classification, and any exclusions or exemptions that applied.</p>
+
+    <div class="callout callout-green">
+      <strong>Use the estimator:</strong> <a href="/#refundEstimator" style="color:inherit">Our IEEPA Refund Estimator</a> will calculate the approximate refundable amount based on your origin, value, and entry date — and tell you exactly which filing path to take.
+    </div>
+  </section>
+
+  <!-- 4. Unliquidated -->
+  <section class="guide-section" id="unliquidated">
+    <h2>Path 1 — Unliquidated entries</h2>
+    <p>If your entry hasn't been liquidated yet (finalized by CBP), you have the simplest path to a refund. As of December 2025, roughly 19.2 million of the 34 million IEEPA entries were still unliquidated.</p>
+    <p>Liquidation typically occurs 314 days after entry. So goods imported after roughly April 2025 likely remain open.</p>
+
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h4>Confirm your entry is unliquidated</h4>
+      <p>Log into the <strong>ACE Secure Data Portal</strong> at <a href="https://ace.cbp.dhs.gov" target="_blank">ace.cbp.dhs.gov</a> and pull your entry summary. Check the liquidation status. If it says "open" or "estimated," you can proceed with a PSC.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h4>File a Post-Summary Correction (PSC)</h4>
+      <p>Through the Automated Broker Interface (ABI) within ACE, file a PSC that recalculates duties by removing the IEEPA tariff component. The PSC must be filed within 300 days of entry or 15 days before the scheduled liquidation — whichever comes first. Your customs broker can handle this.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h4>Separate IEEPA from surviving tariffs</h4>
+      <p>This is critical. Your PSC should only remove tariffs under HTS headings 9903.01.xx (the IEEPA-specific codes). Section 232, Section 301, and regular MFN duties must remain. If you accidentally remove those, CBP will reject the correction or you'll face penalties.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <h4>Receive your refund via ACH</h4>
+      <p>Since February 6, 2026, all CBP refunds are issued electronically via Automated Clearing House (ACH). Make sure you're enrolled at <a href="https://pay.gov" target="_blank">pay.gov</a>. Funds arrive 1–2 business days after approval.</p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- 5. Liquidated -->
+  <section class="guide-section" id="liquidated">
+    <h2>Path 2 — Already-liquidated entries</h2>
+    <p>If CBP has already finalized your entry, the process is more involved. You have two options, and trade attorneys are recommending a "belt and suspenders" approach — do both.</p>
+
+    <h3>Option A: File a CBP Protest (Form 19)</h3>
+    <p>You have <strong>exactly 180 days from the liquidation date</strong> to file a protest. This is done through the ACE protest module using CBP Form 19. There are no extensions.</p>
+    <p>The protest should cite the Supreme Court's ruling in <em>Learning Resources v. Trump</em> and identify the specific IEEPA tariff headings (9903.01.xx) being contested. CBP has up to 2 years to review a protest, but you can request "accelerated disposition" — if they don't respond within 30 days, the protest is deemed denied, which opens the door to CIT litigation.</p>
+
+    <div class="callout callout-red">
+      <strong>Deadline alert:</strong> The earliest IEEPA entries (February 2025, China fentanyl) began being liquidated in December 2025. That means 180-day protest windows start closing in June 2026. If you imported from China in early 2025, act now.
+    </div>
+
+    <h3>Option B: File at the Court of International Trade</h3>
+    <p>For larger refund amounts, filing a summons at the CIT under 28 U.S.C. §1581(i) preserves your claim even if CBP denies the protest. The filing fee is approximately $400.</p>
+    <p>Nearly 2,000 importers had already filed protective CIT actions before the Supreme Court decision. The CIT has indicated it has authority to order reliquidation of entries — even those past the 180-day protest window — though whether it will exercise that power broadly remains to be seen.</p>
+    <p>If CBP denies your protest, you have another 180 days from the denial notice to file a CIT summons.</p>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- 6. Deadlines -->
+  <section class="guide-section" id="deadlines">
+    <h2>Key deadlines</h2>
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-date">Feb 20, 2026</div>
+        <div class="tl-event"><strong>Supreme Court ruling.</strong> IEEPA tariffs declared unlawful. President signs EO revoking IEEPA tariffs "as soon as practicable."</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-date">Feb 24, 2026</div>
+        <div class="tl-event"><strong>Section 122 surcharge takes effect.</strong> New 15% global tariff (150-day limit without congressional extension). Expires ~July 2026.</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-date">Jun–Jul 2026</div>
+        <div class="tl-event"><strong>First 180-day protest deadlines.</strong> Entries liquidated in Dec 2025–Jan 2026 reach their protest window. File before this date or forfeit administrative remedies.</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-date">~Jul 2026</div>
+        <div class="tl-event"><strong>Section 122 surcharge expires</strong> unless Congress extends it.</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-date">Feb 2027</div>
+        <div class="tl-event"><strong>CIT statute of limitations.</strong> 2-year window for earliest Feb 2025 entries to file at the Court of International Trade.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- 7. Surviving tariffs -->
+  <section class="guide-section" id="surviving-tariffs">
+    <h2>What tariffs still remain</h2>
+    <p>The IEEPA ruling did not wipe the slate clean. These tariffs are still in force and were imposed under separate legal authorities:</p>
+
+    <div class="step-card">
+      <h4>Section 301 — China (7.5–25%)</h4>
+      <p>Tariffs on Chinese goods originally imposed under the Trade Act of 1974 in response to intellectual property practices. Covers hundreds of billions in imports including electronics, apparel, and industrial goods. These predate IEEPA and remain fully active.</p>
+    </div>
+
+    <div class="step-card">
+      <h4>Section 232 — Steel (25%) & Aluminum (10–25%)</h4>
+      <p>National security tariffs on steel and aluminum imports from most countries. Also now expanded to autos and auto parts (25%) as of March 2025. Not affected by the IEEPA ruling.</p>
+    </div>
+
+    <div class="step-card">
+      <h4>Section 122 — Temporary 15% surcharge</h4>
+      <p>Imposed the same day as the IEEPA ruling. Applies globally at 15%. Limited to 150 days without Congressional action — set to expire around July 2026. Exceptions exist for USMCA goods, Section 232 products, and certain CAFTA-DR textiles.</p>
+    </div>
+
+    <div class="step-card">
+      <h4>Standard MFN duties</h4>
+      <p>The regular Most Favored Nation tariff rates in the Harmonized Tariff Schedule. These vary by product and have been in effect for decades. Not changed by any recent action.</p>
+    </div>
+
+    <div class="callout callout-blue">
+      <strong>The net effect:</strong> The Treasury Secretary has stated that combining Section 122, 232, and 301 tariffs aims to produce "virtually unchanged tariff revenue in 2026." Importers should not expect lower costs overall — but they are legally owed back the IEEPA portion specifically.
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- 8. Checklist -->
+  <section class="guide-section" id="action-checklist">
+    <h2>Action checklist</h2>
+    <p>Here's what to do this week, regardless of your entry status:</p>
+
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h4>Pull your ACE entry data</h4>
+      <p>Generate a report of all entries from February 2025 onward. Note the liquidation status and dates for each. If you don't have ACE access, request this from your customs broker or file a FOIA request with CBP.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h4>Separate IEEPA from other tariffs</h4>
+      <p>For each entry, identify the IEEPA tariff headings (9903.01.xx) and calculate the IEEPA-specific portion versus Section 232, 301, and MFN duties. Our <a href="/#refundEstimator">refund estimator</a> can help with rough numbers.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h4>File PSCs on unliquidated entries</h4>
+      <p>This is the fastest refund path. Have your broker file Post-Summary Corrections through ACE/ABI immediately for all open entries.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <h4>File protests on liquidated entries</h4>
+      <p>For already-liquidated entries, file CBP Form 19 protests before the 180-day deadline. Prioritize the oldest entries first — their windows close soonest.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">5</div>
+      <h4>Enroll in ACH</h4>
+      <p>All refunds are now electronic. Register at <a href="https://pay.gov" target="_blank">pay.gov</a> if you haven't already.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">6</div>
+      <h4>Consider CIT protective filing</h4>
+      <p>For significant refund amounts (typically $50K+), consult a trade attorney about filing a protective action at the Court of International Trade. This costs ~$400 and preserves your claims if administrative channels fail.</p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">7</div>
+      <h4>Keep paying current tariffs</h4>
+      <p>Even though IEEPA tariffs are revoked, Section 122, 232, 301, and MFN tariffs are still due. Failure to pay current duties will jeopardize your bond and import privileges.</p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="guide-cta">
+    <h3>Estimate your refund amount</h3>
+    <p>Enter your import details and get an instant estimate of the IEEPA-refundable portion.</p>
+    <a class="guide-cta-btn" href="/#refundEstimator">Open Refund Estimator →</a>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <p>iDuties.ai — This guide is for informational purposes only and does not constitute legal, tax, or financial advice. Tariff law is complex and evolving. Consult a <a href="https://www.cbp.gov/trade/basic-import-export/importing-goods/us-customs-brokers" target="_blank">licensed customs broker</a> or trade attorney for guidance specific to your situation.</p>
+</footer>
+
+</body>
+</html>
