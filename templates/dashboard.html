@@ -21,7 +21,7 @@
   --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   --mono: 'SF Mono', 'Fira Code', 'Menlo', monospace;
 }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-y: scroll; }
 body {
   font-family: var(--font); background: var(--bg); color: var(--ink);
   min-height: 100vh; -webkit-font-smoothing: antialiased;
@@ -91,7 +91,22 @@ body {
   max-width: 860px; margin: 0 auto; padding: 0 20px;
   display: flex; gap: 0; border-bottom: 1px solid var(--border2);
   overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; -ms-overflow-style: none;
 }
+.dash-tabs::-webkit-scrollbar { display: none; }
+
+/* ═══════ QUICK ACTIONS ═══════ */
+.quick-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+.qa-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 18px; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+  text-decoration: none; transition: all 0.15s; letter-spacing: -0.01em;
+}
+.qa-btn-primary { background: var(--blue); color: #fff; }
+.qa-btn-primary:hover { background: var(--blue-hover); }
+.qa-btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--border2); }
+.qa-btn-secondary:hover { background: var(--surface2); }
 .dash-tab {
   padding: 12px 16px; font-family: var(--font); font-size: 0.84rem;
   font-weight: 500; color: var(--muted); background: none; border: none;
@@ -234,6 +249,11 @@ body {
       <div class="stat-label">Scans</div>
     </div>
   </div>
+  <div class="quick-actions">
+    <a class="qa-btn qa-btn-primary" href="/">📦 New Calculation</a>
+    <a class="qa-btn qa-btn-secondary" href="/#ieepa">💰 Refund Estimator</a>
+    <a class="qa-btn qa-btn-secondary" href="/refund-guide.html">📋 Refund Guide</a>
+  </div>
 </div>
 
 <!-- ═══════ TABS ═══════ -->
@@ -270,7 +290,7 @@ body {
       <div class="empty-icon">📦</div>
       <div class="empty-h">No calculations yet</div>
       <div class="empty-p">Run a duty calculation and save it to see it here. Your history helps you compare costs across shipments.</div>
-      <a class="empty-btn" href="/">Open Calculator →</a>
+      <a class="empty-btn" href="/">📦 Open Calculator →</a>
     </div>
   {% endif %}
 </div>
@@ -314,7 +334,7 @@ body {
       <div class="empty-icon">💰</div>
       <div class="empty-h">No refund entries yet</div>
       <div class="empty-p">Use the IEEPA Refund Estimator and save your results. We'll track deadlines and filing status for each entry.</div>
-      <a class="empty-btn" href="/">Open Estimator →</a>
+      <a class="empty-btn" href="/#ieepa">💰 Open Estimator →</a>
     </div>
   {% endif %}
 </div>
@@ -346,7 +366,7 @@ body {
       <div class="empty-icon">📋</div>
       <div class="empty-h">No recovery scans yet</div>
       <div class="empty-p">Upload your CBP 7501 entry summaries for an AI-powered scan that identifies every IEEPA-refundable entry.</div>
-      <a class="empty-btn" href="/">Upload Documents →</a>
+      <a class="empty-btn" href="/">📋 Upload Documents →</a>
     </div>
   {% endif %}
 </div>
