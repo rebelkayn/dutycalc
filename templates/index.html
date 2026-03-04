@@ -1110,6 +1110,10 @@ function xrow(k,v) {
 async function searchHTS(val) {
   const dd = document.getElementById('htsDropdown');
   if (!val || val.length < 2) { dd.classList.remove('show'); return; }
+  // Auto-detect valid HTS code as user types
+  if (val.match(/^\d{4}\.\d{2}\.\d{2}/)) {
+    handleManualHTS();
+  }
   clearTimeout(htsTimer);
   htsTimer = setTimeout(async () => {
     let results = [];
@@ -1805,6 +1809,15 @@ async function saveRefundResult(btn) {
     if (rd) { rd.classList.add('open'); rd.style.maxHeight = '9999px'; }
   }
 })();
+
+// ── Auto-open refund drawer from #ieepa hash ────────────
+if (window.location.hash === '#ieepa') {
+  setTimeout(() => {
+    const banner = document.getElementById('ieepa');
+    if (banner) banner.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => toggleRefundDrawer(), 400);
+  }, 300);
+}
 </script>
 </body>
 </html>
