@@ -1,12 +1,19 @@
 """
-build_hts.py — Run this once to convert the USITC HTS Excel file into hts_data.json
+build_hts.py — Download and convert USITC HTS Excel into hts_data.json
+
+Fully automatic — no manual download needed.
+
+Tries each revision in descending order (latest first):
+  https://www.usitc.gov/sites/default/files/tata/hts/bychapter/hts_2026_revision_4_xls.xlsx
+  https://www.usitc.gov/sites/default/files/tata/hts/bychapter/hts_2026_revision_3_xls.xlsx
+  ...
+
+When a new revision is released, the script detects it automatically.
+Stored revision number is saved to data/us_version.txt.
 
 Usage:
-    1. Download HTS Excel from https://www.usitc.gov/harmonized_tariff_information
-       (look for "HTS 2026 Revision X — Excel" link)
-    2. Save it as: data/hts_2026.xlsx  (in the same folder as this script)
-    3. Run: python build_hts.py
-    4. Commit the generated data/hts_data.json to git and push
+    python build_hts.py           # Auto-download latest, skip if up to date
+    python build_hts.py --force   # Force re-download and rebuild
 
 Output: data/hts_data.json — compact JSON loaded by app.py at startup
 """
@@ -15,16 +22,95 @@ import json
 import os
 import re
 import sys
+import urllib.request
+import urllib.error
 
 try:
     import openpyxl
 except ImportError:
     print("Installing openpyxl...")
-    os.system(f"{sys.executable} -m pip install openpyxl")
+    os.system(f"{sys.executable} -m pip install openpyxl --quiet")
     import openpyxl
 
-EXCEL_PATH = os.path.join(os.path.dirname(__file__), "data", "hts_2026.xlsx")
-OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "data", "hts_data.json")
+DATA_DIR     = os.path.join(os.path.dirname(__file__), "data")
+EXCEL_PATH   = os.path.join(DATA_DIR, "hts_2026.xlsx")
+OUTPUT_PATH  = os.path.join(DATA_DIR, "hts_data.json")
+VERSION_PATH = os.path.join(DATA_DIR, "us_version.txt")
+
+YEAR = 2026
+# Try revisions from high to low — stops at first successful download
+MAX_REVISION = 9
+MIN_REVISION = 1
+
+def revision_url(year: int, rev: int) -> str:
+    return (
+        f"https://www.usitc.gov/sites/default/files/tata/hts/bychapter/"
+        f"hts_{year}_revision_{rev}_xls.xlsx"
+    )
+
+def load_stored_version() -> str:
+    if os.path.exists(VERSION_PATH):
+        with open(VERSION_PATH) as f:
+            return f.read().strip()
+    return ""
+
+def save_version(v: str):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(VERSION_PATH, "w") as f:
+        f.write(v)
+
+def find_and_download(force=False) -> tuple[str, int]:
+    """
+    Try revisions from MAX down to MIN. Returns (local_path, revision).
+    Skips download if stored version matches latest found, unless force=True.
+    """
+    stored = load_stored_version()
+
+    for rev in range(MAX_REVISION, MIN_REVISION - 1, -1):
+        url = revision_url(YEAR, rev)
+        version_str = f"{YEAR}_rev{rev}"
+
+        # HEAD check — see if this URL exists without downloading
+        try:
+            req = urllib.request.Request(url, method="HEAD",
+                                         headers={"User-Agent": "iDuties/1.0"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                size = int(r.headers.get("Content-Length", 0))
+                if size < 10000:  # Too small — not a valid Excel
+                    continue
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                continue  # This revision doesn't exist yet
+            continue
+        except Exception:
+            continue
+
+        # Found the latest revision
+        print(f"  Latest revision : {YEAR} Rev {rev}")
+        print(f"  Stored revision : {stored or '(none)'}")
+
+        if not force and version_str == stored and os.path.exists(OUTPUT_PATH):
+            print(f"✓  Already up to date ({version_str})")
+            print(f"   Use --force to rebuild anyway")
+            return None, rev  # Signal: no rebuild needed
+
+        # Download it
+        print(f"\n  Downloading HTS {YEAR} Revision {rev}...")
+        print(f"  URL: {url}")
+        os.makedirs(DATA_DIR, exist_ok=True)
+
+        def progress(count, block, total):
+            pct = min(100, count * block * 100 // total) if total else 0
+            print(f"\r  Progress: {pct}%", end="", flush=True)
+
+        urllib.request.urlretrieve(url, EXCEL_PATH, reporthook=progress)
+        print(f"\r  Downloaded {os.path.getsize(EXCEL_PATH)//1024} KB          ")
+
+        return EXCEL_PATH, rev
+
+    print(f"❌  No valid HTS revision found for {YEAR} (tried Rev {MIN_REVISION}–{MAX_REVISION})")
+    print(f"   Check: https://www.usitc.gov/harmonized_tariff_information")
+    sys.exit(1)
 
 # Section 301 China surcharges by HTS chapter/heading
 # Source: USTR Section 301 Lists 1-4A (as of 2026)
@@ -147,18 +233,16 @@ def find_columns(ws):
 
     return col_map
 
-def build_json():
-    if not os.path.exists(EXCEL_PATH):
-        print(f"\n❌  Excel file not found at: {EXCEL_PATH}")
-        print("\nTo fix:")
-        print("  1. Go to https://www.usitc.gov/harmonized_tariff_information")
-        print("  2. Download the latest HTS Excel file")
-        print("  3. Save it as:  data/hts_2026.xlsx")
-        print("  4. Run this script again\n")
-        sys.exit(1)
+def build_json(force=False):
+    print("🇺🇸  USITC HTS Builder")
+    print("─" * 40)
 
-    print(f"Loading {EXCEL_PATH}...")
-    wb = openpyxl.load_workbook(EXCEL_PATH, read_only=True, data_only=True)
+    excel_path, rev = find_and_download(force=force)
+    if excel_path is None:
+        return False  # Already up to date
+
+    print(f"Loading {excel_path}...")
+    wb = openpyxl.load_workbook(excel_path, read_only=True, data_only=True)
 
     # Try to find the right sheet (usually named "HTS" or first sheet)
     sheet_name = wb.sheetnames[0]
@@ -197,7 +281,7 @@ def build_json():
             chapter = int(code[:2]) if code[:2].isdigit() else 0
 
             hts_data[code] = {
-                "d": desc[:120],       # truncate long descriptions
+                "d": desc[:120],
                 "r": rate,
                 "c": cn301,
                 "ch": chapter,
@@ -207,7 +291,7 @@ def build_json():
             if processed % 1000 == 0:
                 print(f"  Processed {processed} codes...")
 
-        except Exception as e:
+        except Exception:
             skipped += 1
             continue
 
@@ -215,17 +299,23 @@ def build_json():
 
     print(f"\n✓  Parsed {processed} HTS codes ({skipped} rows skipped)")
 
-    # Write compact JSON
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
     with open(OUTPUT_PATH, "w") as f:
         json.dump(hts_data, f, separators=(",", ":"))
 
     size_kb = os.path.getsize(OUTPUT_PATH) / 1024
     print(f"✓  Written to {OUTPUT_PATH}  ({size_kb:.0f} KB)")
+
+    version_str = f"{YEAR}_rev{rev}"
+    save_version(version_str)
+    print(f"✓  Version saved: {version_str}")
+
     print(f"\nNext steps:")
-    print(f"  git add data/hts_data.json")
-    print(f"  git commit -m 'add full USITC HTS 2026 database ({processed} codes)'")
+    print(f"  git add data/hts_data.json data/us_version.txt")
+    print(f"  git commit -m 'US HTS update: {version_str} ({processed} codes)'")
     print(f"  git push")
+    return True
 
 if __name__ == "__main__":
-    build_json()
+    force = "--force" in sys.argv
+    build_json(force=force)
