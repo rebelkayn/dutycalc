@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DutyCalc — US Import Duty Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #f5f5f7;
+  --surface:   #ffffff;
+  --surface2:  #f5f5f7;
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.12);
+  --ink:       #1d1d1f;
+  --ink2:      #3d3d3f;
+  --muted:     #6e6e73;
+  --blue:      #0071e3;
+  --blue-dark: #0064cc;
+  --blue-soft: rgba(0,113,227,0.1);
+  --green:     #1a7a4a;
+  --green-bg:  rgba(26,122,74,0.08);
+  --red:       #c0392b;
+  --red-bg:    rgba(192,57,43,0.08);
+  --amber:     #b45309;
+  --amber-bg:  rgba(180,83,9,0.08);
+  --radius:    14px;
+  --radius-sm: 8px;
+  --shadow:    0 2px 20px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+}
+html { font-size: 16px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Layout ────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245,245,247,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--ink); letter-spacing: -0.02em;
+}
+.nav-brand span { color: var(--blue); }
+.nav-badge {
+  font-size: 0.65rem; font-weight: 500;
+  background: var(--blue-soft); color: var(--blue);
+  padding: 3px 9px; border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+.hero {
+  text-align: center;
+  padding: 64px 24px 40px;
+  max-width: 600px; margin: 0 auto;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 600; letter-spacing: -0.03em;
+  line-height: 1.1; color: var(--ink);
+  margin-bottom: 14px;
+}
+.hero p {
+  font-size: 1.05rem; color: var(--muted);
+  line-height: 1.6; max-width: 480px; margin: 0 auto;
+}
+
+.main { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* ─── Cards ─────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.card-header {
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.card-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem; flex-shrink: 0;
+}
+.icon-blue   { background: var(--blue-soft); }
+.icon-green  { background: var(--green-bg); }
+.icon-amber  { background: var(--amber-bg); }
+.card-title  { font-size: 0.95rem; font-weight: 600; letter-spacing: -0.01em; }
+.card-sub    { font-size: 0.78rem; color: var(--muted); margin-top: 1px; }
+.card-body   { padding: 22px; }
+
+/* ─── API Key Banner ────────────────────────────────── */
+.api-banner {
+  background: linear-gradient(135deg, #e8f4fd 0%, #f0f7ff 100%);
+  border: 1px solid rgba(0,113,227,0.2);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 16px;
+}
+.api-banner-icon { font-size: 1.4rem; flex-shrink: 0; }
+.api-banner-text { flex: 1; }
+.api-banner-text p { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+.api-banner-text strong { font-size: 0.9rem; color: var(--ink); }
+.api-input-row { display: flex; gap: 8px; margin-top: 10px; }
+.api-input-row input {
+  flex: 1; padding: 9px 14px;
+  background: white; border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); font-size: 0.85rem;
+  font-family: "SF Mono", "Menlo", monospace;
+  color: var(--ink); outline: none;
+  transition: border-color 0.15s;
+}
+.api-input-row input:focus { border-color: var(--blue); }
+.api-save-btn {
+  padding: 9px 16px; background: var(--blue); color: white;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 0.82rem; font-weight: 500; cursor: pointer;
+  transition: background 0.15s; white-space: nowrap;
+}
+.api-save-btn:hover { background: var(--blue-dark); }
+
+/* ─── Upload Zone ───────────────────────────────────── */
+.upload-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 36px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  margin-bottom: 16px;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+.upload-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0;
+  cursor: pointer; width: 100%; height: 100%;
+}
+.upload-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.upload-title { font-size: 0.95rem; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+.upload-hint  { font-size: 0.78rem; color: var(--muted); }
+
+.file-pill {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+}
+.file-pill-icon { font-size: 1.3rem; flex-shrink: 0; }
+.file-pill-name { font-size: 0.88rem; font-weight: 500; }
+.file-pill-size { font-size: 0.75rem; color: var(--muted); }
+.file-pill-remove {
+  margin-left: auto; background: none; border: none;
+  color: var(--muted); cursor: pointer; font-size: 1.1rem;
+  padding: 2px 6px; border-radius: 4px; transition: color 0.15s;
+}
+.file-pill-remove:hover { color: var(--red); }
+
+/* ─── Form Elements ─────────────────────────────────── */
+.field { margin-bottom: 14px; }
+.field label {
+  display: block; font-size: 0.78rem; font-weight: 500;
+  color: var(--muted); margin-bottom: 6px; letter-spacing: 0.01em;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 14px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); font-size: 0.92rem;
+  font-family: var(--font); color: var(--ink);
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none; -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+.field textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236e6e73' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 38px; cursor: pointer;
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) {
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+}
+
+/* ─── HTS Search ────────────────────────────────────── */
+.hts-search-wrap { position: relative; }
+.hts-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+  z-index: 50; overflow: hidden; display: none;
+}
+.hts-dropdown.show { display: block; }
+.hts-option {
+  padding: 10px 14px; cursor: pointer; transition: background 0.1s;
+  border-bottom: 1px solid var(--border);
+}
+.hts-option:last-child { border-bottom: none; }
+.hts-option:hover { background: var(--surface2); }
+.hts-code { font-family: "SF Mono", "Menlo", monospace; font-size: 0.78rem; color: var(--blue); font-weight: 500; }
+.hts-desc { font-size: 0.83rem; color: var(--ink); margin-top: 1px; }
+.hts-rate { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+
+/* ─── Extracted Data Preview ────────────────────────── */
+.extracted-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-bg); color: var(--green);
+  border: 1px solid rgba(26,122,74,0.2);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 0.72rem; font-weight: 500; margin-bottom: 14px;
+}
+.extracted-badge::before { content: "✦"; font-size: 0.65rem; }
+
+/* ─── Toggle ────────────────────────────────────────── */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.toggle-label { font-size: 0.85rem; color: var(--ink); }
+.toggle-desc  { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+.toggle-switch {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: #d1d1d6; cursor: pointer; position: relative;
+  transition: background 0.2s; flex-shrink: 0;
+  border: none; outline: none;
+}
+.toggle-switch.on { background: #30d158; }
+.toggle-switch::after {
+  content: ''; position: absolute;
+  top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; transition: left 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.toggle-switch.on::after { left: 22px; }
+
+/* ─── Buttons ───────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px; border-radius: var(--radius-sm);
+  font-size: 0.92rem; font-weight: 500; font-family: var(--font);
+  cursor: pointer; transition: all 0.15s; border: none;
+  letter-spacing: -0.01em;
+}
+.btn-primary { background: var(--blue); color: white; width: 100%; }
+.btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+.btn-secondary {
+  background: var(--surface2); color: var(--ink);
+  border: 1px solid var(--border2); width: 100%; margin-top: 10px;
+}
+.btn-secondary:hover { background: #e8e8ec; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-loading { pointer-events: none; }
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+.btn-loading .spinner { display: block; }
+.btn-loading .btn-text { opacity: 0.7; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Results Panel ─────────────────────────────────── */
+.result-placeholder {
+  padding: 52px 20px; text-align: center; color: var(--muted);
+}
+.result-placeholder-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; }
+.result-placeholder p { font-size: 0.9rem; line-height: 1.6; max-width: 240px; margin: 0 auto; }
+
+.result-body { animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Flags */
+.flag {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: 0.83rem; line-height: 1.5; margin-bottom: 10px;
+}
+.flag-green { background: var(--green-bg); color: var(--green); }
+.flag-amber { background: var(--amber-bg); color: var(--amber); }
+.flag-red   { background: var(--red-bg); color: var(--red); }
+.flag-icon  { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
+
+/* HTS chip */
+.hts-chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 16px;
+  display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+}
+.hts-chip-code {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 1rem; color: var(--blue); font-weight: 600;
+  flex-shrink: 0;
+}
+.hts-chip-desc { font-size: 0.83rem; color: var(--ink); line-height: 1.4; }
+.hts-chip-rate { font-size: 0.73rem; color: var(--muted); margin-top: 3px; }
+
+/* Breakdown rows */
+.breakdown { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.breakdown-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 16px; border-bottom: 1px solid var(--border);
+  font-size: 0.88rem; transition: background 0.1s;
+}
+.breakdown-row:last-child { border-bottom: none; }
+.breakdown-row:hover { background: var(--surface2); }
+.breakdown-row .label { color: var(--muted); }
+.breakdown-row .value { font-family: "SF Mono", "Menlo", monospace; font-size: 0.83rem; color: var(--ink); }
+.breakdown-row.subtotal .label { color: var(--ink); font-weight: 500; }
+.breakdown-row.subtotal .value { color: var(--blue); }
+.breakdown-total {
+  background: var(--ink); color: white;
+  padding: 16px 16px; border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.breakdown-total .label { font-size: 0.92rem; font-weight: 500; }
+.breakdown-total .value { font-family: "SF Mono", "Menlo", monospace; font-size: 1rem; font-weight: 600; }
+
+/* ─── Two-col layout ────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } }
+.sticky-col { position: sticky; top: 68px; }
+
+/* ─── Tabs ──────────────────────────────────────────── */
+.tabs { display: flex; gap: 2px; padding: 4px; background: var(--surface2); border-radius: 10px; margin-bottom: 18px; }
+.tab {
+  flex: 1; padding: 7px 14px; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 500;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); transition: all 0.15s;
+}
+.tab.active { background: white; color: var(--ink); box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── Confidence pill ───────────────────────────────── */
+.confidence {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 500;
+}
+.conf-high   { background: var(--green-bg); color: var(--green); }
+.conf-medium { background: var(--amber-bg); color: var(--amber); }
+.conf-low    { background: var(--red-bg);   color: var(--red); }
+
+/* ─── Divider ───────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ─── Utility ───────────────────────────────────────── */
+.text-muted { color: var(--muted); font-size: 0.8rem; }
+.mt-12 { margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">Duty<span>Calc</span></div>
+  <span class="nav-badge">US Importer · Beta</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Know your landed cost<br>before you buy.</h1>
+  <p>Upload a commercial invoice or enter product details — get an instant US import duty breakdown powered by AI.</p>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- API KEY BANNER -->
+  <div class="api-banner" id="apiBanner">
+    <div class="api-banner-icon">🔑</div>
+    <div class="api-banner-text">
+      <strong>Gemini API Key Required for AI Extraction</strong>
+      <p>Needed to read invoice images. Manual entry works without it. Get a free key at <a href="https://aistudio.google.com" target="_blank" style="color:var(--blue)">aistudio.google.com</a></p>
+      <div class="api-input-row">
+        <input type="password" id="apiKeyInput" placeholder="AIza..." />
+        <button class="api-save-btn" onclick="saveApiKey()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- LEFT: INPUTS -->
+    <div>
+
+      <!-- STEP 1: INVOICE / PRODUCT -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-blue">📄</div>
+          <div>
+            <div class="card-title">Step 1 — Product & Invoice</div>
+            <div class="card-sub">Upload an invoice photo or enter details manually</div>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab('upload', this)">Upload Invoice</button>
+            <button class="tab" onclick="switchTab('manual', this)">Manual Entry</button>
+          </div>
+
+          <!-- UPLOAD TAB -->
+          <div class="tab-panel active" id="tab-upload">
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFile(this)">
+              <div class="upload-icon">📎</div>
+              <div class="upload-title">Drop invoice here or tap to browse</div>
+              <div class="upload-hint">JPG · PNG · PDF · WEBP — photos of paper invoices work great</div>
+            </div>
+
+            <div class="file-pill" id="filePill" style="display:none">
+              <span class="file-pill-icon" id="filePillIcon">📋</span>
+              <div>
+                <div class="file-pill-name" id="filePillName"></div>
+                <div class="file-pill-size" id="filePillSize"></div>
+              </div>
+              <button class="file-pill-remove" onclick="clearFile()">✕</button>
+            </div>
+
+            <div id="extractedPreview" style="display:none">
+              <div class="extracted-badge">AI Extracted</div>
+              <div id="extractedContent"></div>
+            </div>
+
+            <button class="btn btn-primary" id="extractBtn" onclick="extractInvoice()" disabled>
+              <div class="spinner"></div>
+              <span class="btn-text">✦ Extract with Gemini</span>
+            </button>
+          </div>
+
+          <!-- MANUAL TAB -->
+          <div class="tab-panel" id="tab-manual">
+            <div class="field">
+              <label>Product Description</label>
+              <textarea id="productDesc" placeholder="e.g. Men's 100% cotton T-shirt, crew neck, short sleeve, various colors"></textarea>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>HTS Code <span class="text-muted">(optional)</span></label>
+                <div class="hts-search-wrap">
+                  <input type="text" id="htsInput" placeholder="Search or enter code…" oninput="searchHTS(this.value)" autocomplete="off">
+                  <div class="hts-dropdown" id="htsDropdown"></div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Country of Origin</label>
+                <select id="originCountry">
+                  <option value="">Select…</option>
+                  <option value="CN">🇨🇳 China</option>
+                  <option value="VN">🇻🇳 Vietnam</option>
+                  <option value="IN">🇮🇳 India</option>
+                  <option value="BD">🇧🇩 Bangladesh</option>
+                  <option value="MX">🇲🇽 Mexico</option>
+                  <option value="CA">🇨🇦 Canada</option>
+                  <option value="KR">🇰🇷 South Korea</option>
+                  <option value="JP">🇯🇵 Japan</option>
+                  <option value="DE">🇩🇪 Germany</option>
+                  <option value="IT">🇮🇹 Italy</option>
+                  <option value="TR">🇹🇷 Turkey</option>
+                  <option value="PH">🇵🇭 Philippines</option>
+                  <option value="ID">🇮🇩 Indonesia</option>
+                  <option value="TH">🇹🇭 Thailand</option>
+                  <option value="MY">🇲🇾 Malaysia</option>
+                  <option value="PK">🇵🇰 Pakistan</option>
+                  <option value="US">🇺🇸 United States</option>
+                  <option value="GB">🇬🇧 United Kingdom</option>
+                  <option value="FR">🇫🇷 France</option>
+                  <option value="TW">🇹🇼 Taiwan</option>
+                  <option value="Other">🌐 Other</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-secondary" style="margin-top:0;margin-bottom:14px" onclick="classifyDescription()">
+              <span class="btn-text">AI Classify Description →</span>
+            </button>
+            <div id="classifyResult" style="display:none"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- STEP 2: VALUES -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-green">💵</div>
+          <div>
+            <div class="card-title">Step 2 — Shipment Values</div>
+            <div class="card-sub">US uses FOB valuation — only product cost is dutiable</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-row-3">
+            <div class="field">
+              <label>Product Value</label>
+              <input type="number" id="productValue" placeholder="0.00" min="0" step="0.01" oninput="checkDeMin()">
+            </div>
+            <div class="field">
+              <label>Currency</label>
+              <select id="currency" onchange="updateRate()">
+                <option value="USD" data-rate="1">USD</option>
+                <option value="EUR" data-rate="1.08">EUR</option>
+                <option value="GBP" data-rate="1.27">GBP</option>
+                <option value="CNY" data-rate="0.138">CNY</option>
+                <option value="JPY" data-rate="0.0067">JPY</option>
+                <option value="PHP" data-rate="0.0175">PHP</option>
+                <option value="AUD" data-rate="0.63">AUD</option>
+                <option value="CAD" data-rate="0.74">CAD</option>
+                <option value="KRW" data-rate="0.00074">KRW</option>
+                <option value="INR" data-rate="0.012">INR</option>
+                <option value="VND" data-rate="0.000040">VND</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>USD Rate</label>
+              <input type="number" id="exchangeRate" value="1.00" min="0.0001" step="0.0001">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Shipping Cost</label>
+              <input type="number" id="shippingCost" placeholder="0.00" min="0" step="0.01" value="0">
+            </div>
+            <div class="field">
+              <label>Insurance</label>
+              <input type="number" id="insuranceCost" placeholder="0.00" min="0" step="0.01" value="0">
+            </div>
+          </div>
+          <div id="deMinWarning" style="display:none" class="flag flag-green">
+            <span class="flag-icon">★</span>
+            <span>Value is below the <strong>$800 US de minimis</strong> threshold — no duties will apply.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: TRADE DETAILS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-amber">⚖️</div>
+          <div>
+            <div class="card-title">Step 3 — Trade Details</div>
+            <div class="card-sub">FTA programs and rate overrides</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>FTA / Special Program</label>
+              <select id="ftaSelect">
+                <option value="none">None — Standard Rate</option>
+                <option value="usmca">USMCA (Mexico / Canada) — 0%</option>
+                <option value="korus">KORUS (South Korea)</option>
+                <option value="singapore">US-Singapore FTA — 0%</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Duty Rate Override <span class="text-muted">(%)</span></label>
+              <input type="number" id="dutyOverride" placeholder="Leave blank for auto" min="0" max="300" step="0.1">
+            </div>
+          </div>
+          <div class="divider"></div>
+          <button class="btn btn-primary" id="calcBtn" onclick="calculate()">
+            <div class="spinner"></div>
+            <span class="btn-text">Calculate Landed Cost →</span>
+          </button>
+          <button class="btn btn-secondary" onclick="resetAll()">Clear All</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: RESULTS -->
+    <div class="sticky-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-blue">📊</div>
+          <div>
+            <div class="card-title">Landed Cost Breakdown</div>
+            <div class="card-sub">US Import · FOB Valuation · No Federal VAT</div>
+          </div>
+        </div>
+
+        <div id="resultPlaceholder" class="result-placeholder">
+          <div class="result-placeholder-icon">⟳</div>
+          <p>Complete the steps on the left and calculate to see your full duty breakdown.</p>
+        </div>
+
+        <div id="resultBody" class="card-body" style="display:none"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────
+let fileB64 = null, fileMime = null, currentFile = null;
+let selectedHTS = { code: "", rate: null, cn301: null, desc: "" };
+let htsSearchTimeout = null;
+
+// ─── API Key ──────────────────────────────────────────
+function saveApiKey() {
+  const k = document.getElementById("apiKeyInput").value.trim();
+  if (!k) return;
+  sessionStorage.setItem("gemini_key", k);
+  document.getElementById("apiBanner").style.background = "linear-gradient(135deg,#e8f9f0,#f0fff4)";
+  document.getElementById("apiBanner").style.borderColor = "rgba(26,122,74,0.2)";
+  document.querySelector(".api-banner-icon").textContent = "✅";
+  document.querySelector(".api-banner-text strong").textContent = "API Key Saved";
+  document.querySelector(".api-banner-text p").textContent = "AI invoice extraction is enabled.";
+  document.querySelector(".api-input-row").style.display = "none";
+}
+function getApiKey() { return sessionStorage.getItem("gemini_key") || ""; }
+
+// ─── Tab Switching ────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("tab-" + name).classList.add("active");
+}
+
+// ─── File Handling ────────────────────────────────────
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  currentFile = file;
+  document.getElementById("uploadZone").style.display = "none";
+  document.getElementById("filePill").style.display = "flex";
+  document.getElementById("filePillName").textContent = file.name;
+  document.getElementById("filePillSize").textContent = (file.size/1024).toFixed(1) + " KB";
+  document.getElementById("filePillIcon").textContent = file.type.includes("pdf") ? "📑" : "🖼️";
+  document.getElementById("extractBtn").disabled = false;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const parts = e.target.result.split(",");
+    fileB64 = parts[1];
+    fileMime = file.type || "image/jpeg";
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearFile() {
+  currentFile = fileB64 = fileMime = null;
+  document.getElementById("uploadZone").style.display = "block";
+  document.getElementById("filePill").style.display = "none";
+  document.getElementById("extractBtn").disabled = true;
+  document.getElementById("extractedPreview").style.display = "none";
+  document.getElementById("fileInput").value = "";
+}
+
+// ─── Invoice Extraction ───────────────────────────────
+async function extractInvoice() {
+  const key = getApiKey();
+  if (!key) { alert("Please enter your Gemini API key first."); return; }
+  if (!fileB64) { alert("Please select an invoice file."); return; }
+
+  const btn = document.getElementById("extractBtn");
+  btn.classList.add("btn-loading"); btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/classify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image_b64: fileB64, image_mime: fileMime, api_key: key })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Populate form fields
+    if (data.product_description) document.getElementById("productDesc").value = data.product_description;
+    if (data.total_value) document.getElementById("productValue").value = parseFloat(data.total_value) || "";
+    if (data.currency) document.getElementById("currency").value = data.currency;
+    if (data.shipping_cost) document.getElementById("shippingCost").value = parseFloat(data.shipping_cost) || 0;
+    if (data.insurance) document.getElementById("insuranceCost").value = parseFloat(data.insurance) || 0;
+    if (data.country_of_origin) document.getElementById("originCountry").value = data.country_of_origin;
+    if (data.hts_code) {
+      document.getElementById("htsInput").value = data.hts_code;
+      selectedHTS = { code: data.hts_code, desc: data.hts_description || "", rate: data.base_rate, cn301: data.cn_301_rate };
+    }
+    if (data.incoterms?.includes("FOB")) {}
+
+    // Show extracted preview
+    const preview = document.getElementById("extractedPreview");
+    preview.style.display = "block";
+    const conf = data.classification_confidence || "medium";
+    document.getElementById("extractedContent").innerHTML = `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;font-size:0.83rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-weight:500;color:var(--ink)">Extracted Fields</span>
+          <span class="confidence conf-${conf}">${conf} confidence</span>
+        </div>
+        ${renderExtractedRow("Product", data.product_description)}
+        ${renderExtractedRow("Value", data.currency + " " + (data.total_value || "—"))}
+        ${renderExtractedRow("Origin", data.country_of_origin || "—")}
+        ${renderExtractedRow("HTS Code", data.hts_code || "—")}
+        ${renderExtractedRow("Incoterms", data.incoterms || "—")}
+        ${data.classification_notes ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);color:var(--muted);font-size:0.75rem;">${data.classification_notes}</div>` : ""}
+      </div>`;
+
+    // Switch to manual tab to show filled fields
+    document.querySelectorAll(".tab")[1].click();
+    updateRate(); checkDeMin();
+  } catch (e) {
+    alert("Extraction failed: " + e.message);
+  }
+
+  btn.classList.remove("btn-loading"); btn.disabled = false;
+}
+
+function renderExtractedRow(k, v) {
+  return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">
+    <span style="color:var(--muted)">${k}</span>
+    <span style="font-weight:500;max-width:200px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v || "—"}</span>
+  </div>`;
+}
+
+// ─── HTS Search ───────────────────────────────────────
+async function searchHTS(val) {
+  const dd = document.getElementById("htsDropdown");
+  if (!val || val.length < 2) { dd.classList.remove("show"); return; }
+  clearTimeout(htsSearchTimeout);
+  htsSearchTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(`/api/hts-search?q=${encodeURIComponent(val)}`);
+      const results = await res.json();
+      if (!results.length) { dd.classList.remove("show"); return; }
+      dd.innerHTML = results.map(r => `
+        <div class="hts-option" onclick="selectHTS('${r.code}','${r.desc.replace(/'/g,"\\'")}',${r.rate},${r.cn_301})">
+          <div class="hts-code">${r.code}</div>
+          <div class="hts-desc">${r.desc}</div>
+          <div class="hts-rate">Base rate: ${r.rate}% ${r.cn_301 > 0 ? `· CN 301: +${r.cn_301}%` : ""}</div>
+        </div>`).join("");
+      dd.classList.add("show");
+    } catch (e) {}
+  }, 200);
+}
+
+function selectHTS(code, desc, rate, cn301) {
+  selectedHTS = { code, desc, rate, cn301 };
+  document.getElementById("htsInput").value = code;
+  document.getElementById("htsDropdown").classList.remove("show");
+}
+
+document.addEventListener("click", e => {
+  if (!e.target.closest(".hts-search-wrap")) {
+    document.getElementById("htsDropdown").classList.remove("show");
+  }
+});
+
+// ─── Classify Description ─────────────────────────────
+async function classifyDescription() {
+  const desc = document.getElementById("productDesc").value.trim();
+  const key = getApiKey();
+  const resultDiv = document.getElementById("classifyResult");
+  if (!desc) { alert("Enter a product description first."); return; }
+
+  resultDiv.style.display = "none";
+  const btn = event.target.closest(".btn");
+  btn.classList.add("btn-loading");
+
+  try {
+    const body = { description: desc };
+    if (key) body.api_key = key;
+    const res = await fetch("/api/classify", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    selectedHTS = { code: data.hts_code || "", desc: data.hts_description || "", rate: data.base_rate, cn301: data.cn_301_rate };
+    if (data.hts_code) document.getElementById("htsInput").value = data.hts_code;
+
+    const conf = data.classification_confidence || "medium";
+    resultDiv.style.display = "block";
+    resultDiv.innerHTML = `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;font-size:0.83rem;margin-top:-6px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-family:SF Mono,Menlo,monospace;font-size:0.9rem;font-weight:600;color:var(--blue)">${data.hts_code}</span>
+          <span class="confidence conf-${conf}">${conf}</span>
+        </div>
+        <div style="color:var(--ink);margin-bottom:6px">${data.hts_description || ""}</div>
+        ${data.base_rate !== undefined ? `<div style="color:var(--muted);font-size:0.75rem">Base rate: ${data.base_rate}%${data.cn_301_rate > 0 ? ` · China 301 surcharge: +${data.cn_301_rate}%` : ""}</div>` : ""}
+        ${data.classification_notes ? `<div style="color:var(--muted);font-size:0.75rem;margin-top:4px">${data.classification_notes}</div>` : ""}
+      </div>`;
+  } catch (e) {
+    alert("Classification failed: " + e.message + (key ? "" : "\nTip: Add a Gemini API key for better results."));
+  }
+  btn.classList.remove("btn-loading");
+}
+
+// ─── Currency ─────────────────────────────────────────
+function updateRate() {
+  const sel = document.getElementById("currency");
+  const opt = sel.options[sel.selectedIndex];
+  document.getElementById("exchangeRate").value = opt.dataset.rate || "1.00";
+  checkDeMin();
+}
+
+function checkDeMin() {
+  const val = parseFloat(document.getElementById("productValue").value) || 0;
+  const rate = parseFloat(document.getElementById("exchangeRate").value) || 1;
+  const valUSD = val * rate;
+  document.getElementById("deMinWarning").style.display = valUSD > 0 && valUSD <= 800 ? "flex" : "none";
+}
+
+// ─── Calculate ────────────────────────────────────────
+async function calculate() {
+  const productVal = parseFloat(document.getElementById("productValue").value) || 0;
+  if (!productVal) { alert("Please enter the product value."); return; }
+
+  const htsCode = selectedHTS.code || document.getElementById("htsInput").value.trim();
+
+  const btn = document.getElementById("calcBtn");
+  btn.classList.add("btn-loading");
+
+  try {
+    const payload = {
+      product_value: productVal,
+      shipping: parseFloat(document.getElementById("shippingCost").value) || 0,
+      insurance: parseFloat(document.getElementById("insuranceCost").value) || 0,
+      hts_code: htsCode,
+      origin_country: document.getElementById("originCountry").value,
+      fta: document.getElementById("ftaSelect").value,
+      currency: document.getElementById("currency").value,
+      exchange_rate: parseFloat(document.getElementById("exchangeRate").value) || 1,
+    };
+    const override = document.getElementById("dutyOverride").value;
+    if (override) payload.duty_rate_override = parseFloat(override);
+
+    const res = await fetch("/api/calculate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    renderResults(data);
+  } catch (e) {
+    alert("Calculation error: " + e.message);
+  }
+  btn.classList.remove("btn-loading");
+}
+
+// ─── Render Results ───────────────────────────────────
+function renderResults(d) {
+  document.getElementById("resultPlaceholder").style.display = "none";
+  const body = document.getElementById("resultBody");
+  body.style.display = "block";
+
+  const fmt = n => "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const pct = n => n.toFixed(2) + "%";
+
+  let html = `<div class="result-body">`;
+
+  // Flags
+  if (d.de_minimis) {
+    html += `<div class="flag flag-green"><span class="flag-icon">★</span><span>${d.message}</span></div>`;
+    html += `<div class="divider"></div>
+      <div class="breakdown">
+        <div class="breakdown-row"><span class="label">Product Value</span><span class="value">${fmt(d.total_landed_usd - (d.shipping_usd||0) - (d.insurance_usd||0))}</span></div>
+        <div class="breakdown-row"><span class="label">Duties &amp; Taxes</span><span class="value">$0.00</span></div>
+        <div class="breakdown-total"><span class="label">Total Landed Cost</span><span class="value">${fmt(d.total_landed_usd)}</span></div>
+      </div>`;
+    html += `</div>`;
+    body.innerHTML = html;
+    return;
+  }
+
+  // Compliance flags
+  if (d.china_301_surcharge > 0) {
+    html += `<div class="flag flag-amber"><span class="flag-icon">⚠</span><span>China origin detected — <strong>Section 301 surcharge of +${d.china_301_surcharge}%</strong> applied on top of the base duty rate.</span></div>`;
+  }
+  if (d.fta_applied) {
+    html += `<div class="flag flag-green"><span class="flag-icon">✓</span><span><strong>${d.fta_name}</strong> preference applied — duty rate reduced accordingly.</span></div>`;
+  }
+  if (d.effective_duty_rate > 25) {
+    html += `<div class="flag flag-amber"><span class="flag-icon">!</span><span>High duty rate (${pct(d.effective_duty_rate)}). Verify the HTS classification — a different subheading may qualify for a lower rate.</span></div>`;
+  }
+  if (!d.db_match && d.hts_code) {
+    html += `<div class="flag flag-amber"><span class="flag-icon">i</span><span>HTS code <strong>${d.hts_code}</strong> is not in our verified database. Rate is estimated — consult a broker for a formal ruling.</span></div>`;
+  }
+
+  // HTS Chip
+  if (d.hts_code) {
+    html += `<div class="hts-chip" style="margin-top:14px">
+      <div class="hts-chip-code">${d.hts_code}</div>
+      <div>
+        <div class="hts-chip-desc">${d.hts_desc || "Unverified code"}</div>
+        <div class="hts-chip-rate">Base: ${pct(d.base_duty_rate)}${d.china_301_surcharge > 0 ? ` + ${pct(d.china_301_surcharge)} Section 301` : ""} = <strong>${pct(d.effective_duty_rate)}</strong> effective · ${d.valuation_method} basis</div>
+      </div>
+    </div>`;
+  }
+
+  // Breakdown
+  const curr = d.currency !== "USD" ? ` (${d.currency})` : "";
+  html += `<div class="breakdown">
+    <div class="breakdown-row"><span class="label">Product Value${curr}</span><span class="value">${fmt(d.product_value_usd)}</span></div>
+    ${d.shipping_usd > 0 ? `<div class="breakdown-row"><span class="label">Shipping</span><span class="value">${fmt(d.shipping_usd)}</span></div>` : ""}
+    ${d.insurance_usd > 0 ? `<div class="breakdown-row"><span class="label">Insurance</span><span class="value">${fmt(d.insurance_usd)}</span></div>` : ""}
+    <div class="breakdown-row subtotal"><span class="label">FOB Taxable Base</span><span class="value">${fmt(d.taxable_base_usd)}</span></div>
+    <div class="breakdown-row"><span class="label">Customs Duty (${pct(d.effective_duty_rate)})</span><span class="value">${fmt(d.duty_amount)}</span></div>
+    <div class="breakdown-row subtotal"><span class="label">Total Duties &amp; Taxes</span><span class="value">${fmt(d.total_duties)}</span></div>
+    <div class="breakdown-total"><span class="label">Total Landed Cost</span><span class="value">${fmt(d.total_landed_usd)}</span></div>
+  </div>`;
+
+  // Notes
+  html += `<p class="text-muted mt-12" style="padding:0 2px">${d.notes}</p>`;
+  html += `<button class="btn btn-secondary" style="margin-top:14px" onclick="copyResults()">Copy Summary</button>`;
+  html += `</div>`;
+
+  body.innerHTML = html;
+  window._lastResult = d;
+}
+
+// ─── Copy Results ─────────────────────────────────────
+function copyResults() {
+  const d = window._lastResult;
+  if (!d) return;
+  const fmt = n => "$" + Number(n).toFixed(2);
+  const text = `DUTYCALC — LANDED COST SUMMARY
+HTS Code: ${d.hts_code} — ${d.hts_desc}
+Effective Duty Rate: ${d.effective_duty_rate}%
+Product Value: ${fmt(d.product_value_usd)}
+Customs Duty: ${fmt(d.duty_amount)}
+Total Duties: ${fmt(d.total_duties)}
+────────────────────────
+Total Landed Cost: ${fmt(d.total_landed_usd)}
+(FOB valuation · No US federal VAT)`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = "Copied ✓";
+    setTimeout(() => { btn.textContent = "Copy Summary"; }, 2000);
+  });
+}
+
+// ─── Reset ────────────────────────────────────────────
+function resetAll() {
+  ["productDesc","htsInput","productValue","shippingCost","insuranceCost","dutyOverride"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = id === "shippingCost" || id === "insuranceCost" ? "0" : "";
+  });
+  document.getElementById("originCountry").value = "";
+  document.getElementById("ftaSelect").value = "none";
+  document.getElementById("currency").value = "USD";
+  document.getElementById("exchangeRate").value = "1.00";
+  selectedHTS = { code:"", rate:null, cn301:null, desc:"" };
+  clearFile();
+  document.getElementById("resultPlaceholder").style.display = "block";
+  document.getElementById("resultBody").style.display = "none";
+  document.getElementById("deMinWarning").style.display = "none";
+  document.getElementById("classifyResult").style.display = "none";
+}
+
+// ─── Drag & Drop ──────────────────────────────────────
+const zone = document.getElementById("uploadZone");
+["dragenter","dragover"].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.add("drag-over"); }));
+["dragleave","drop"].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.remove("drag-over"); }));
+zone.addEventListener("drop", ev => {
+  const f = ev.dataTransfer.files[0];
+  if (f) {
+    const dt = new DataTransfer(); dt.items.add(f);
+    document.getElementById("fileInput").files = dt.files;
+    handleFile(document.getElementById("fileInput"));
+  }
+});
+</script>
+</body>
+</html>

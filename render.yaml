@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: dutycalc
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false

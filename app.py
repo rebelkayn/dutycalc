@@ -1,0 +1,376 @@
+import os
+import json
+import re
+import base64
+import logging
+from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask_cors import CORS
+import google.generativeai as genai
+
+app = Flask(__name__)
+CORS(app)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# ── Config ────────────────────────────────────────────────
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+HTS_PDF_PATH = os.path.join(os.path.dirname(__file__), "data", "finalCopy_2026HTSRev4.pdf")
+
+# ── HTS Knowledge Base (Top ~120 SMB codes, US importer) ──
+# Source: USITC HTS 2026 Rev4 + Census frequency data
+# Format: hts_code -> {desc, rate, cn_301, unit, notes}
+HTS_DB = {
+    # Chapter 61 - Knit apparel
+    "6109.10.00": {"desc": "T-shirts, singlets, cotton, knitted", "rate": 16.5, "cn_301": 7.5, "unit": "doz", "chapter": 61},
+    "6109.90.10": {"desc": "T-shirts, man-made fiber, knitted", "rate": 32.0, "cn_301": 7.5, "unit": "doz", "chapter": 61},
+    "6110.20.20": {"desc": "Sweaters/pullovers, cotton, knitted", "rate": 17.1, "cn_301": 7.5, "unit": "doz", "chapter": 61},
+    "6110.30.30": {"desc": "Sweaters/pullovers, man-made fiber", "rate": 32.0, "cn_301": 7.5, "unit": "doz", "chapter": 61},
+    "6104.62.20": {"desc": "Women's trousers/pants, cotton, knitted", "rate": 14.9, "cn_301": 7.5, "unit": "doz", "chapter": 61},
+    "6103.42.10": {"desc": "Men's trousers, cotton, knitted", "rate": 14.9, "cn_301": 7.5, "unit": "doz", "chapter": 61},
+    "6115.10.00": {"desc": "Compression hosiery/socks", "rate": 14.6, "cn_301": 7.5, "unit": "doz pr", "chapter": 61},
+    "6116.10.08": {"desc": "Gloves, mittens, knitted, coated", "rate": 0.0, "cn_301": 7.5, "unit": "doz pr", "chapter": 61},
+
+    # Chapter 62 - Woven apparel
+    "6203.42.40": {"desc": "Men's trousers/jeans, cotton, woven", "rate": 17.0, "cn_301": 7.5, "unit": "doz", "chapter": 62},
+    "6204.62.40": {"desc": "Women's trousers/jeans, cotton, woven", "rate": 17.0, "cn_301": 7.5, "unit": "doz", "chapter": 62},
+    "6205.20.20": {"desc": "Men's shirts, cotton, woven", "rate": 19.7, "cn_301": 7.5, "unit": "doz", "chapter": 62},
+    "6206.30.30": {"desc": "Women's blouses, cotton, woven", "rate": 15.9, "cn_301": 7.5, "unit": "doz", "chapter": 62},
+    "6211.42.00": {"desc": "Track suits, cotton, woven", "rate": 10.0, "cn_301": 7.5, "unit": "doz", "chapter": 62},
+
+    # Chapter 64 - Footwear
+    "6403.99.60": {"desc": "Footwear, leather upper, rubber/plastic sole", "rate": 10.0, "cn_301": 7.5, "unit": "prs", "chapter": 64},
+    "6404.11.20": {"desc": "Athletic footwear, textile upper", "rate": 20.0, "cn_301": 7.5, "unit": "prs", "chapter": 64},
+    "6404.19.15": {"desc": "Casual footwear, textile upper, rubber sole", "rate": 37.5, "cn_301": 7.5, "unit": "prs", "chapter": 64},
+    "6402.99.18": {"desc": "Footwear, rubber/plastic upper and sole", "rate": 6.0, "cn_301": 7.5, "unit": "prs", "chapter": 64},
+
+    # Chapter 84-85 - Electronics
+    "8517.13.00": {"desc": "Smartphones, cellular phones", "rate": 0.0, "cn_301": 0.0, "unit": "no.", "chapter": 85},
+    "8471.30.01": {"desc": "Laptops, portable computers <10kg", "rate": 0.0, "cn_301": 0.0, "unit": "no.", "chapter": 84},
+    "8473.30.11": {"desc": "Parts/accessories for computers", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 84},
+    "8518.30.20": {"desc": "Headphones, earphones (wired)", "rate": 4.9, "cn_301": 7.5, "unit": "no.", "chapter": 85},
+    "8518.30.10": {"desc": "Headphones, earbuds, wireless (AirPods-type)", "rate": 0.0, "cn_301": 7.5, "unit": "no.", "chapter": 85},
+    "8525.60.20": {"desc": "Webcams, digital cameras for video", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 85},
+    "8528.72.64": {"desc": "TV monitors/displays, flat panel", "rate": 5.0, "cn_301": 25.0, "unit": "no.", "chapter": 85},
+    "8544.42.90": {"desc": "USB cables, charging cables", "rate": 2.6, "cn_301": 25.0, "unit": "no.", "chapter": 85},
+    "8507.60.00": {"desc": "Lithium-ion batteries", "rate": 3.4, "cn_301": 7.5, "unit": "no.", "chapter": 85},
+    "8513.10.20": {"desc": "Flashlights, portable electric lamps", "rate": 3.5, "cn_301": 25.0, "unit": "no.", "chapter": 85},
+    "8443.99.20": {"desc": "Printer parts and accessories", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 84},
+
+    # Chapter 94 - Furniture
+    "9401.61.40": {"desc": "Upholstered seats with wooden frame", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 94},
+    "9401.71.00": {"desc": "Seats with metal frame (chairs)", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 94},
+    "9403.20.00": {"desc": "Metal furniture (desks, shelving)", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 94},
+    "9403.60.80": {"desc": "Wooden furniture (tables, desks)", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 94},
+    "9403.70.40": {"desc": "Plastic furniture", "rate": 5.3, "cn_301": 25.0, "unit": "no.", "chapter": 94},
+    "9404.29.90": {"desc": "Mattresses, foam/spring", "rate": 3.0, "cn_301": 25.0, "unit": "no.", "chapter": 94},
+
+    # Chapter 95 - Toys & games
+    "9503.00.00": {"desc": "Toys, games, puzzles, scale models", "rate": 0.0, "cn_301": 7.5, "unit": "no.", "chapter": 95},
+    "9504.50.00": {"desc": "Video game consoles and machines", "rate": 0.0, "cn_301": 7.5, "unit": "no.", "chapter": 95},
+    "9506.91.00": {"desc": "Sports/fitness equipment (weights, etc.)", "rate": 4.6, "cn_301": 7.5, "unit": "no.", "chapter": 95},
+    "9506.62.40": {"desc": "Inflatable balls (basketballs, soccer)", "rate": 4.9, "cn_301": 7.5, "unit": "no.", "chapter": 95},
+
+    # Chapter 42 - Bags & leather goods
+    "4202.11.00": {"desc": "Suitcases, briefcases, leather outer surface", "rate": 20.0, "cn_301": 7.5, "unit": "no.", "chapter": 42},
+    "4202.12.20": {"desc": "Suitcases, hardshell, plastic/textile", "rate": 20.0, "cn_301": 7.5, "unit": "no.", "chapter": 42},
+    "4202.22.15": {"desc": "Handbags, purses, leather", "rate": 9.0, "cn_301": 7.5, "unit": "no.", "chapter": 42},
+    "4202.92.08": {"desc": "Backpacks, daypacks, textile", "rate": 17.6, "cn_301": 7.5, "unit": "no.", "chapter": 42},
+    "4202.32.10": {"desc": "Wallets, card holders, leather", "rate": 8.0, "cn_301": 7.5, "unit": "no.", "chapter": 42},
+
+    # Chapter 33 - Cosmetics
+    "3304.10.00": {"desc": "Lip makeup preparations (lipstick)", "rate": 5.1, "cn_301": 0.0, "unit": "kg", "chapter": 33},
+    "3304.20.00": {"desc": "Eye makeup (mascara, eyeshadow)", "rate": 5.1, "cn_301": 0.0, "unit": "kg", "chapter": 33},
+    "3304.99.10": {"desc": "Face powder, blush, foundation", "rate": 5.1, "cn_301": 0.0, "unit": "kg", "chapter": 33},
+    "3305.10.00": {"desc": "Shampoos, hair wash", "rate": 0.9, "cn_301": 0.0, "unit": "kg", "chapter": 33},
+    "3307.10.00": {"desc": "Pre/after shave products", "rate": 0.0, "cn_301": 0.0, "unit": "kg", "chapter": 33},
+
+    # Chapter 39 - Plastics
+    "3926.90.99": {"desc": "Plastic articles (cases, containers, misc)", "rate": 5.3, "cn_301": 25.0, "unit": "kg", "chapter": 39},
+    "3923.30.00": {"desc": "Carboys, bottles, flasks (plastic)", "rate": 3.0, "cn_301": 25.0, "unit": "kg", "chapter": 39},
+    "3924.10.40": {"desc": "Plastic tableware, kitchenware", "rate": 3.4, "cn_301": 25.0, "unit": "no.", "chapter": 39},
+    "3926.20.10": {"desc": "Plastic apparel/clothing accessories", "rate": 5.0, "cn_301": 25.0, "unit": "no.", "chapter": 39},
+
+    # Chapter 63 - Home textiles
+    "6302.21.90": {"desc": "Bed linens, cotton, printed", "rate": 6.2, "cn_301": 7.5, "unit": "no.", "chapter": 63},
+    "6302.60.00": {"desc": "Toilet/kitchen linen, terry cloth (towels)", "rate": 9.1, "cn_301": 7.5, "unit": "no.", "chapter": 63},
+    "6303.91.00": {"desc": "Curtains, drapes, cotton", "rate": 11.4, "cn_301": 7.5, "unit": "no.", "chapter": 63},
+    "6304.91.00": {"desc": "Pillow covers, cushion covers, cotton", "rate": 6.4, "cn_301": 7.5, "unit": "no.", "chapter": 63},
+
+    # Chapter 73 - Steel/iron articles
+    "7326.90.86": {"desc": "Steel articles (brackets, hooks, misc)", "rate": 2.9, "cn_301": 25.0, "unit": "kg", "chapter": 73},
+    "7323.93.00": {"desc": "Kitchen/household stainless steel items", "rate": 2.0, "cn_301": 25.0, "unit": "no.", "chapter": 73},
+    "7318.15.20": {"desc": "Screws, bolts, hex bolts, steel", "rate": 8.5, "cn_301": 25.0, "unit": "kg", "chapter": 73},
+
+    # Chapter 90 - Instruments/optics
+    "9001.50.00": {"desc": "Spectacle lenses (eyeglasses)", "rate": 2.0, "cn_301": 0.0, "unit": "no.", "chapter": 90},
+    "9004.10.00": {"desc": "Sunglasses", "rate": 2.5, "cn_301": 7.5, "unit": "no.", "chapter": 90},
+    "9102.11.25": {"desc": "Wristwatches, electronic display", "rate": 5.1, "cn_301": 7.5, "unit": "no.", "chapter": 91},
+    "9102.91.40": {"desc": "Wristwatches, mechanical", "rate": 5.1, "cn_301": 7.5, "unit": "no.", "chapter": 91},
+
+    # Chapter 48 - Paper/packaging
+    "4820.10.20": {"desc": "Notebooks, notepads, planners", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 48},
+    "4901.99.00": {"desc": "Books, printed (non-educational)", "rate": 0.0, "cn_301": 0.0, "unit": "no.", "chapter": 49},
+
+    # Chapter 69 - Ceramics
+    "6912.00.44": {"desc": "Ceramic mugs, cups", "rate": 6.0, "cn_301": 25.0, "unit": "no.", "chapter": 69},
+    "6911.10.37": {"desc": "Porcelain/china tableware (plates, bowls)", "rate": 26.0, "cn_301": 7.5, "unit": "no.", "chapter": 69},
+
+    # Chapter 82/83 - Tools/hardware
+    "8211.92.60": {"desc": "Kitchen knives, chef knives", "rate": 0.4, "cn_301": 25.0, "unit": "no.", "chapter": 82},
+    "8302.41.60": {"desc": "Door/window hardware, pulls, handles", "rate": 3.5, "cn_301": 25.0, "unit": "no.", "chapter": 83},
+
+    # Chapter 85 more
+    "8523.51.00": {"desc": "Solid-state storage (USB drives, SD cards)", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 85},
+    "8536.90.80": {"desc": "Electrical connectors, switches", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 85},
+    "8543.70.96": {"desc": "Smart home devices (smart plugs, etc.)", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 85},
+
+    # Chapter 9619 - Personal care
+    "9619.00.11": {"desc": "Diapers, baby wipes", "rate": 0.0, "cn_301": 7.5, "unit": "no.", "chapter": 96},
+    "9616.10.00": {"desc": "Perfume atomizers, spray bottles", "rate": 0.0, "cn_301": 25.0, "unit": "no.", "chapter": 96},
+
+    # Pet products
+    "4201.00.30": {"desc": "Dog leashes, collars, pet accessories (leather)", "rate": 2.4, "cn_301": 7.5, "unit": "no.", "chapter": 42},
+    "6307.90.98": {"desc": "Pet beds, stuffed pet toys, textile", "rate": 7.0, "cn_301": 7.5, "unit": "no.", "chapter": 63},
+}
+
+# ── FTA Rates (US) ──────────────────────────────────────
+FTA_RATES = {
+    "usmca": {"name": "USMCA (Mexico/Canada)", "countries": ["MX", "CA"], "rate_modifier": 0.0, "override": True},
+    "korus":  {"name": "KORUS (South Korea)",  "countries": ["KR"], "rate_modifier": -0.5},
+    "singapore": {"name": "US-Singapore FTA",  "countries": ["SG"], "rate_modifier": 0.0, "override": True},
+}
+
+DE_MINIMIS_USD = 800.0  # US de minimis threshold
+
+# ── Routes ────────────────────────────────────────────────
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/api/classify", methods=["POST"])
+def classify():
+    """Use Gemini to classify a product description → HTS code + extract invoice data."""
+    data = request.json or {}
+    description = data.get("description", "")
+    image_b64 = data.get("image_b64")  # optional invoice image
+    image_mime = data.get("image_mime", "image/jpeg")
+    api_key = data.get("api_key") or GEMINI_API_KEY
+
+    if not api_key:
+        return jsonify({"error": "No Gemini API key provided"}), 400
+    if not description and not image_b64:
+        return jsonify({"error": "Provide a description or invoice image"}), 400
+
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-2.0-flash")
+
+        hts_list = "\n".join([f"{k}: {v['desc']}" for k, v in HTS_DB.items()])
+
+        if image_b64:
+            prompt = f"""You are a US customs classification expert. Analyze this commercial invoice image.
+
+Extract ALL of these fields and return ONLY valid JSON (no markdown, no extra text):
+{{
+  "product_description": "most detailed product description found on invoice",
+  "quantity": "total quantity",
+  "unit_value": "value per unit as number",
+  "total_value": "total invoice value as number",
+  "currency": "3-letter currency code",
+  "country_of_origin": "2-letter ISO country code of manufacturer/seller",
+  "shipping_cost": "shipping cost as number or 0",
+  "insurance": "insurance cost as number or 0",
+  "incoterms": "e.g. FOB, CIF, EXW or empty string",
+  "seller_name": "seller/exporter company name",
+  "hts_code": "best matching HTS code from this list or your knowledge",
+  "hts_description": "description of matched code",
+  "classification_confidence": "high/medium/low",
+  "classification_notes": "brief reason for classification"
+}}
+
+Available HTS codes for reference:
+{hts_list}
+
+If field not found, use empty string or 0. Return ONLY the JSON object."""
+
+            image_part = {"mime_type": image_mime, "data": image_b64}
+            response = model.generate_content([prompt, image_part])
+        else:
+            prompt = f"""You are a US customs classification expert.
+
+Classify this product and return ONLY valid JSON (no markdown, no extra text):
+{{
+  "hts_code": "best matching 10-digit HTS code",
+  "hts_description": "official description of that code",
+  "classification_confidence": "high/medium/low",
+  "classification_notes": "brief reason for this classification",
+  "alternative_codes": ["code1", "code2"]
+}}
+
+Product: {description}
+
+Available HTS codes for reference:
+{hts_list}
+
+If unsure, provide the closest match and note it. Return ONLY the JSON object."""
+            response = model.generate_content(prompt)
+
+        raw = response.text.strip()
+        # Strip markdown fences if present
+        raw = re.sub(r"```(?:json)?", "", raw).strip().rstrip("`").strip()
+        result = json.loads(raw)
+
+        # Enrich with our local DB if code matched
+        hts_code = result.get("hts_code", "")
+        if hts_code in HTS_DB:
+            result["db_match"] = True
+            result["base_rate"] = HTS_DB[hts_code]["rate"]
+            result["cn_301_rate"] = HTS_DB[hts_code]["cn_301"]
+        else:
+            result["db_match"] = False
+
+        return jsonify(result)
+
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parse error: {e}, raw: {raw}")
+        return jsonify({"error": "Could not parse AI response", "raw": raw}), 500
+    except Exception as e:
+        logger.error(f"Classification error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/calculate", methods=["POST"])
+def calculate():
+    """Calculate landed cost given all parameters."""
+    d = request.json or {}
+
+    try:
+        product_value = float(d.get("product_value", 0))
+        shipping = float(d.get("shipping", 0))
+        insurance = float(d.get("insurance", 0))
+        hts_code = d.get("hts_code", "")
+        duty_rate_override = d.get("duty_rate_override")  # optional manual override
+        origin_country = d.get("origin_country", "").upper()
+        fta = d.get("fta", "none")
+        currency = d.get("currency", "USD")
+        exchange_rate = float(d.get("exchange_rate", 1.0))  # to USD
+
+        if product_value <= 0:
+            return jsonify({"error": "Product value must be greater than 0"}), 400
+
+        # Convert to USD
+        value_usd = product_value * exchange_rate
+        shipping_usd = shipping * exchange_rate
+        insurance_usd = insurance * exchange_rate
+
+        # De minimis check
+        fob_value_usd = value_usd
+        if fob_value_usd <= DE_MINIMIS_USD:
+            return jsonify({
+                "de_minimis": True,
+                "message": f"Shipment value (${fob_value_usd:,.2f}) is at or below the US de minimis threshold of $800. No duties apply.",
+                "total_landed_usd": value_usd + shipping_usd + insurance_usd,
+                "duty_amount": 0,
+                "total_duties": 0,
+                "effective_rate": 0,
+            })
+
+        # US uses FOB for duty calculation
+        taxable_base = value_usd  # FOB = product value only
+
+        # Get duty rate
+        db_entry = HTS_DB.get(hts_code, {})
+        base_rate = db_entry.get("rate", 12.0) if db_entry else 12.0
+        cn_301 = db_entry.get("cn_301", 0) if db_entry else 0
+
+        if duty_rate_override is not None:
+            base_rate = float(duty_rate_override)
+            cn_301 = 0  # manual override clears surcharge
+
+        # FTA logic
+        fta_applied = False
+        fta_name = ""
+        if fta in FTA_RATES:
+            fta_info = FTA_RATES[fta]
+            if origin_country in fta_info["countries"]:
+                if fta_info.get("override"):
+                    base_rate = 0.0
+                    cn_301 = 0.0
+                    fta_applied = True
+                    fta_name = fta_info["name"]
+                else:
+                    base_rate = base_rate * fta_info["rate_modifier"]
+                    fta_applied = True
+                    fta_name = fta_info["name"]
+
+        # China 301 surcharge
+        china_surcharge = 0.0
+        if origin_country == "CN" and not fta_applied and cn_301 > 0:
+            china_surcharge = cn_301
+
+        effective_duty_rate = base_rate + china_surcharge
+
+        # Calculation
+        duty_amount = taxable_base * (effective_duty_rate / 100)
+        # No VAT in the US (state sales tax handled at point of sale, not customs)
+        total_duties = duty_amount
+        total_landed = value_usd + shipping_usd + insurance_usd + total_duties
+
+        return jsonify({
+            "de_minimis": False,
+            "currency": currency,
+            "exchange_rate": exchange_rate,
+            "product_value_usd": round(value_usd, 2),
+            "shipping_usd": round(shipping_usd, 2),
+            "insurance_usd": round(insurance_usd, 2),
+            "taxable_base_usd": round(taxable_base, 2),
+            "valuation_method": "FOB",
+            "base_duty_rate": round(base_rate, 2),
+            "china_301_surcharge": round(china_surcharge, 2),
+            "effective_duty_rate": round(effective_duty_rate, 2),
+            "duty_amount": round(duty_amount, 2),
+            "total_duties": round(total_duties, 2),
+            "total_landed_usd": round(total_landed, 2),
+            "fta_applied": fta_applied,
+            "fta_name": fta_name,
+            "hts_code": hts_code,
+            "hts_desc": db_entry.get("desc", ""),
+            "db_match": bool(db_entry),
+            "de_minimis_threshold": DE_MINIMIS_USD,
+            "notes": "US customs uses FOB valuation. No federal VAT; state sales tax not included.",
+        })
+
+    except Exception as e:
+        logger.error(f"Calculation error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/hts-search", methods=["GET"])
+def hts_search():
+    """Simple keyword search against our local HTS DB."""
+    query = request.args.get("q", "").lower()
+    if not query or len(query) < 2:
+        return jsonify([])
+    results = []
+    for code, info in HTS_DB.items():
+        if query in info["desc"].lower() or query in code:
+            results.append({
+                "code": code,
+                "desc": info["desc"],
+                "rate": info["rate"],
+                "cn_301": info["cn_301"],
+                "chapter": info["chapter"],
+            })
+        if len(results) >= 8:
+            break
+    return jsonify(results)
+
+
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok", "hts_codes_loaded": len(HTS_DB)})
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
