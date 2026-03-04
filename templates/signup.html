@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Create Account — iDuties.ai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #F5F5F0; --surface: #FFFFFF; --surface2: #F0F0EB;
+  --border: rgba(0,0,0,0.06); --border2: rgba(0,0,0,0.10);
+  --ink: #1A1A1A; --ink2: #3D3D3D; --muted: #7A7A7A; --dim: #ACACAC;
+  --blue: #0055FF; --blue-hover: #003FCC; --blue-soft: rgba(0,85,255,0.06);
+  --red: #D62828; --red-bg: rgba(214,40,40,0.05);
+  --green: #0F7B3F; --green-bg: rgba(15,123,63,0.06);
+  --radius: 14px; --radius-sm: 10px; --radius-xs: 7px;
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font); background: var(--bg); color: var(--ink);
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column;
+}
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245,245,240,0.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 56px;
+  display: flex; align-items: center; gap: 16px;
+}
+.nav-brand {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0;
+}
+.nav-brand svg { color: var(--blue); }
+.nav-dot { color: var(--blue); }
+.auth-wrap {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.auth-card {
+  width: 100%; max-width: 400px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 36px 32px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+}
+.auth-h {
+  font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em;
+  margin-bottom: 6px; text-align: center;
+}
+.auth-sub {
+  font-size: 0.88rem; color: var(--muted); text-align: center;
+  margin-bottom: 28px; line-height: 1.5;
+}
+.auth-error {
+  padding: 10px 14px; background: var(--red-bg); border: 1px solid rgba(214,40,40,0.1);
+  border-radius: var(--radius-xs); color: var(--red); font-size: 0.82rem;
+  margin-bottom: 16px; line-height: 1.45;
+}
+.auth-field { margin-bottom: 16px; }
+.auth-field label {
+  display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted);
+  margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.auth-field input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm); font-size: 0.92rem; font-family: var(--font);
+  color: var(--ink); background: var(--bg); outline: none; transition: all 0.15s;
+}
+.auth-field input:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft);
+  background: var(--surface);
+}
+.auth-hint { font-size: 0.73rem; color: var(--dim); margin-top: 4px; }
+.auth-btn {
+  width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm);
+  background: var(--blue); color: white; font-family: var(--font);
+  font-size: 0.92rem; font-weight: 600; cursor: pointer;
+  transition: background 0.15s; margin-top: 4px; letter-spacing: -0.01em;
+}
+.auth-btn:hover { background: var(--blue-hover); }
+.auth-footer {
+  text-align: center; margin-top: 20px; font-size: 0.84rem; color: var(--muted);
+}
+.auth-footer a { color: var(--blue); text-decoration: none; font-weight: 600; }
+.auth-footer a:hover { text-decoration: underline; }
+.auth-divider {
+  display: flex; align-items: center; gap: 12px; margin: 20px 0;
+  font-size: 0.72rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.05em;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border2);
+}
+.auth-skip {
+  display: block; text-align: center; color: var(--muted); font-size: 0.82rem;
+  text-decoration: none; transition: color 0.15s;
+}
+.auth-skip:hover { color: var(--ink); }
+.value-props { margin-bottom: 24px; }
+.vp-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 6px 0;
+  font-size: 0.82rem; color: var(--ink2); line-height: 1.4;
+}
+.vp-check { color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+@media (max-width: 500px) {
+  .auth-card { padding: 28px 22px; }
+  .auth-h { font-size: 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-brand" href="/">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    <span>iDuties<span class="nav-dot">.ai</span></span>
+  </a>
+</nav>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1 class="auth-h">Create your account</h1>
+    <p class="auth-sub">Free — save calculations, track IEEPA refunds</p>
+
+    <div class="value-props">
+      <div class="vp-item"><span class="vp-check">✓</span> Save and revisit duty calculations</div>
+      <div class="vp-item"><span class="vp-check">✓</span> Track IEEPA refund deadlines and filing status</div>
+      <div class="vp-item"><span class="vp-check">✓</span> Upload documents for AI Recovery Scan</div>
+    </div>
+
+    {% if error %}
+    <div class="auth-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/signup">
+      <div class="auth-field">
+        <label>Company Name <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input type="text" name="company_name" value="{{ company|default('') }}" placeholder="Acme Trading Co.">
+      </div>
+      <div class="auth-field">
+        <label>Email Address</label>
+        <input type="email" name="email" value="{{ email|default('') }}" placeholder="you@company.com" required autofocus>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required minlength="8">
+        <div class="auth-hint">At least 8 characters</div>
+      </div>
+      <button class="auth-btn" type="submit">Create Account</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="/signin">Sign in</a>
+    </div>
+
+    <div class="auth-divider">or</div>
+    <a class="auth-skip" href="/">← Continue without an account</a>
+  </div>
+</div>
+
+</body>
+</html>

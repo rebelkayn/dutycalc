@@ -2,17 +2,141 @@ import os
 import json
 import re
 import logging
-from flask import Flask, request, jsonify, render_template
+import hashlib
+import secrets
+from datetime import datetime, timedelta
+from functools import wraps
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session, g
 from flask_cors import CORS
 import google.generativeai as genai
+import psycopg2
+import psycopg2.extras
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
+app.permanent_session_lifetime = timedelta(days=30)
 CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+
+
+# ── Database ──────────────────────────────────────────────
+def get_db():
+    if "db" not in g:
+        g.db = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+    return g.db
+
+@app.teardown_appcontext
+def close_db(exc):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+def init_db():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            company_name TEXT DEFAULT '',
+            broker_name TEXT DEFAULT '',
+            broker_email TEXT DEFAULT '',
+            ace_id TEXT DEFAULT '',
+            phone TEXT DEFAULT '',
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS calculations (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            hts_code TEXT DEFAULT '',
+            hts_desc TEXT DEFAULT '',
+            origin TEXT DEFAULT '',
+            destination TEXT DEFAULT 'US',
+            product_value NUMERIC DEFAULT 0,
+            currency TEXT DEFAULT 'USD',
+            duty_rate NUMERIC DEFAULT 0,
+            effective_rate NUMERIC DEFAULT 0,
+            duty_amount NUMERIC DEFAULT 0,
+            total_landed NUMERIC DEFAULT 0,
+            result_json TEXT DEFAULT '{}',
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS refund_entries (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            origin TEXT DEFAULT '',
+            origin_label TEXT DEFAULT '',
+            product_value NUMERIC DEFAULT 0,
+            entry_period TEXT DEFAULT '',
+            entry_status TEXT DEFAULT '',
+            ieepa_rate NUMERIC DEFAULT 0,
+            ieepa_amount NUMERIC DEFAULT 0,
+            surviving_amount NUMERIC DEFAULT 0,
+            est_liquidation TEXT DEFAULT '',
+            protest_deadline TEXT DEFAULT '',
+            filing_status TEXT DEFAULT 'pending',
+            notes TEXT DEFAULT '',
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS scan_results (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            filename TEXT DEFAULT '',
+            file_count INTEGER DEFAULT 0,
+            total_refundable NUMERIC DEFAULT 0,
+            total_entries INTEGER DEFAULT 0,
+            scan_json TEXT DEFAULT '{}',
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+try:
+    if DATABASE_URL:
+        init_db()
+        logger.info("PostgreSQL tables initialized")
+except Exception as e:
+    logger.warning(f"DB init skipped: {e}")
+
+
+# ── Auth helpers ──────────────────────────────────────────
+def hash_password(password):
+    salt = secrets.token_hex(16)
+    h = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000)
+    return salt + ":" + h.hex()
+
+def verify_password(password, stored):
+    salt, h = stored.split(":", 1)
+    check = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000)
+    return check.hex() == h
+
+def get_current_user():
+    uid = session.get("user_id")
+    if not uid:
+        return None
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("SELECT * FROM users WHERE id = %s", (uid,))
+    user = cur.fetchone()
+    cur.close()
+    return user
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("user_id"):
+            return redirect(url_for("signin"))
+        return f(*args, **kwargs)
+    return decorated
 
 # ── Per-destination config ─────────────────────────────────
 DEST_CONFIG = {
@@ -191,11 +315,192 @@ FTA_RATES = {
 # ── Routes ─────────────────────────────────────────────────
 @app.route("/")
 def index():
-    return render_template("index.html")
+    user = get_current_user()
+    return render_template("index.html", user=user)
 
 @app.route("/refund-guide.html")
 def refund_guide():
-    return render_template("refund-guide.html")
+    user = get_current_user()
+    return render_template("refund-guide.html", user=user)
+
+
+# ── Auth Routes ───────────────────────────────────────────
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if session.get("user_id"):
+        return redirect(url_for("dashboard"))
+    if request.method == "GET":
+        return render_template("signup.html")
+    data = request.form
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+    company = (data.get("company_name") or "").strip()
+    if not email or not password:
+        return render_template("signup.html", error="Email and password are required.")
+    if len(password) < 8:
+        return render_template("signup.html", error="Password must be at least 8 characters.", email=email, company=company)
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("SELECT id FROM users WHERE email = %s", (email,))
+    existing = cur.fetchone()
+    if existing:
+        cur.close()
+        return render_template("signup.html", error="An account with this email already exists.", email=email, company=company)
+    pw_hash = hash_password(password)
+    cur.execute("INSERT INTO users (email, password_hash, company_name) VALUES (%s, %s, %s) RETURNING id", (email, pw_hash, company))
+    new_id = cur.fetchone()["id"]
+    db.commit()
+    cur.close()
+    session["user_id"] = new_id
+    session.permanent = True
+    return redirect(url_for("dashboard"))
+
+@app.route("/signin", methods=["GET", "POST"])
+def signin():
+    if session.get("user_id"):
+        return redirect(url_for("dashboard"))
+    if request.method == "GET":
+        return render_template("signin.html")
+    data = request.form
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+    if not email or not password:
+        return render_template("signin.html", error="Email and password are required.")
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+    user = cur.fetchone()
+    cur.close()
+    if not user or not verify_password(password, user["password_hash"]):
+        return render_template("signin.html", error="Invalid email or password.", email=email)
+    session["user_id"] = user["id"]
+    session.permanent = True
+    next_url = request.args.get("next") or url_for("dashboard")
+    return redirect(next_url)
+
+@app.route("/signout")
+def signout():
+    session.clear()
+    return redirect(url_for("index"))
+
+
+# ── Dashboard ─────────────────────────────────────────────
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    user = get_current_user()
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("SELECT * FROM calculations WHERE user_id = %s ORDER BY created_at DESC LIMIT 50", (user["id"],))
+    calcs = cur.fetchall()
+    cur.execute("SELECT * FROM refund_entries WHERE user_id = %s ORDER BY created_at DESC", (user["id"],))
+    refunds = cur.fetchall()
+    cur.execute("SELECT * FROM scan_results WHERE user_id = %s ORDER BY created_at DESC", (user["id"],))
+    scans = cur.fetchall()
+    cur.close()
+    # Pre-compute stats for template
+    total_refund = sum(float(r.get("ieepa_amount", 0) or 0) for r in refunds)
+    pending_count = sum(1 for r in refunds if r.get("filing_status") == "pending")
+    return render_template("dashboard.html", user=user, calcs=calcs, refunds=refunds, scans=scans,
+                           total_refund=total_refund, pending_count=pending_count)
+
+
+# ── API: Save Calculation ─────────────────────────────────
+@app.route("/api/save-calculation", methods=["POST"])
+def save_calculation():
+    if not session.get("user_id"):
+        return jsonify({"error": "login_required", "signin_url": "/signin"}), 401
+    data = request.json or {}
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("""INSERT INTO calculations
+        (user_id, hts_code, hts_desc, origin, destination, product_value,
+         currency, duty_rate, effective_rate, duty_amount, total_landed, result_json)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        (session["user_id"], data.get("hts_code",""), data.get("hts_desc",""),
+         data.get("origin",""), data.get("destination","US"),
+         data.get("product_value",0), data.get("currency","USD"),
+         data.get("duty_rate",0), data.get("effective_rate",0),
+         data.get("duty_amount",0), data.get("total_landed",0),
+         json.dumps(data.get("full_result",{}))))
+    db.commit()
+    cur.close()
+    return jsonify({"ok": True})
+
+
+# ── API: Save Refund Entry ────────────────────────────────
+@app.route("/api/save-refund", methods=["POST"])
+def save_refund():
+    if not session.get("user_id"):
+        return jsonify({"error": "login_required", "signin_url": "/signin"}), 401
+    data = request.json or {}
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("""INSERT INTO refund_entries
+        (user_id, origin, origin_label, product_value, entry_period, entry_status,
+         ieepa_rate, ieepa_amount, surviving_amount, est_liquidation, protest_deadline)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        (session["user_id"], data.get("origin",""), data.get("origin_label",""),
+         data.get("product_value",0), data.get("entry_period",""),
+         data.get("entry_status",""), data.get("ieepa_rate",0),
+         data.get("ieepa_amount",0), data.get("surviving_amount",0),
+         data.get("est_liquidation",""), data.get("protest_deadline","")))
+    db.commit()
+    cur.close()
+    return jsonify({"ok": True})
+
+
+# ── API: Update Refund Status ─────────────────────────────
+@app.route("/api/update-refund/<int:entry_id>", methods=["POST"])
+@login_required
+def update_refund(entry_id):
+    data = request.json or {}
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("UPDATE refund_entries SET filing_status = %s, notes = %s WHERE id = %s AND user_id = %s",
+        (data.get("filing_status","pending"), data.get("notes",""), entry_id, session["user_id"]))
+    db.commit()
+    cur.close()
+    return jsonify({"ok": True})
+
+
+# ── API: Delete Entries ───────────────────────────────────
+@app.route("/api/delete-calculation/<int:calc_id>", methods=["POST"])
+@login_required
+def delete_calculation(calc_id):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("DELETE FROM calculations WHERE id = %s AND user_id = %s", (calc_id, session["user_id"]))
+    db.commit()
+    cur.close()
+    return jsonify({"ok": True})
+
+@app.route("/api/delete-refund/<int:entry_id>", methods=["POST"])
+@login_required
+def delete_refund(entry_id):
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("DELETE FROM refund_entries WHERE id = %s AND user_id = %s", (entry_id, session["user_id"]))
+    db.commit()
+    cur.close()
+    return jsonify({"ok": True})
+
+
+# ── API: Update Profile ──────────────────────────────────
+@app.route("/api/update-profile", methods=["POST"])
+@login_required
+def update_profile():
+    data = request.json or {}
+    db = get_db()
+    cur = db.cursor()
+    cur.execute("""UPDATE users SET company_name=%s, broker_name=%s, broker_email=%s, ace_id=%s, phone=%s
+        WHERE id=%s""",
+        (data.get("company_name",""), data.get("broker_name",""),
+         data.get("broker_email",""), data.get("ace_id",""),
+         data.get("phone",""), session["user_id"]))
+    db.commit()
+    cur.close()
+    return jsonify({"ok": True})
 
 @app.route("/api/classify", methods=["POST"])
 def classify():

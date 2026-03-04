@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dashboard — iDuties.ai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #F5F5F0; --surface: #FFFFFF; --surface2: #F0F0EB;
+  --border: rgba(0,0,0,0.06); --border2: rgba(0,0,0,0.10);
+  --ink: #1A1A1A; --ink2: #3D3D3D; --muted: #7A7A7A; --dim: #ACACAC;
+  --blue: #0055FF; --blue-hover: #003FCC; --blue-soft: rgba(0,85,255,0.06);
+  --green: #0F7B3F; --green-bg: rgba(15,123,63,0.06);
+  --red: #D62828; --red-bg: rgba(214,40,40,0.05);
+  --amber: #9A6700; --amber-bg: rgba(154,103,0,0.06);
+  --radius: 14px; --radius-sm: 10px; --radius-xs: 7px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.03);
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --mono: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font); background: var(--bg); color: var(--ink);
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════ NAV ═══════ */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(245,245,240,0.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 56px;
+  display: flex; align-items: center; gap: 16px;
+}
+.nav-brand {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
+  display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0;
+}
+.nav-brand svg { color: var(--blue); }
+.nav-dot { color: var(--blue); }
+.nav-links { display: flex; gap: 2px; }
+.nav-link {
+  font-size: 0.8rem; font-weight: 500; color: var(--muted);
+  padding: 6px 12px; border-radius: var(--radius-xs);
+  border: 1px solid transparent; cursor: pointer;
+  text-decoration: none; white-space: nowrap; transition: all 0.15s;
+}
+.nav-link:hover { color: var(--ink); background: var(--surface2); }
+.nav-link.active { color: var(--ink); background: var(--surface); border-color: var(--border2); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.nav-spacer { flex: 1; }
+.nav-user {
+  display: flex; align-items: center; gap: 10px; font-size: 0.82rem;
+}
+.nav-user-email { color: var(--muted); display: none; }
+.nav-signout {
+  color: var(--muted); text-decoration: none; font-weight: 500;
+  font-size: 0.78rem; padding: 5px 10px; border-radius: var(--radius-xs);
+  border: 1px solid var(--border2); transition: all 0.15s;
+}
+.nav-signout:hover { color: var(--ink); background: var(--surface2); }
+@media (min-width: 600px) { .nav-user-email { display: block; } }
+@media (max-width: 500px) {
+  .nav { padding: 0 14px; height: 52px; gap: 10px; }
+  .nav-link { font-size: 0.74rem; padding: 5px 9px; }
+}
+
+/* ═══════ DASHBOARD HEADER ═══════ */
+.dash-header {
+  max-width: 860px; margin: 0 auto; padding: 32px 20px 0;
+}
+.dash-h { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px; }
+.dash-sub { font-size: 0.88rem; color: var(--muted); margin-bottom: 24px; }
+.dash-stats { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.stat-card {
+  flex: 1; min-width: 120px; padding: 16px 18px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow);
+}
+.stat-val { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stat-val.green { color: var(--green); }
+.stat-val.amber { color: var(--amber); }
+.stat-val.blue { color: var(--blue); }
+.stat-label { font-size: 0.7rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+
+/* ═══════ TABS ═══════ */
+.dash-tabs {
+  max-width: 860px; margin: 0 auto; padding: 0 20px;
+  display: flex; gap: 0; border-bottom: 1px solid var(--border2);
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.dash-tab {
+  padding: 12px 16px; font-family: var(--font); font-size: 0.84rem;
+  font-weight: 500; color: var(--muted); background: none; border: none;
+  cursor: pointer; white-space: nowrap; position: relative;
+  transition: color 0.15s; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.dash-tab:hover { color: var(--ink2); }
+.dash-tab.active { color: var(--blue); font-weight: 600; border-bottom-color: var(--blue); }
+.dash-panel { display: none; max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; }
+.dash-panel.active { display: block; animation: fadeUp 0.2s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ═══════ CARDS ═══════ */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px; margin-bottom: 12px;
+  box-shadow: var(--shadow); transition: box-shadow 0.15s;
+}
+.card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.card-meta { font-size: 0.72rem; color: var(--dim); margin-top: 6px; }
+.card-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 2px; }
+.card-desc { font-size: 0.82rem; color: var(--muted); }
+.card-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; white-space: nowrap; }
+.card-val.green { color: var(--green); }
+.card-actions { display: flex; gap: 6px; margin-top: 10px; }
+.card-btn {
+  padding: 5px 10px; border-radius: var(--radius-xs);
+  font-family: var(--font); font-size: 0.72rem; font-weight: 600;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--muted); cursor: pointer; transition: all 0.15s;
+}
+.card-btn:hover { color: var(--ink); background: var(--surface2); }
+.card-btn.red { color: var(--red); border-color: rgba(214,40,40,0.15); }
+.card-btn.red:hover { background: var(--red-bg); }
+
+/* Status badges */
+.badge {
+  display: inline-block; padding: 3px 8px; border-radius: 20px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-amber { background: var(--amber-bg); color: var(--amber); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-blue { background: var(--blue-soft); color: var(--blue); }
+
+/* Deadline bar */
+.deadline-bar {
+  display: flex; align-items: center; gap: 8px; margin-top: 8px;
+  font-size: 0.78rem; color: var(--muted);
+}
+.deadline-bar strong { color: var(--ink); }
+.deadline-urgent { color: var(--red); font-weight: 600; }
+
+/* ═══════ EMPTY STATE ═══════ */
+.empty {
+  text-align: center; padding: 48px 20px;
+}
+.empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
+.empty-h { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+.empty-p { font-size: 0.86rem; color: var(--muted); margin-bottom: 20px; max-width: 360px; margin-left: auto; margin-right: auto; line-height: 1.55; }
+.empty-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px; border-radius: var(--radius-sm);
+  background: var(--blue); color: white; font-family: var(--font);
+  font-size: 0.86rem; font-weight: 600; text-decoration: none;
+  transition: background 0.15s;
+}
+.empty-btn:hover { background: var(--blue-hover); }
+
+/* ═══════ PROFILE FORM ═══════ */
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 500px) { .profile-grid { grid-template-columns: 1fr; } }
+.pf-field { margin-bottom: 0; }
+.pf-field label {
+  display: block; font-size: 0.7rem; font-weight: 700; color: var(--muted);
+  margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.pf-field input {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm); font-size: 0.9rem; font-family: var(--font);
+  color: var(--ink); background: var(--bg); outline: none; transition: all 0.15s;
+}
+.pf-field input:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); background: var(--surface);
+}
+.pf-save {
+  margin-top: 20px; padding: 12px 28px; border-radius: var(--radius-sm);
+  background: var(--ink); color: white; font-family: var(--font);
+  font-size: 0.88rem; font-weight: 600; border: none; cursor: pointer;
+  transition: background 0.15s;
+}
+.pf-save:hover { background: #333; }
+.pf-saved {
+  display: none; margin-left: 12px; font-size: 0.82rem;
+  color: var(--green); font-weight: 600;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ NAV ═══════ -->
+<nav class="nav">
+  <a class="nav-brand" href="/">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    <span>iDuties<span class="nav-dot">.ai</span></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="/">Calculator</a>
+    <a class="nav-link" href="/refund-guide.html">Refund</a>
+    <a class="nav-link active" href="/dashboard">Dashboard</a>
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="nav-user">
+    <span class="nav-user-email">{{ user.email }}</span>
+    <a class="nav-signout" href="/signout">Sign Out</a>
+  </div>
+</nav>
+
+<!-- ═══════ HEADER + STATS ═══════ -->
+<div class="dash-header">
+  <h1 class="dash-h">{% if user.company_name %}{{ user.company_name }}{% else %}Dashboard{% endif %}</h1>
+  <p class="dash-sub">{{ user.email }}</p>
+
+  <div class="dash-stats">
+    <div class="stat-card">
+      <div class="stat-val blue">{{ calcs|length }}</div>
+      <div class="stat-label">Calculations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val green">${{ "{:,.0f}".format(total_refund) }}</div>
+      <div class="stat-label">Potential Refund</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val amber">{{ pending_count }}</div>
+      <div class="stat-label">Pending Filings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">{{ scans|length }}</div>
+      <div class="stat-label">Scans</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ TABS ═══════ -->
+<div class="dash-tabs">
+  <button class="dash-tab active" onclick="switchDashTab('history',this)">History</button>
+  <button class="dash-tab" onclick="switchDashTab('refunds',this)">Refund Tracker</button>
+  <button class="dash-tab" onclick="switchDashTab('scans',this)">Scans</button>
+  <button class="dash-tab" onclick="switchDashTab('profile',this)">Company Profile</button>
+</div>
+
+<!-- ═══════ HISTORY PANEL ═══════ -->
+<div class="dash-panel active" id="panel-history">
+  {% if calcs %}
+    {% for c in calcs %}
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <div class="card-title">{{ c.hts_code or 'No HTS' }} — {{ c.hts_desc or 'Manual calculation' }}</div>
+          <div class="card-desc">{{ c.origin or '?' }} → {{ c.destination }} · {{ c.currency }} {{ "{:,.2f}".format(c.product_value) }}</div>
+          <div class="card-meta">{{ c.created_at.strftime('%b %d, %Y %I:%M %p') if c.created_at else '' }}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="card-val">${{ "{:,.2f}".format(c.total_landed) }}</div>
+          <div class="card-desc">{{ c.effective_rate }}% effective</div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn red" onclick="deleteCalc({{ c.id }}, this)">Delete</button>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      <div class="empty-icon">📦</div>
+      <div class="empty-h">No calculations yet</div>
+      <div class="empty-p">Run a duty calculation and save it to see it here. Your history helps you compare costs across shipments.</div>
+      <a class="empty-btn" href="/">Open Calculator →</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- ═══════ REFUNDS PANEL ═══════ -->
+<div class="dash-panel" id="panel-refunds">
+  {% if refunds %}
+    {% for r in refunds %}
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <div class="card-title">{{ r.origin_label or r.origin }}</div>
+          <div class="card-desc">${{ "{:,.2f}".format(r.product_value) }} · {{ r.entry_period }} · {{ r.ieepa_rate }}% IEEPA</div>
+          <div class="deadline-bar">
+            {% if r.filing_status == 'filed' %}
+              <span class="badge badge-green">Filed</span>
+            {% elif r.filing_status == 'denied' %}
+              <span class="badge badge-red">Denied</span>
+            {% else %}
+              <span class="badge badge-amber">Pending</span>
+            {% endif %}
+            {% if r.protest_deadline %}
+              <span>Protest by: <strong>{{ r.protest_deadline }}</strong></span>
+            {% endif %}
+          </div>
+          <div class="card-meta">Saved {{ r.created_at.strftime('%b %d, %Y') if r.created_at else '' }}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="card-val green">${{ "{:,.2f}".format(r.ieepa_amount) }}</div>
+          <div class="card-desc">refundable</div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button class="card-btn" onclick="updateRefundStatus({{ r.id }}, 'filed', this)">Mark Filed</button>
+        <button class="card-btn red" onclick="deleteRefund({{ r.id }}, this)">Delete</button>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      <div class="empty-icon">💰</div>
+      <div class="empty-h">No refund entries yet</div>
+      <div class="empty-p">Use the IEEPA Refund Estimator and save your results. We'll track deadlines and filing status for each entry.</div>
+      <a class="empty-btn" href="/">Open Estimator →</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- ═══════ SCANS PANEL ═══════ -->
+<div class="dash-panel" id="panel-scans">
+  {% if scans %}
+    {% for s in scans %}
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <div class="card-title">{{ s.filename or 'Recovery Scan' }}</div>
+          <div class="card-desc">{{ s.file_count }} file{{ 's' if s.file_count != 1 }} · {{ s.total_entries }} entries</div>
+          <div class="card-meta">{{ s.created_at.strftime('%b %d, %Y') if s.created_at else '' }}</div>
+        </div>
+        <div style="text-align:right">
+          {% if s.status == 'complete' %}
+            <div class="card-val green">${{ "{:,.2f}".format(s.total_refundable) }}</div>
+            <div class="card-desc">refundable</div>
+          {% else %}
+            <span class="badge badge-amber">{{ s.status }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      <div class="empty-icon">📋</div>
+      <div class="empty-h">No recovery scans yet</div>
+      <div class="empty-p">Upload your CBP 7501 entry summaries for an AI-powered scan that identifies every IEEPA-refundable entry.</div>
+      <a class="empty-btn" href="/">Upload Documents →</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- ═══════ PROFILE PANEL ═══════ -->
+<div class="dash-panel" id="panel-profile">
+  <div class="card" style="padding:24px">
+    <div class="card-title" style="font-size:1.05rem;margin-bottom:16px">Company & Broker Details</div>
+    <div class="profile-grid">
+      <div class="pf-field">
+        <label>Company Name</label>
+        <input id="pf-company" value="{{ user.company_name or '' }}">
+      </div>
+      <div class="pf-field">
+        <label>Phone</label>
+        <input id="pf-phone" value="{{ user.phone or '' }}" placeholder="+1 555-000-0000">
+      </div>
+      <div class="pf-field">
+        <label>Customs Broker Name</label>
+        <input id="pf-broker" value="{{ user.broker_name or '' }}" placeholder="Your broker's name">
+      </div>
+      <div class="pf-field">
+        <label>Broker Email</label>
+        <input id="pf-broker-email" value="{{ user.broker_email or '' }}" placeholder="broker@example.com">
+      </div>
+      <div class="pf-field">
+        <label>ACE Portal ID</label>
+        <input id="pf-ace" value="{{ user.ace_id or '' }}" placeholder="Your ACE importer number">
+      </div>
+      <div class="pf-field">
+        <label>Account Email</label>
+        <input value="{{ user.email }}" disabled style="opacity:0.5">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;margin-top:20px">
+      <button class="pf-save" onclick="saveProfile()">Save Profile</button>
+      <span class="pf-saved" id="pfSaved">✓ Saved</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Tab switching ─────────────────────────────────────────
+function switchDashTab(tab, el) {
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ── API helpers ───────────────────────────────────────────
+async function deleteCalc(id, btn) {
+  if (!confirm('Delete this calculation?')) return;
+  await fetch('/api/delete-calculation/' + id, { method: 'POST' });
+  btn.closest('.card').remove();
+}
+async function deleteRefund(id, btn) {
+  if (!confirm('Delete this refund entry?')) return;
+  await fetch('/api/delete-refund/' + id, { method: 'POST' });
+  btn.closest('.card').remove();
+}
+async function updateRefundStatus(id, status, btn) {
+  await fetch('/api/update-refund/' + id, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filing_status: status })
+  });
+  btn.textContent = '✓ Filed';
+  btn.disabled = true;
+  const badge = btn.closest('.card').querySelector('.badge');
+  if (badge) { badge.className = 'badge badge-green'; badge.textContent = 'Filed'; }
+}
+async function saveProfile() {
+  await fetch('/api/update-profile', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      company_name: document.getElementById('pf-company').value,
+      phone: document.getElementById('pf-phone').value,
+      broker_name: document.getElementById('pf-broker').value,
+      broker_email: document.getElementById('pf-broker-email').value,
+      ace_id: document.getElementById('pf-ace').value,
+    })
+  });
+  const s = document.getElementById('pfSaved');
+  s.style.display = 'inline'; setTimeout(() => s.style.display = 'none', 3000);
+}
+
+// ── Deep link to tab from hash ────────────────────────────
+if (window.location.hash) {
+  const tab = window.location.hash.replace('#','');
+  const btn = document.querySelector(`[onclick*="'${tab}'"]`);
+  if (btn) switchDashTab(tab, btn);
+}
+</script>
+</body>
+</html>

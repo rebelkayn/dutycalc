@@ -65,6 +65,13 @@ body {
 }
 .nav-link:hover { color: var(--ink); background: var(--surface2); }
 .nav-link.active { color: var(--ink); background: var(--surface); border-color: var(--border2); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.nav-auth-btn {
+  padding: 6px 14px; border-radius: var(--radius-xs);
+  font-size: 0.78rem; font-weight: 600; color: var(--blue);
+  border: 1.5px solid var(--blue); text-decoration: none;
+  transition: all 0.15s; flex-shrink: 0; white-space: nowrap;
+}
+.nav-auth-btn:hover { background: var(--blue); color: white; }
 .nav-back {
   font-size: 0.82rem; font-weight: 600; color: var(--blue); text-decoration: none;
   display: flex; align-items: center; gap: 4px;
@@ -73,32 +80,32 @@ body {
 /* Hero */
 .guide-hero {
   background: linear-gradient(135deg, #0C1D2E 0%, #162B44 50%, #1A3350 100%);
-  color: #fff; padding: 48px 20px 44px; position: relative; overflow: hidden;
+  color: #fff; padding: 28px 20px; position: relative; overflow: hidden;
 }
 .guide-hero::before {
-  content: ''; position: absolute; top: -40%; right: -15%; width: 500px; height: 500px;
+  content: ''; position: absolute; top: -50%; right: -20%; width: 500px; height: 500px;
   background: radial-gradient(circle, rgba(0,85,255,0.12) 0%, transparent 70%);
   pointer-events: none;
 }
-.guide-hero-inner { max-width: 680px; margin: 0 auto; position: relative; z-index: 1; }
+.guide-hero-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
 .guide-eyebrow {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
   border-radius: 20px; padding: 4px 12px 4px 8px;
   font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 16px;
+  text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 14px;
 }
 .guide-eyebrow-dot { width: 6px; height: 6px; border-radius: 3px; background: #4ADE80; }
 .guide-hero h1 {
-  font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700;
-  letter-spacing: -0.04em; line-height: 1.12; margin-bottom: 14px;
+  font-size: clamp(1.3rem, 3.5vw, 1.75rem); font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 10px;
 }
 .guide-hero h1 span { color: #60A5FA; }
-.guide-hero p { font-size: 0.95rem; color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 540px; }
-.guide-updated { font-size: 0.73rem; color: rgba(255,255,255,0.35); margin-top: 14px; }
+.guide-hero p { font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.55; max-width: 560px; }
+.guide-updated { font-size: 0.73rem; color: rgba(255,255,255,0.35); margin-top: 12px; }
 
 /* Content */
-.guide-wrap { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
+.guide-wrap { max-width: 800px; margin: 0 auto; padding: 40px 20px 80px; }
 
 /* TOC */
 .toc {
@@ -204,7 +211,7 @@ body {
 
 /* Footer */
 .footer {
-  max-width: 680px; margin: 0 auto; padding: 20px;
+  max-width: 800px; margin: 0 auto; padding: 20px;
   font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border);
   line-height: 1.6;
 }
@@ -212,7 +219,7 @@ body {
 
 @media (max-width: 500px) {
   .nav { padding: 0 16px; height: 52px; }
-  .guide-hero { padding: 32px 16px 28px; }
+  .guide-hero { padding: 22px 16px; }
   .guide-wrap { padding: 28px 16px 60px; }
   .tl-row { flex-direction: column; gap: 4px; }
   .tl-date { width: auto; }
@@ -231,8 +238,14 @@ body {
   <div class="nav-links">
     <a class="nav-link" href="/">Calculator</a>
     <a class="nav-link active" href="/refund-guide.html">Refund</a>
+    {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
   </div>
   <div class="nav-spacer"></div>
+  {% if user %}
+    <a href="/signout" class="nav-auth-btn">Sign Out</a>
+  {% else %}
+    <a href="/signin" class="nav-auth-btn">Sign In</a>
+  {% endif %}
 </nav>
 
 <!-- Hero -->

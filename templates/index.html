@@ -91,6 +91,13 @@ body {
 .s301-active { color: var(--amber); }
 
 @media (min-width: 860px) { .nav-ticker { display: flex; } }
+.nav-auth-btn {
+  padding: 6px 14px; border-radius: var(--radius-xs);
+  font-size: 0.78rem; font-weight: 600; color: var(--blue);
+  border: 1.5px solid var(--blue); text-decoration: none;
+  transition: all 0.15s; flex-shrink: 0; white-space: nowrap;
+}
+.nav-auth-btn:hover { background: var(--blue); color: white; }
 @media (max-width: 500px) {
   .nav { padding: 0 16px; height: 52px; }
   .nav-link { font-size: 0.75rem; padding: 5px 9px; }
@@ -563,6 +570,7 @@ body {
   <div class="nav-links">
     <a class="nav-link active" href="#">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund</a>
+    {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
   </div>
   <div class="nav-spacer"></div>
   <div class="nav-ticker">
@@ -572,6 +580,11 @@ body {
     <div class="ticker-item"><span class="ticker-label">CNY</span><span class="ticker-value" id="rate-CNY">—</span></div>
     <div class="ticker-item"><span class="ticker-label">PHP</span><span class="ticker-value" id="rate-PHP">—</span></div>
   </div>
+  {% if user %}
+    <a href="/signout" class="nav-auth-btn" title="Sign out">{{ user.email[:20] }}</a>
+  {% else %}
+    <a href="/signin" class="nav-auth-btn">Sign In</a>
+  {% endif %}
 </nav>
 
 <!-- ═══════ IEEPA BANNER ═══════ -->
@@ -957,6 +970,7 @@ body {
 
 <!-- ═══════ JAVASCRIPT ═══════ -->
 <script>
+const IS_LOGGED_IN = {{ 'true' if user else 'false' }};
 let fileB64 = null, fileMime = null;
 let selectedHTS = { code:'', rate:null, cn301:null, desc:'' };
 let htsTimer = null;
@@ -1300,6 +1314,9 @@ function renderResults(d) {
   }
 
   h += `<button class="btn btn-secondary" style="margin-top:10px" onclick="copyResults()">Copy Summary</button>`;
+  h += IS_LOGGED_IN
+    ? `<button class="btn btn-secondary" style="margin-top:6px;color:var(--green);border-color:rgba(15,123,63,0.2)" onclick="saveCalcResult()">Save to Dashboard</button>`
+    : `<a href="/signup" class="btn btn-secondary" style="margin-top:6px;color:var(--blue);border-color:rgba(0,85,255,0.15);text-decoration:none">Save to Dashboard — Create Free Account</a>`;
   h += '</div>';
   body.innerHTML = h;
   window._lastResult = d;
@@ -1585,10 +1602,72 @@ function estimateRefund() {
   }
   document.getElementById('refundSteps').innerHTML = sh;
 
+  // Store data for saving
+  window._lastRefundEstimate = {
+    origin, origin_label: rates.label, product_value: value,
+    entry_period: entryDate, entry_status: status || (isLiquidated ? 'liquidated' : 'unliquidated'),
+    ieepa_rate: ieepaRate, ieepa_amount: ieepaAmount,
+    surviving_amount: survivingEstimate,
+    est_liquidation: fmtDate(liqDate), protest_deadline: isLiquidated ? fmtDate(protestDeadline) : ''
+  };
+
   // Show results
   const el = document.getElementById('refundResult');
   el.classList.add('show');
+
+  // Add save button (after disclaimer)
+  let existingSave = document.getElementById('refundSavePrompt');
+  if (!existingSave) {
+    const saveDiv = document.createElement('div');
+    saveDiv.id = 'refundSavePrompt';
+    saveDiv.style.cssText = 'margin-top:14px;text-align:center';
+    if (IS_LOGGED_IN) {
+      saveDiv.innerHTML = `<button onclick="saveRefundResult(this)" style="padding:10px 24px;border-radius:var(--radius-sm);background:var(--green);color:#fff;border:none;font-family:var(--font);font-size:0.84rem;font-weight:600;cursor:pointer">Track This Refund in Dashboard</button>`;
+    } else {
+      saveDiv.innerHTML = `<a href="/signup" style="display:inline-block;padding:10px 24px;border-radius:var(--radius-sm);background:var(--blue);color:#fff;font-size:0.84rem;font-weight:600;text-decoration:none;font-family:var(--font)">Track Refund Deadlines — Create Free Account</a>`;
+    }
+    el.appendChild(saveDiv);
+  }
+
   setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+// ── Save to Dashboard ─────────────────────────────────────
+async function saveCalcResult() {
+  const d = window._lastResult;
+  if (!d) return;
+  const btn = event.target;
+  try {
+    const res = await fetch('/api/save-calculation', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hts_code: d.hts_code || '', hts_desc: d.hts_desc || '',
+        origin: d.origin || '', destination: d.dest_name || 'US',
+        product_value: d.product_value_usd || 0, currency: d.currency || 'USD',
+        duty_rate: d.base_duty_rate || 0, effective_rate: d.effective_duty_rate || 0,
+        duty_amount: d.duty_amount || 0, total_landed: d.total_landed_usd || 0,
+        full_result: d
+      })
+    });
+    if (res.status === 401) { window.location.href = '/signup'; return; }
+    btn.textContent = 'Saved ✓';
+    btn.style.background = 'var(--green)'; btn.style.color = '#fff'; btn.style.borderColor = 'transparent';
+    btn.disabled = true;
+  } catch(e) { btn.textContent = 'Error — try again'; }
+}
+
+async function saveRefundResult(btn) {
+  const d = window._lastRefundEstimate;
+  if (!d) return;
+  try {
+    const res = await fetch('/api/save-refund', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(d)
+    });
+    if (res.status === 401) { window.location.href = '/signup'; return; }
+    btn.textContent = '✓ Saved to Dashboard';
+    btn.style.opacity = '0.6'; btn.disabled = true;
+  } catch(e) { btn.textContent = 'Error — try again'; }
 }
 </script>
 </body>
