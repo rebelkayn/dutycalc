@@ -1,0 +1,82 @@
+name: Tariff Auto-Update
+
+on:
+  schedule:
+    # Run every Monday at 06:00 UTC
+    # UK/EU/CA/AU/JP are checked — only rebuilds if version changed
+    - cron: '0 6 * * 1'
+
+  # Also allow manual trigger from GitHub UI
+  workflow_dispatch:
+    inputs:
+      country:
+        description: 'Country to update (leave blank for all)'
+        required: false
+        default: ''
+      force:
+        description: 'Force rebuild even if version unchanged'
+        required: false
+        default: 'false'
+
+jobs:
+  update-tariffs:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # Needed to push updated JSON files
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests openpyxl
+
+      - name: Run tariff updater
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.country }}" != "" ]; then
+            ARGS="--country ${{ github.event.inputs.country }}"
+          fi
+          if [ "${{ github.event.inputs.force }}" == "true" ]; then
+            ARGS="$ARGS --force"
+          fi
+          python update_all.py $ARGS
+        env:
+          PYTHONUNBUFFERED: "1"
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --quiet data/ || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push updated tariff data
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config user.name  "iDuties Bot"
+          git config user.email "bot@iduties.ai"
+          git add data/
+          # Build commit message listing which files changed
+          CHANGED=$(git diff --cached --name-only | grep tariff | tr '\n' ' ')
+          git commit -m "auto: tariff update — ${CHANGED}[$(date +'%Y-%m-%d')]"
+          git push
+
+      - name: No changes detected
+        if: steps.git-check.outputs.changed != 'true'
+        run: echo "✓ All tariff databases are up to date — no changes."
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-logs-${{ github.run_id }}
+          path: logs/
+          retention-days: 30
