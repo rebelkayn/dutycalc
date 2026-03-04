@@ -140,6 +140,7 @@ body {
   cursor: pointer; transition: all 0.15s; white-space: nowrap;
   margin-bottom: -1px;
 }
+.ws-tab:first-child { padding-left: 0; }
 .ws-tab:hover { color: var(--ink); }
 .ws-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 .ws-tab-icon { font-size: 0.9rem; }
@@ -620,7 +621,7 @@ body.embed-refund #panelRefund { display: block !important; }
   <div class="refund-inner">
 
     <div class="demo-bar" style="margin-bottom:20px">
-      <span>⚖️ IEEPA tariffs ruled unlawful — $175B in duties may be refundable. Importers have 180 days from liquidation to file.</span>
+      <span>⚖️ IEEPA tariffs ruled unlawful — $175B in duties may be refundable.<br>Importers have 180 days from liquidation to file.</span>
       <a href="/refund-guide.html" class="demo-btn demo-btn-fill" style="text-decoration:none">Read Guide</a>
     </div>
 
