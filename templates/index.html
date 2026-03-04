@@ -553,11 +553,13 @@ body {
   max-width: 800px; margin: 0 auto; padding: 20px 20px 32px;
   display: flex; justify-content: space-between; align-items: center;
   font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border);
-}
-@media (max-width: 500px) { .footer { padding: 20px 16px 32px; } }
   flex-wrap: wrap; gap: 8px;
 }
-.footer a { color: var(--blue); text-decoration: none; font-weight: 500; }
+.footer-links { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.footer-sep { color: var(--border2); }
+.footer a { color: var(--muted); text-decoration: none; font-weight: 500; }
+.footer a:hover { color: var(--ink); }
+@media (max-width: 500px) { .footer { padding: 20px 16px 32px; } }
 
 /* ═══════ SCROLLBAR ═══════ */
 ::-webkit-scrollbar { width: 5px; }
@@ -645,6 +647,10 @@ body {
         <div class="refund-field">
           <label>Total Product Value (USD)</label>
           <input type="number" id="refundValue" placeholder="e.g. 250000" min="0" step="0.01">
+        </div>
+        <div class="refund-field">
+          <label>HTS Code <span style="font-weight:400;color:var(--muted)">(optional — improves accuracy)</span></label>
+          <input type="text" id="refundHTS" placeholder="e.g. 8708.29.51" autocomplete="off">
         </div>
         <div class="refund-field">
           <label>Approximate Entry Date</label>
@@ -967,8 +973,14 @@ body {
 
 <!-- ═══════ FOOTER ═══════ -->
 <footer class="footer">
-  <span>iDuties.ai — Import duty intelligence</span>
-  <span>Not legal advice. Verify with a <a href="https://www.cbp.gov/trade/basic-import-export/importing-goods/us-customs-brokers" target="_blank">licensed customs broker</a>.</span>
+  <span>© 2026 iDuties LLC · Not legal advice</span>
+  <div class="footer-links">
+    <a href="/terms">Terms</a>
+    <span class="footer-sep">·</span>
+    <a href="/privacy">Privacy</a>
+    <span class="footer-sep">·</span>
+    <a href="mailto:support@iduties.ai">Contact</a>
+  </div>
 </footer>
 
 <!-- ═══════ JAVASCRIPT ═══════ -->
@@ -1678,7 +1690,7 @@ const IEEPA_RATES = {
   OTHER: { '2025-02': 0, '2025-03': 0, '2025-04': 10, '2025-05': 10, '2025-07': 10, '2025-10': 10, '2026-01': 10, label: 'Other (reciprocal baseline)' },
 };
 
-function estimateRefund() {
+async function estimateRefund() {
   const origin = document.getElementById('refundOrigin').value;
   const value = parseFloat(document.getElementById('refundValue').value) || 0;
   const entryDate = document.getElementById('refundEntryDate').value;
@@ -1696,15 +1708,47 @@ function estimateRefund() {
   // Estimate surviving tariffs (Section 232, 301, 122 remain)
   let survivingNote = '';
   let survivingEstimate = 0;
-  if (origin === 'CN') {
-    survivingEstimate = value * (0.075 + 0.15); // Avg S.301 + S.122 for China
-    survivingNote = 'Section 301 (7.5–25%), Section 122 (15%), and MFN duties remain. Only the IEEPA portion is refundable.';
+  const refundHTS = (document.getElementById('refundHTS').value || '').trim();
+
+  // If HTS code provided, try to look it up for accurate rates
+  let htsRate = null, htsCn301 = null, htsCh = 0;
+  if (refundHTS) {
+    const local = HTS_DB.find(r => r.code === refundHTS);
+    if (local) {
+      htsRate = local.rate; htsCn301 = local.cn301; htsCh = parseInt(local.code.replace(/\./g,'').substring(0,2))||0;
+    } else {
+      // Try API lookup
+      try {
+        const searchRes = await fetch(`/api/hts-search?q=${encodeURIComponent(refundHTS)}&dest=US`);
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          const exact = searchData.find(r => r.code === refundHTS) || searchData[0];
+          if (exact) { htsRate = exact.rate; htsCn301 = exact.cn_301||0; htsCh = parseInt(exact.code.replace(/\./g,'').substring(0,2))||0; }
+        }
+      } catch(e) {}
+    }
+  }
+
+  if (htsRate !== null && origin === 'CN') {
+    const s301 = htsCn301 || 0;
+    const s232 = (htsCh===72||htsCh===73||htsCh===76||htsCh===87) ? 25 : 0;
+    const s122 = 15;
+    survivingEstimate = value * ((htsRate + s301 + s232 + s122) / 100);
+    survivingNote = `Based on HTS ${refundHTS}: MFN ${htsRate}%${s301>0?' + S.301 '+s301+'%':''}${s232>0?' + S.232 '+s232+'%':''} + S.122 ${s122}%. Only the IEEPA portion is refundable.`;
+  } else if (htsRate !== null) {
+    const s232 = (htsCh===72||htsCh===73||htsCh===76||htsCh===87) ? 25 : 0;
+    const s122 = 15;
+    survivingEstimate = value * ((htsRate + s232 + s122) / 100);
+    survivingNote = `Based on HTS ${refundHTS}: MFN ${htsRate}%${s232>0?' + S.232 '+s232+'%':''} + S.122 ${s122}%. Only the IEEPA portion is refundable.`;
+  } else if (origin === 'CN') {
+    survivingEstimate = value * (0.075 + 0.15);
+    survivingNote = 'Section 301 (7.5–25%), Section 122 (15%), and MFN duties remain. Only the IEEPA portion is refundable. Add an HTS code for a more precise estimate.';
   } else if (origin === 'CA' || origin === 'MX') {
     survivingNote = 'USMCA-eligible goods may have 0% base duty. Section 122 (15%) and Section 232 steel/aluminum (25%) still apply.';
-    survivingEstimate = value * 0.15; // S.122
+    survivingEstimate = value * 0.15;
   } else {
-    survivingEstimate = value * 0.15; // S.122
-    survivingNote = 'Section 122 (15%), MFN duties, and any Section 232 (steel/aluminum) tariffs still apply.';
+    survivingEstimate = value * 0.15;
+    survivingNote = 'Section 122 (15%), MFN duties, and any Section 232 (steel/aluminum) tariffs still apply. Add an HTS code for a more precise estimate.';
   }
 
   const totalDutyPaid = ieepaAmount + survivingEstimate;

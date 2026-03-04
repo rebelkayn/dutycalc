@@ -304,8 +304,10 @@ body {
   border-top: 1px solid var(--border);
   max-width: 800px; margin: 0 auto; padding: 20px;
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.72rem; color: var(--dim);
+  font-size: 0.72rem; color: var(--dim); flex-wrap: wrap; gap: 8px;
 }
+.footer-links { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.footer-sep { color: var(--border2); }
 .footer a { color: var(--muted); text-decoration: none; }
 .footer a:hover { color: var(--ink); }
 </style>
@@ -359,14 +361,8 @@ body {
   <p class="hero-sub">Upload an invoice, get a classification, a landed cost, and a legal rationale — in 15 seconds. iDuties is agentic trade intelligence for the post-IEEPA era.</p>
   <div class="hero-actions">
     <a class="btn-hero btn-hero-primary" href="/calculator">Open Calculator →</a>
-    <a class="btn-hero btn-hero-secondary" href="#features">See How It Works</a>
   </div>
 </section>
-
-<!-- ═══════ SOCIAL PROOF ═══════ -->
-<div class="proof">
-  <div class="proof-text">Built for importers, freight brokers, and trade attorneys</div>
-</div>
 
 <!-- ═══════ FEATURES ═══════ -->
 <section class="features-section" id="features">
@@ -488,15 +484,23 @@ body {
   <h2>You upload the file. We find the money.</h2>
   <p>Customs is no longer a tax problem — it's a data problem. Turn your messy logistics paperwork into a bulletproof legal defense and a revenue recovery engine.</p>
   <div class="hero-actions">
-    <a class="btn-hero btn-hero-primary" href="/calculator">Start Free →</a>
+    <a class="btn-hero btn-hero-primary" href="/signup">Create Account →</a>
     <a class="btn-hero btn-hero-secondary" href="/refund-guide.html">Read the IEEPA Guide</a>
   </div>
 </section>
 
 <!-- ═══════ FOOTER ═══════ -->
 <footer class="footer">
-  <span>© 2026 iDuties — a PH Studio product</span>
-  <a href="/refund-guide.html">Refund Guide</a>
+  <span>© 2026 iDuties LLC</span>
+  <div class="footer-links">
+    <a href="/terms">Terms of Service</a>
+    <span class="footer-sep">·</span>
+    <a href="/privacy">Privacy Policy</a>
+    <span class="footer-sep">·</span>
+    <a href="/refund-guide.html">Refund Guide</a>
+    <span class="footer-sep">·</span>
+    <a href="mailto:support@iduties.ai">Contact</a>
+  </div>
 </footer>
 
 </body>
