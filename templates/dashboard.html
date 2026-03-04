@@ -88,8 +88,14 @@ body {
 .dash-header {
   max-width: 860px; margin: 0 auto; padding: 32px 20px 0;
 }
+.dash-header-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.dash-header-left {}
 .dash-h { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px; }
-.dash-sub { font-size: 0.88rem; color: var(--muted); margin-bottom: 24px; }
+.dash-sub { font-size: 0.88rem; color: var(--muted); }
+.dash-header-actions { display: flex; gap: 10px; flex-shrink: 0; }
 .dash-stats { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 .stat-card {
   flex: 1; min-width: 120px; padding: 16px 18px;
@@ -111,8 +117,7 @@ body {
 }
 .dash-tabs::-webkit-scrollbar { display: none; }
 
-/* ═══════ QUICK ACTIONS ═══════ */
-.quick-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+/* ═══════ QUICK ACTIONS (now in header) ═══════ */
 .qa-btn {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 10px 18px; border-radius: var(--radius-sm);
@@ -268,7 +273,6 @@ body {
     <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
   <div class="nav-links">
-    <a class="nav-link" href="/">Home</a>
     <a class="nav-link" href="/calculator">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund</a>
     <a class="nav-link active" href="/dashboard">Dashboard</a>
@@ -286,8 +290,16 @@ body {
 
 <!-- ═══════ HEADER + STATS ═══════ -->
 <div class="dash-header">
-  <h1 class="dash-h">{% if user.company_name %}{{ user.company_name }}{% else %}Dashboard{% endif %}</h1>
-  <p class="dash-sub">{{ user.email }}</p>
+  <div class="dash-header-top">
+    <div class="dash-header-left">
+      <h1 class="dash-h">{% if user.company_name %}{{ user.company_name }}{% else %}Dashboard{% endif %}</h1>
+      <p class="dash-sub">{{ user.email }}</p>
+    </div>
+    <div class="dash-header-actions">
+      <button class="qa-btn qa-btn-primary" onclick="openDrawer('calc')">📦 New Calculation</button>
+      <button class="qa-btn qa-btn-secondary" onclick="openDrawer('refund')">💰 Refund Estimator</button>
+    </div>
+  </div>
 
   <div class="dash-stats">
     <div class="stat-card">
@@ -306,11 +318,6 @@ body {
       <div class="stat-val">{{ scans|length }}</div>
       <div class="stat-label">Scans</div>
     </div>
-  </div>
-  <div class="quick-actions">
-    <button class="qa-btn qa-btn-primary" onclick="openDrawer('calc')">📦 New Calculation</button>
-    <button class="qa-btn qa-btn-secondary" onclick="openDrawer('refund')">💰 Refund Estimator</button>
-    <a class="qa-btn qa-btn-secondary" href="/refund-guide.html">📋 Refund Guide</a>
   </div>
 </div>
 
