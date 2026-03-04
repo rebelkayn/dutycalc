@@ -80,14 +80,14 @@ body {
 /* Hero */
 .guide-hero {
   background: linear-gradient(135deg, #0C1D2E 0%, #162B44 50%, #1A3350 100%);
-  color: #fff; padding: 28px 20px; position: relative; overflow: hidden;
+  color: #fff; position: relative; overflow: hidden;
 }
 .guide-hero::before {
   content: ''; position: absolute; top: -50%; right: -20%; width: 500px; height: 500px;
   background: radial-gradient(circle, rgba(0,85,255,0.12) 0%, transparent 70%);
   pointer-events: none;
 }
-.guide-hero-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
+.guide-hero-inner { max-width: 800px; margin: 0 auto; padding: 28px 20px; position: relative; z-index: 1; }
 .guide-eyebrow {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
@@ -219,7 +219,7 @@ body {
 
 @media (max-width: 500px) {
   .nav { padding: 0 16px; height: 52px; }
-  .guide-hero { padding: 22px 16px; }
+  .guide-hero-inner { padding: 22px 16px; }
   .guide-wrap { padding: 28px 16px 60px; }
   .tl-row { flex-direction: column; gap: 4px; }
   .tl-date { width: auto; }
