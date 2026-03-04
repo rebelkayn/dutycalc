@@ -148,10 +148,10 @@ body {
 
 /* ═══════ REFUND ESTIMATOR ═══════ */
 .refund-drawer {
-  max-height: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+  max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out;
   background: var(--surface); border-bottom: 1px solid var(--border);
 }
-.refund-drawer.open { max-height: 2200px; }
+.refund-drawer.open { /* height set by JS */ }
 .refund-inner { max-width: 800px; margin: 0 auto; padding: 32px 20px 36px; }
 .refund-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; }
 .refund-tab {
@@ -615,7 +615,7 @@ body.embed-refund .refund-drawer { max-height: none !important; overflow: visibl
       <div><div class="ieepa-stat-val">180 days</div><div class="ieepa-stat-label">Protest Window</div></div>
     </div>
     <div class="ieepa-actions">
-      <button class="ieepa-btn ieepa-btn-primary" onclick="toggleRefundDrawer()">Check Your Refund Eligibility ↓</button>
+      <button class="ieepa-btn ieepa-btn-primary" id="refundToggleBtn" onclick="toggleRefundDrawer()">Check Refund Eligibility ↓</button>
       <a class="ieepa-btn ieepa-btn-ghost" href="/refund-guide.html" style="text-decoration:none">How Refunds Work →</a>
     </div>
   </div>
@@ -1572,13 +1572,22 @@ zone.addEventListener('drop',ev=>{const f=ev.dataTransfer.files[0];if(f){const d
 // ── Refund Drawer Toggle ──────────────────────────────────
 function toggleRefundDrawer() {
   const drawer = document.getElementById('refundDrawer');
-  const btn = document.querySelector('.ieepa-btn-primary');
-  drawer.classList.toggle('open');
-  if (drawer.classList.contains('open')) {
-    btn.textContent = 'Close Estimator ↑';
-    setTimeout(() => drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  const btn = document.getElementById('refundToggleBtn');
+  if (!drawer || !btn) return;
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    drawer.style.maxHeight = drawer.scrollHeight + 'px';
+    requestAnimationFrame(() => { drawer.style.maxHeight = '0px'; });
+    drawer.classList.remove('open');
+    btn.textContent = 'Check Refund Eligibility ↓';
   } else {
-    btn.textContent = 'Check Your Refund Eligibility ↓';
+    drawer.classList.add('open');
+    drawer.style.maxHeight = drawer.scrollHeight + 'px';
+    btn.textContent = 'Close Estimator ↑';
+    setTimeout(() => {
+      drawer.style.maxHeight = 'none';
+      drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 420);
   }
 }
 
@@ -1908,7 +1917,7 @@ async function saveRefundResult(btn) {
     if (banner) banner.style.display = 'none';
     // Force estimator drawer open
     const rd = document.getElementById('refundDrawer');
-    if (rd) { rd.classList.add('open'); rd.style.maxHeight = '9999px'; }
+    if (rd) { rd.classList.add('open'); rd.style.maxHeight = 'none'; }
   }
 })();
 
