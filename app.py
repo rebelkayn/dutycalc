@@ -372,6 +372,13 @@ def privacy():
     user = get_current_user()
     return render_template("privacy.html", user=user)
 
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    user = get_current_user()
+    if request.method == "POST":
+        return render_template("contact.html", user=user, submitted=True)
+    return render_template("contact.html", user=user, submitted=False)
+
 
 # ── Auth Routes ───────────────────────────────────────────
 @app.route("/signup", methods=["GET", "POST"])
