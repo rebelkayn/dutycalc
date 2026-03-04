@@ -60,7 +60,7 @@ body {
 }
 .nav-brand {
   font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
-  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-decoration: none;
 }
 .nav-brand svg { color: var(--blue); }
 .nav-dot { color: var(--blue); }
@@ -1756,6 +1756,8 @@ async function saveRefundResult(btn) {
     if (banner) banner.style.display = 'none';
     const drawer = document.querySelector('.refund-drawer');
     if (drawer) drawer.style.display = 'none';
+    const demo = document.querySelector('.demo-bar');
+    if (demo) demo.style.display = 'none';
   } else if (embed === 'refund') {
     // Hide calculator, hide banner hero, auto-open estimator
     const main = document.querySelector('.main');
