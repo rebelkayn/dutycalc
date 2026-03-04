@@ -1740,6 +1740,33 @@ async function saveRefundResult(btn) {
     btn.style.opacity = '0.6'; btn.disabled = true;
   } catch(e) { btn.textContent = 'Error — try again'; }
 }
+// ── Embed mode (for dashboard drawers) ───────────────────
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const embed = params.get('embed');
+  if (!embed) return;
+  // Hide nav and footer
+  const nav = document.querySelector('.nav');
+  if (nav) nav.style.display = 'none';
+  const footer = document.querySelector('.footer');
+  if (footer) footer.style.display = 'none';
+  if (embed === 'calc') {
+    // Hide IEEPA banner + estimator, show just calculator
+    const banner = document.getElementById('ieepa');
+    if (banner) banner.style.display = 'none';
+    const drawer = document.querySelector('.refund-drawer');
+    if (drawer) drawer.style.display = 'none';
+  } else if (embed === 'refund') {
+    // Hide calculator, hide banner hero, auto-open estimator
+    const main = document.querySelector('.main');
+    if (main) main.style.display = 'none';
+    const banner = document.getElementById('ieepa');
+    if (banner) banner.style.display = 'none';
+    // Force estimator drawer open
+    const rd = document.getElementById('refundDrawer');
+    if (rd) { rd.classList.add('open'); rd.style.maxHeight = '9999px'; }
+  }
+})();
 </script>
 </body>
 </html>

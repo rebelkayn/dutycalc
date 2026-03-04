@@ -102,11 +102,47 @@ body {
   padding: 10px 18px; border-radius: var(--radius-sm);
   font-family: var(--font); font-size: 0.84rem; font-weight: 600;
   text-decoration: none; transition: all 0.15s; letter-spacing: -0.01em;
+  cursor: pointer;
 }
-.qa-btn-primary { background: var(--blue); color: #fff; }
+.qa-btn-primary { background: var(--blue); color: #fff; border: none; }
 .qa-btn-primary:hover { background: var(--blue-hover); }
 .qa-btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--border2); }
 .qa-btn-secondary:hover { background: var(--surface2); }
+
+/* ═══════ SLIDE-OUT DRAWER ═══════ */
+.drawer-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  z-index: 999; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+.drawer-panel {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: min(580px, 92vw); background: var(--bg);
+  z-index: 1000; transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+  border-left: 1px solid var(--border);
+}
+.drawer-panel.open { transform: translateX(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+.drawer-title { font-size: 0.92rem; font-weight: 700; letter-spacing: -0.02em; }
+.drawer-close {
+  width: 32px; height: 32px; border-radius: 8px; border: none;
+  background: var(--surface2); cursor: pointer; font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); transition: all 0.15s;
+}
+.drawer-close:hover { background: var(--border2); color: var(--ink); }
+.drawer-body { flex: 1; overflow: hidden; }
+.drawer-body iframe {
+  width: 100%; height: 100%; border: none; background: var(--bg);
+}
 .dash-tab {
   padding: 12px 16px; font-family: var(--font); font-size: 0.84rem;
   font-weight: 500; color: var(--muted); background: none; border: none;
@@ -173,6 +209,7 @@ body {
   padding: 10px 20px; border-radius: var(--radius-sm);
   background: var(--blue); color: white; font-family: var(--font);
   font-size: 0.86rem; font-weight: 600; text-decoration: none;
+  border: none; cursor: pointer;
   transition: background 0.15s;
 }
 .empty-btn:hover { background: var(--blue-hover); }
@@ -250,8 +287,8 @@ body {
     </div>
   </div>
   <div class="quick-actions">
-    <a class="qa-btn qa-btn-primary" href="/">📦 New Calculation</a>
-    <a class="qa-btn qa-btn-secondary" href="/#ieepa">💰 Refund Estimator</a>
+    <button class="qa-btn qa-btn-primary" onclick="openDrawer('calc')">📦 New Calculation</button>
+    <button class="qa-btn qa-btn-secondary" onclick="openDrawer('refund')">💰 Refund Estimator</button>
     <a class="qa-btn qa-btn-secondary" href="/refund-guide.html">📋 Refund Guide</a>
   </div>
 </div>
@@ -290,7 +327,7 @@ body {
       <div class="empty-icon">📦</div>
       <div class="empty-h">No calculations yet</div>
       <div class="empty-p">Run a duty calculation and save it to see it here. Your history helps you compare costs across shipments.</div>
-      <a class="empty-btn" href="/">📦 Open Calculator →</a>
+      <button class="empty-btn" onclick="openDrawer('calc')">📦 Open Calculator →</button>
     </div>
   {% endif %}
 </div>
@@ -334,7 +371,7 @@ body {
       <div class="empty-icon">💰</div>
       <div class="empty-h">No refund entries yet</div>
       <div class="empty-p">Use the IEEPA Refund Estimator and save your results. We'll track deadlines and filing status for each entry.</div>
-      <a class="empty-btn" href="/#ieepa">💰 Open Estimator →</a>
+      <button class="empty-btn" onclick="openDrawer('refund')">💰 Open Estimator →</button>
     </div>
   {% endif %}
 </div>
@@ -366,7 +403,7 @@ body {
       <div class="empty-icon">📋</div>
       <div class="empty-h">No recovery scans yet</div>
       <div class="empty-p">Upload your CBP 7501 entry summaries for an AI-powered scan that identifies every IEEPA-refundable entry.</div>
-      <a class="empty-btn" href="/">📋 Upload Documents →</a>
+      <button class="empty-btn" onclick="openDrawer('refund')">📋 Upload Documents →</button>
     </div>
   {% endif %}
 </div>
@@ -408,6 +445,23 @@ body {
   </div>
 </div>
 
+<!-- ═══════ SLIDE-OUT DRAWERS ═══════ -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<div class="drawer-panel" id="drawerCalc">
+  <div class="drawer-header">
+    <span class="drawer-title">📦 Duty Calculator</span>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerCalcBody"></div>
+</div>
+<div class="drawer-panel" id="drawerRefund">
+  <div class="drawer-header">
+    <span class="drawer-title">💰 Refund Estimator</span>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerRefundBody"></div>
+</div>
+
 <script>
 // ── Tab switching ─────────────────────────────────────────
 function switchDashTab(tab, el) {
@@ -416,6 +470,31 @@ function switchDashTab(tab, el) {
   el.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
 }
+
+// ── Slide-out drawer ─────────────────────────────────────
+let activeDrawer = null;
+function openDrawer(type) {
+  const panel = type === 'calc' ? document.getElementById('drawerCalc') : document.getElementById('drawerRefund');
+  const body = type === 'calc' ? document.getElementById('drawerCalcBody') : document.getElementById('drawerRefundBody');
+  const src = type === 'calc' ? '/?embed=calc' : '/?embed=refund';
+  // Lazy-load iframe
+  if (!body.querySelector('iframe')) {
+    body.innerHTML = `<iframe src="${src}" title="${type === 'calc' ? 'Calculator' : 'Estimator'}"></iframe>`;
+  }
+  document.getElementById('drawerBackdrop').classList.add('open');
+  panel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  activeDrawer = panel;
+}
+function closeDrawer() {
+  document.getElementById('drawerBackdrop').classList.remove('open');
+  if (activeDrawer) activeDrawer.classList.remove('open');
+  document.body.style.overflow = '';
+  // Reload to refresh dashboard stats after using calc/estimator
+  if (activeDrawer) setTimeout(() => location.reload(), 350);
+  activeDrawer = null;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
 // ── API helpers ───────────────────────────────────────────
 async function deleteCalc(id, btn) {
