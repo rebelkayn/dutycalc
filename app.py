@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
+# Render gives postgres:// but psycopg2 requires postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 
 # ── Database ──────────────────────────────────────────────
