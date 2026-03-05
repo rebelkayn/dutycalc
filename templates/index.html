@@ -602,7 +602,7 @@ body.embed-refund #panelRefund { display: block !important; }
       <div class="ws-status">
         <div class="ws-status-item ws-status-warn"><span class="ws-dot ws-dot-red"></span>IEEPA Struck Down</div>
         <div class="ws-status-item"><span class="ws-dot ws-dot-amber"></span>S.301 Active</div>
-        <div class="ws-status-item"><span class="ws-dot ws-dot-green"></span>S.122 15%</div>
+        <div class="ws-status-item"><span class="ws-dot ws-dot-green"></span>S.122 10%</div>
       </div>
     </div>
     <div class="ws-tabs">
@@ -779,8 +779,8 @@ body.embed-refund #panelRefund { display: block !important; }
               <div class="rp-rates">
                 <div class="rp-rate"><span class="rl">Base</span><span class="rv" id="rp-base">—</span></div>
                 <div class="rp-rate s301" id="rp-301-wrap"><span class="rl">S.301</span><span class="rv" id="rp-301">—</span></div>
-                <div class="rp-rate s301" id="rp-232-wrap" style="display:none"><span class="rl">S.232</span><span class="rv" id="rp-232">—</span></div>
-                <div class="rp-rate" id="rp-122-wrap"><span class="rl">S.122</span><span class="rv" id="rp-122">+15.0%</span></div>
+                <div class="rp-rate s301" id="rp-232-wrap"><span class="rl">S.232</span><span class="rv" id="rp-232">0.0%</span></div>
+                <div class="rp-rate" id="rp-122-wrap"><span class="rl">S.122</span><span class="rv" id="rp-122">+10.0%</span></div>
                 <div class="rp-rate eff"><span class="rl">Effective</span><span class="rv" id="rp-eff">—</span></div>
               </div>
             </div>
@@ -1164,12 +1164,12 @@ async function searchHTS(val) {
       const s301 = (origin==='CN'&&s301val>0)?s301val:0;
       const ch = parseInt((r.code||'').replace(/\./g,'').substring(0,2))||0;
       const s232 = (ch===72||ch===73||ch===76||ch===87)?25:0;
-      const s122 = 15;
+      const s122 = s232 > 0 ? 0 : 10;
       const eff = r.rate+s301+s232+s122;
       let rateStr = 'Base '+r.rate+'%';
       if(s301>0) rateStr += ' · S.301 +'+s301+'%';
       if(s232>0) rateStr += ' · S.232 +'+s232+'%';
-      rateStr += ' · S.122 +15% · Eff. '+eff.toFixed(1)+'%';
+      rateStr += ' · S.122 +' + s122 + '% · Eff. '+eff.toFixed(1)+'%';
       return `
       <div class="hts-opt" onclick="selectHTS('${r.code}','${(r.desc||'').replace(/'/g,"\\'")}',${r.rate},${s301val})">
         <div class="hts-opt-code">${r.code}</div>
@@ -1209,9 +1209,12 @@ function handleManualHTS() {
     fetch(`/api/hts-search?q=${encodeURIComponent(val)}&dest=${document.getElementById('destCountry').value||'US'}`)
       .then(r => r.json())
       .then(results => {
-        const exact = results.find(r => r.code === val);
+        // Try exact match, then with .00 suffix for 8-digit codes
+        let exact = results.find(r => r.code === val);
+        if (!exact) exact = results.find(r => r.code === val + '.00');
         if (exact) {
-          selectedHTS = { code:val, desc:exact.desc, rate:exact.rate, cn301:exact.cn_301||0 };
+          selectedHTS = { code:exact.code, desc:exact.desc, rate:exact.rate, cn301:exact.cn_301||0 };
+          document.getElementById('htsInput').value = exact.code;
           if (exact.desc && exact.desc !== 'Other') descField.value = exact.desc;
           updateRatePreview();
           return;
@@ -1228,7 +1231,7 @@ function handleManualHTS() {
                   const s301 = (origin==='CN'&&s301val>0)?s301val:0;
                   const ch = parseInt((r.code||'').replace(/\./g,'').substring(0,2))||0;
                   const s232 = (ch===72||ch===73||ch===76||ch===87)?25:0;
-                  const s122 = 15;
+                  const s122 = s232 > 0 ? 0 : 10;
                   const eff = r.rate+s301+s232+s122;
                   return `<div class="hts-opt" onclick="selectHTS('${r.code}','${(r.desc||'').replace(/'/g,"\\'")}',${r.rate},${s301val})">
                     <div class="hts-opt-code">${r.code}</div>
@@ -1257,21 +1260,18 @@ function updateRatePreview() {
   const s301 = (origin === 'CN' && !ftaApplied) ? (selectedHTS.cn301 || 0) : 0;
   const ch = parseInt(selectedHTS.code.replace(/\./g,'').substring(0,2)) || 0;
   const s232 = (!ftaApplied && (ch===72||ch===73||ch===76||ch===87)) ? 25 : 0;
-  const s122 = ftaApplied ? 0 : 15;
+  const s122 = (ftaApplied || s232 > 0) ? 0 : 10;
   const base = ftaApplied ? 0 : (selectedHTS.rate || 0);
   const eff = base + s301 + s232 + s122;
   document.getElementById('rp-code').textContent = selectedHTS.code;
   document.getElementById('rp-desc').textContent = selectedHTS.desc || '—';
   document.getElementById('rp-base').textContent = base.toFixed(1) + '%';
-  const wrap301 = document.getElementById('rp-301-wrap');
-  if (s301 > 0) { document.getElementById('rp-301').textContent = '+' + s301.toFixed(1) + '%'; wrap301.style.display = ''; }
-  else { wrap301.style.display = 'none'; }
-  const wrap232 = document.getElementById('rp-232-wrap');
-  if (s232 > 0) { document.getElementById('rp-232').textContent = '+' + s232.toFixed(1) + '%'; wrap232.style.display = ''; }
-  else { wrap232.style.display = 'none'; }
-  const wrap122 = document.getElementById('rp-122-wrap');
-  if (s122 > 0) { document.getElementById('rp-122').textContent = '+' + s122.toFixed(1) + '%'; wrap122.style.display = ''; }
-  else { wrap122.style.display = 'none'; }
+  document.getElementById('rp-301').textContent = s301 > 0 ? '+' + s301.toFixed(1) + '%' : '0.0%';
+  document.getElementById('rp-301-wrap').style.display = '';
+  document.getElementById('rp-232').textContent = s232 > 0 ? '+' + s232.toFixed(1) + '%' : '0.0%';
+  document.getElementById('rp-232-wrap').style.display = '';
+  document.getElementById('rp-122').textContent = s122 > 0 ? '+' + s122.toFixed(1) + '%' : '0.0%';
+  document.getElementById('rp-122-wrap').style.display = '';
   document.getElementById('rp-eff').textContent = eff.toFixed(1) + '%';
   preview.classList.add('show');
 }
@@ -1303,7 +1303,7 @@ async function classifyDescription() {
         const s301=data.cn_301_rate>0&&o==='CN'?data.cn_301_rate:0;
         const ch=parseInt((data.hts_code||'').replace(/\./g,'').substring(0,2))||0;
         const s232=(ch===72||ch===73||ch===76||ch===87)?25:0;
-        const s122=15;
+        const s122 = s232 > 0 ? 0 : 10;
         const eff=data.base_rate+s301+s232+s122;
         let t='Base '+data.base_rate+'%';
         if(s301>0)t+=' · S.301 +'+s301+'%';
@@ -1346,7 +1346,7 @@ async function classifyDescription() {
             const s301=match.cn301>0&&o==='CN'?match.cn301:0;
             const ch=parseInt(match.code.replace(/\./g,'').substring(0,2))||0;
             const s232=(ch===72||ch===73||ch===76||ch===87)?25:0;
-            const s122=15;
+            const s122 = s232 > 0 ? 0 : 10;
             const eff=match.rate+s301+s232+s122;
             let t='Base '+match.rate+'%';
             if(s301>0)t+=' · S.301 +'+s301+'%';
@@ -1448,7 +1448,7 @@ async function calculate() {
     const s301 = (origin==='CN'&&!ftaApplied) ? cn301 : 0;
     const ch = parseInt(hts.replace(/\./g,'').substring(0,2))||0;
     const s232 = (!ftaApplied && (ch===72||ch===73||ch===76||ch===87)) ? 25 : 0;
-    const s122 = ftaApplied ? 0 : 15;
+    const s122 = (ftaApplied || s232 > 0) ? 0 : 10;
     const eff = base+s301+s232+s122, duty = pUSD*(eff/100), mpf = Math.min(614.35,Math.max(32.71,pUSD*0.003464));
     renderResults({ de_minimis:false, hts_code:hts, hts_desc:entry.desc, base_duty_rate:base, china_301_surcharge:s301, section_232:s232, section_122:s122, effective_duty_rate:eff, product_value_usd:pUSD, shipping_usd:sUSD, insurance_usd:iUSD, taxable_base_usd:pUSD, valuation_method:'FOB', duty_amount:duty, mpf:mpf, vat_amount:0, vat_rate:0, total_duties:duty+mpf, total_landed_usd:pUSD+sUSD+iUSD+duty+mpf, fta_applied:ftaApplied, fta_name:ftaName, db_match:!!HTS_DB.find(r=>r.code===hts), currency:curr, dest_name:'United States', notes:'Local fallback — FOB valuation. No federal VAT.' });
   }
@@ -1566,7 +1566,7 @@ function loadDemo() {
   document.getElementById('classifyResult').innerHTML = `<div class="classify-box">
     <div class="classify-box-head"><span class="classify-code">6109.10.00</span><span class="confidence conf-high">high</span></div>
     <div style="color:var(--ink);font-size:0.8rem;margin-bottom:3px">T-shirts, singlets and other vests, of cotton, knitted</div>
-    <div style="color:var(--muted);font-size:0.72rem">Base 16.5% · S.301 +7.5% · S.122 +15.0% · Eff. 39.0% from CN</div>
+    <div style="color:var(--muted);font-size:0.72rem">Base 16.5% · S.301 +7.5% · S.122 +10.0% · Eff. 34.0% from CN</div>
   </div>`;
   checkDeMin();
   calculate();
@@ -1782,23 +1782,23 @@ async function estimateRefund() {
   if (htsRate !== null && origin === 'CN') {
     const s301 = htsCn301 || 0;
     const s232 = (htsCh===72||htsCh===73||htsCh===76||htsCh===87) ? 25 : 0;
-    const s122 = 15;
+    const s122 = s232 > 0 ? 0 : 10;
     survivingEstimate = value * ((htsRate + s301 + s232 + s122) / 100);
     survivingNote = `Based on HTS ${refundHTS}: MFN ${htsRate}%${s301>0?' + S.301 '+s301+'%':''}${s232>0?' + S.232 '+s232+'%':''} + S.122 ${s122}%. Only the IEEPA portion is refundable.`;
   } else if (htsRate !== null) {
     const s232 = (htsCh===72||htsCh===73||htsCh===76||htsCh===87) ? 25 : 0;
-    const s122 = 15;
+    const s122 = s232 > 0 ? 0 : 10;
     survivingEstimate = value * ((htsRate + s232 + s122) / 100);
     survivingNote = `Based on HTS ${refundHTS}: MFN ${htsRate}%${s232>0?' + S.232 '+s232+'%':''} + S.122 ${s122}%. Only the IEEPA portion is refundable.`;
   } else if (origin === 'CN') {
-    survivingEstimate = value * (0.075 + 0.15);
-    survivingNote = 'Section 301 (7.5–25%), Section 122 (15%), and MFN duties remain. Only the IEEPA portion is refundable. Add an HTS code for a more precise estimate.';
+    survivingEstimate = value * (0.075 + 0.10);
+    survivingNote = 'Section 301 (7.5–25%), Section 122 (10%), and MFN duties remain. Only the IEEPA portion is refundable. Add an HTS code for a more precise estimate.';
   } else if (origin === 'CA' || origin === 'MX') {
-    survivingNote = 'USMCA-eligible goods may have 0% base duty. Section 122 (15%) and Section 232 steel/aluminum (25%) still apply.';
-    survivingEstimate = value * 0.15;
+    survivingNote = 'USMCA-eligible goods may have 0% base duty. Section 122 (10%) and Section 232 steel/aluminum (25%) still apply.';
+    survivingEstimate = value * 0.10;
   } else {
-    survivingEstimate = value * 0.15;
-    survivingNote = 'Section 122 (15%), MFN duties, and any Section 232 (steel/aluminum) tariffs still apply. Add an HTS code for a more precise estimate.';
+    survivingEstimate = value * 0.10;
+    survivingNote = 'Section 122 (10%), MFN duties, and any Section 232 (steel/aluminum) tariffs still apply. Add an HTS code for a more precise estimate.';
   }
 
   const totalDutyPaid = ieepaAmount + survivingEstimate;
