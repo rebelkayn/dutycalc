@@ -762,43 +762,15 @@ body.embed-refund #panelRefund { display: block !important; }
       <div class="card">
         <div class="card-header">
           <div class="card-icon icon-blue">📦</div>
-          <div><div class="card-title">Product Details</div><div class="card-sub">Upload an invoice or enter product info manually</div></div>
+          <div><div class="card-title">Product Details</div><div class="card-sub">Enter your HTS code or describe your product</div></div>
         </div>
 
-        <!-- Upload Zone -->
-        <div class="upload-section" id="uploadCollapse">
-          <div class="upload-zone" id="uploadZone">
-            <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFile(this)">
-            <div class="upload-icon">📄</div>
-            <div class="upload-title">Drop a commercial invoice here</div>
-            <div class="upload-hint">JPG · PNG · PDF · WEBP — phone photos work great</div>
-            <div class="file-pill" id="filePill">
-              <span id="filePillName"></span>
-              <button class="file-pill-x" onclick="clearFile(event)">✕</button>
-            </div>
-          </div>
-          <div id="extractedSection" style="display:none;margin-top:12px">
-            <div class="extracted-badge">✦ AI Extracted</div>
-            <div id="extractedContent"></div>
-          </div>
-          <button class="extract-btn" id="extractBtn" onclick="extractInvoice()" disabled>
-            <div class="spinner"></div>
-            <span class="btn-text">Extract with AI</span>
-          </button>
-        </div>
-
-        <div class="or-divider" id="uploadDivider"><span>or enter manually</span></div>
-
-        <!-- Manual Fields -->
+        <!-- Manual Fields (primary flow) -->
         <div class="form-section">
-          <div class="field">
-            <label>Product Description</label>
-            <textarea id="productDesc" placeholder="e.g. Men's 100% cotton T-shirt, crew neck, short sleeve"></textarea>
-          </div>
           <div class="field">
             <label>HTS Code</label>
             <div class="hts-wrap">
-              <input type="text" id="htsInput" placeholder="Search or type code…" oninput="searchHTS(this.value)" onblur="handleManualHTS()" autocomplete="off">
+              <input type="text" id="htsInput" placeholder="Paste or search HTS code…" oninput="searchHTS(this.value)" onblur="handleManualHTS()" autocomplete="off">
               <div class="hts-dropdown" id="htsDropdown"></div>
             </div>
             <div class="rate-preview" id="ratePreview">
@@ -812,6 +784,10 @@ body.embed-refund #panelRefund { display: block !important; }
                 <div class="rp-rate eff"><span class="rl">Effective</span><span class="rv" id="rp-eff">—</span></div>
               </div>
             </div>
+          </div>
+          <div class="field">
+            <label>Product Description <span style="font-weight:400;color:var(--muted)">(auto-fills from HTS, or type to classify)</span></label>
+            <textarea id="productDesc" placeholder="e.g. Men's 100% cotton T-shirt, crew neck, short sleeve"></textarea>
           </div>
           <div class="field-row">
             <div class="field">
@@ -864,6 +840,30 @@ body.embed-refund #panelRefund { display: block !important; }
             </div>
           </div>
           <div id="classifyResult" style="display:none"></div>
+        </div>
+
+        <div class="or-divider" id="uploadDivider"><span>upload invoice</span></div>
+
+        <!-- Upload Zone -->
+        <div class="upload-section" id="uploadCollapse">
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFile(this)">
+            <div class="upload-icon">📄</div>
+            <div class="upload-title">Drop a commercial invoice here</div>
+            <div class="upload-hint">JPG · PNG · PDF · WEBP — phone photos work great</div>
+            <div class="file-pill" id="filePill">
+              <span id="filePillName"></span>
+              <button class="file-pill-x" onclick="clearFile(event)">✕</button>
+            </div>
+          </div>
+          <div id="extractedSection" style="display:none;margin-top:12px">
+            <div class="extracted-badge">✦ AI Extracted</div>
+            <div id="extractedContent"></div>
+          </div>
+          <button class="extract-btn" id="extractBtn" onclick="extractInvoice()" disabled>
+            <div class="spinner"></div>
+            <span class="btn-text">Extract with AI</span>
+          </button>
         </div>
       </div>
 
@@ -1176,6 +1176,9 @@ function selectHTS(code,desc,rate,cn301) {
   selectedHTS = {code,desc,rate,cn301};
   document.getElementById('htsInput').value = code;
   document.getElementById('htsDropdown').classList.remove('show');
+  // Auto-fill product description if empty
+  const descField = document.getElementById('productDesc');
+  if (!descField.value.trim() && desc) descField.value = desc;
   updateRatePreview();
 }
 
@@ -1183,10 +1186,12 @@ function handleManualHTS() {
   const val = document.getElementById('htsInput').value.trim();
   if (!val || val.length < 7) return;
   if (selectedHTS.code === val) return;
+  const descField = document.getElementById('productDesc');
   // Try local DB first (exact match)
   const local = HTS_DB.find(r => r.code === val);
   if (local) {
     selectedHTS = { code:val, desc:local.desc, rate:local.rate, cn301:local.cn301 };
+    if (!descField.value.trim() && local.desc) descField.value = local.desc;
     updateRatePreview();
     return;
   }
@@ -1200,6 +1205,7 @@ function handleManualHTS() {
         const exact = results.find(r => r.code === val);
         if (exact) {
           selectedHTS = { code:val, desc:exact.desc, rate:exact.rate, cn301:exact.cn_301||0 };
+          if (!descField.value.trim() && exact.desc) descField.value = exact.desc;
           updateRatePreview();
           return;
         }
