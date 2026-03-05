@@ -17,6 +17,15 @@ app.permanent_session_lifetime = timedelta(days=30)
 CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+@app.after_request
+def set_security_headers(response):
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
 # ── Global error handlers (prevent worker death) ─────────
 @app.errorhandler(500)
 def internal_error(e):
@@ -534,17 +543,17 @@ def signup():
     db = get_db()
     if not db:
         return render_template("signup.html", error="Database temporarily unavailable. Please try again.", email=email, company=company)
+    pw_hash = hash_password(password)
     cur = db.cursor()
-    cur.execute("SELECT id FROM users WHERE email = %s", (email,))
-    existing = cur.fetchone()
-    if existing:
+    try:
+        cur.execute("INSERT INTO users (email, password_hash, company_name) VALUES (%s, %s, %s) RETURNING id", (email, pw_hash, company))
+        new_id = cur.fetchone()["id"]
+        db.commit()
+        cur.close()
+    except psycopg2.IntegrityError:
+        db.rollback()
         cur.close()
         return render_template("signup.html", error="An account with this email already exists.", email=email, company=company)
-    pw_hash = hash_password(password)
-    cur.execute("INSERT INTO users (email, password_hash, company_name) VALUES (%s, %s, %s) RETURNING id", (email, pw_hash, company))
-    new_id = cur.fetchone()["id"]
-    db.commit()
-    cur.close()
     session["user_id"] = new_id
     session.permanent = True
     return redirect(url_for("dashboard"))
@@ -570,7 +579,10 @@ def signin():
         return render_template("signin.html", error="Invalid email or password.", email=email)
     session["user_id"] = user["id"]
     session.permanent = True
-    next_url = request.args.get("next") or url_for("dashboard")
+    next_url = request.args.get("next") or ""
+    # Only allow relative paths to prevent open redirect phishing
+    if not next_url or not next_url.startswith("/") or next_url.startswith("//"):
+        next_url = url_for("dashboard")
     return redirect(next_url)
 @app.route("/signout")
 def signout():
@@ -736,7 +748,7 @@ Product: {description}\nReference HTS codes:\n{hts_list}\nReturn ONLY the JSON o
         return jsonify({"error": "Could not parse AI response"}), 500
     except Exception as e:
         logger.error(f"Classify error: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Classification failed. Please try again."}), 500
 @app.route("/api/calculate", methods=["POST"])
 def calculate():
     d = request.json or {}
@@ -855,7 +867,7 @@ def calculate():
         })
     except Exception as e:
         logger.error(f"Calculation error: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Calculation failed. Please try again."}), 500
 @app.route("/api/hts-search", methods=["GET"])
 def hts_search():
     query = request.args.get("q", "").lower().strip()
