@@ -115,6 +115,16 @@ def init_db():
             status TEXT DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT NOW()
         );
+        CREATE TABLE IF NOT EXISTS hts_codes (
+            code TEXT PRIMARY KEY,
+            description TEXT NOT NULL DEFAULT '',
+            rate NUMERIC NOT NULL DEFAULT 0,
+            cn_301 NUMERIC NOT NULL DEFAULT 0,
+            chapter INTEGER NOT NULL DEFAULT 0,
+            dest TEXT NOT NULL DEFAULT 'US'
+        );
+        CREATE INDEX IF NOT EXISTS idx_hts_codes_dest ON hts_codes(dest);
+        CREATE INDEX IF NOT EXISTS idx_hts_codes_chapter ON hts_codes(chapter);
     """)
     conn.commit()
     cur.close()
@@ -276,61 +286,70 @@ DEST_CONFIG = {
     },
 }
 
-# ── Tariff DB loader (lazy, cached) ────────────────────────
-_tariff_cache = {}
+# ── HTS Database (PostgreSQL) ─────────────────────────────
+def hts_lookup(code, dest="US"):
+    """Look up a single HTS code. Falls back to 8-digit parent."""
+    db = get_db()
+    if not db:
+        return None
+    cur = db.cursor()
+    cur.execute("SELECT code, description AS desc, rate, cn_301, chapter FROM hts_codes WHERE code=%s AND dest=%s", (code, dest))
+    row = cur.fetchone()
+    if not row:
+        parent = '.'.join(code.split('.')[:3])
+        if parent != code:
+            cur.execute("SELECT code, description AS desc, rate, cn_301, chapter FROM hts_codes WHERE code=%s AND dest=%s", (parent, dest))
+            row = cur.fetchone()
+    cur.close()
+    return dict(row) if row else None
 
-def _load_tariff_db(dest: str) -> dict:
-    if dest in _tariff_cache:
-        return _tariff_cache[dest]
-    config = DEST_CONFIG.get(dest, {})
-    db_file = config.get("db_file")
-    if not db_file:
-        _tariff_cache[dest] = {}
-        return {}
-    path = os.path.join(DATA_DIR, db_file)
-    if not os.path.exists(path):
-        logger.warning(f"No tariff DB for {dest}: {path}")
-        _tariff_cache[dest] = {}
-        return {}
-    try:
-        with open(path) as f:
-            raw = json.load(f)
-        if dest == "SG":
-            raw = raw.get("tariff", {})
-        compact = config.get("db_compact", True)
-        db = {}
-        for code, v in raw.items():
-            if compact:
-                db[code] = {
-                    "desc":    v.get("d", v.get("desc", "")),
-                    "rate":    float(v.get("r", v.get("rate", 0.0))),
-                    "cn_301":  float(v.get("c", v.get("cn_301", 0.0))),
-                    "chapter": v.get("ch", v.get("chapter", 0)),
-                }
-            else:
-                db[code] = v
-        logger.info(f"Loaded {len(db)} codes for {dest}")
-        _tariff_cache[dest] = db
-        return db
-    except Exception as e:
-        logger.warning(f"Could not load DB for {dest}: {e}")
-        _tariff_cache[dest] = {}
-        return {}
+def hts_search_db(query, dest="US", limit=8):
+    """Search HTS codes by code prefix or description text."""
+    db = get_db()
+    if not db:
+        return []
+    cur = db.cursor()
+    q = f"%{query.lower()}%"
+    cur.execute("""
+        SELECT code, description AS desc, rate, cn_301
+        FROM hts_codes WHERE dest=%s AND (LOWER(description) LIKE %s OR code LIKE %s)
+        ORDER BY code LIMIT %s
+    """, (dest, q, q, limit))
+    rows = cur.fetchall()
+    cur.close()
+    return [dict(r) for r in rows]
 
-# Load US on startup
-HTS_DB = _load_tariff_db("US")
-if not HTS_DB:
-    HTS_DB = {
-        "6109.10.00": {"desc": "T-shirts, cotton, knitted", "rate": 16.5, "cn_301": 7.5, "chapter": 61},
-        "8517.13.00": {"desc": "Smartphones", "rate": 0.0, "cn_301": 0.0, "chapter": 85},
-        "8471.30.01": {"desc": "Laptops", "rate": 0.0, "cn_301": 0.0, "chapter": 84},
-        "9503.00.00": {"desc": "Toys and games", "rate": 0.0, "cn_301": 7.5, "chapter": 95},
-        "4202.92.08": {"desc": "Backpacks, textile", "rate": 17.6, "cn_301": 7.5, "chapter": 42},
-        "6403.99.60": {"desc": "Footwear, leather upper", "rate": 10.0, "cn_301": 7.5, "chapter": 64},
-        "6203.42.40": {"desc": "Men's trousers, cotton", "rate": 17.0, "cn_301": 7.5, "chapter": 62},
-        "9401.61.40": {"desc": "Upholstered seats, wood frame", "rate": 0.0, "cn_301": 25.0, "chapter": 94},
-    }
-    _tariff_cache["US"] = HTS_DB
+def hts_sample(dest="US", n=200):
+    """Get evenly spaced sample of codes for AI hints."""
+    db = get_db()
+    if not db:
+        return []
+    cur = db.cursor()
+    total = hts_count(dest)
+    if total <= n:
+        cur.execute("SELECT code, description AS desc FROM hts_codes WHERE dest=%s ORDER BY code", (dest,))
+    else:
+        step = max(1, total // n)
+        cur.execute("""
+            SELECT code, description AS desc FROM (
+                SELECT code, description, ROW_NUMBER() OVER (ORDER BY code) AS rn
+                FROM hts_codes WHERE dest=%s
+            ) sub WHERE rn %% %s = 0 LIMIT %s
+        """, (dest, step, n))
+    rows = cur.fetchall()
+    cur.close()
+    return [dict(r) for r in rows]
+
+def hts_count(dest="US"):
+    """Count codes for a destination."""
+    db = get_db()
+    if not db:
+        return 0
+    cur = db.cursor()
+    cur.execute("SELECT COUNT(*) AS cnt FROM hts_codes WHERE dest=%s", (dest,))
+    row = cur.fetchone()
+    cur.close()
+    return row["cnt"] if row else 0
 
 FTA_RATES = {
     "usmca":     {"name": "USMCA",           "countries": ["MX","CA"], "override": True},
@@ -582,11 +601,9 @@ def classify():
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.0-flash")
-        # Sample hint codes across all chapters (not just first 200)
-        all_codes = list(HTS_DB.items())
-        step = max(1, len(all_codes) // 200)
-        hint_codes = all_codes[::step][:200]
-        hts_list = "\n".join([f"{k}: {v['desc']}" for k, v in hint_codes])
+        # Sample hint codes from DB
+        hints = hts_sample("US", 200)
+        hts_list = "\n".join([f"{h['code']}: {h['desc']}" for h in hints])
         if image_b64:
             prompt = f"""You are a customs classification expert. Analyze this commercial invoice.
 Extract all fields and return ONLY valid JSON (no markdown):
@@ -602,21 +619,15 @@ Product: {description}\nReference HTS codes:\n{hts_list}\nReturn ONLY the JSON o
         raw = re.sub(r"```(?:json)?", "", response.text.strip()).strip().rstrip("`").strip()
         result = json.loads(raw)
         hts_code = result.get("hts_code", "")
-        if hts_code in HTS_DB:
+        entry = hts_lookup(hts_code, "US") if hts_code else None
+        if entry:
             result["db_match"]    = True
-            result["base_rate"]   = HTS_DB[hts_code]["rate"]
-            result["cn_301_rate"] = HTS_DB[hts_code]["cn_301"]
+            result["base_rate"]   = float(entry["rate"])
+            result["cn_301_rate"] = float(entry["cn_301"])
         else:
-            # Try 8-digit parent
-            parent = '.'.join(hts_code.split('.')[:3])
-            if parent in HTS_DB:
-                result["db_match"]    = True
-                result["base_rate"]   = HTS_DB[parent]["rate"]
-                result["cn_301_rate"] = HTS_DB[parent]["cn_301"]
-            else:
-                result["db_match"] = False
-                result.setdefault("base_rate", 0)
-                result.setdefault("cn_301_rate", 0)
+            result["db_match"] = False
+            result.setdefault("base_rate", 0)
+            result.setdefault("cn_301_rate", 0)
         return jsonify(result)
     except json.JSONDecodeError:
         return jsonify({"error": "Could not parse AI response"}), 500
@@ -668,14 +679,9 @@ def calculate():
             })
 
         # Tariff lookup
-        tariff_db = _load_tariff_db(dest_country)
-        db_entry  = tariff_db.get(hts_code, {})
-        if not db_entry:
-            # Try 8-digit parent
-            parent = '.'.join(hts_code.split('.')[:3])
-            db_entry = tariff_db.get(parent, {})
-        base_rate = float(db_entry.get("rate", config.get("default_rate", 12.0))) if db_entry else config.get("default_rate", 12.0)
-        cn_301    = float(db_entry.get("cn_301", 0.0)) if db_entry else 0.0
+        entry = hts_lookup(hts_code, dest_country)
+        base_rate = float(entry["rate"]) if entry else config.get("default_rate", 12.0)
+        cn_301    = float(entry["cn_301"]) if entry else 0.0
 
         if duty_rate_override is not None:
             base_rate = float(duty_rate_override)
@@ -755,8 +761,8 @@ def calculate():
             "fta_applied":         fta_applied,
             "fta_name":            fta_name,
             "hts_code":            hts_code,
-            "hts_desc":            db_entry.get("desc", "") if db_entry else "",
-            "db_match":            bool(db_entry),
+            "hts_desc":            entry.get("desc", "") if entry else "",
+            "db_match":            bool(entry),
             "notes":               config.get("notes", ""),
         })
 
@@ -771,15 +777,7 @@ def hts_search():
     dest  = request.args.get("dest", "US").upper()
     if not query or len(query) < 2:
         return jsonify([])
-    db = _load_tariff_db(dest) or HTS_DB
-    results = []
-    for code, info in db.items():
-        desc = info.get("desc", info.get("d", ""))
-        if query in desc.lower() or query in code:
-            results.append({"code": code, "desc": desc,
-                            "rate": info.get("rate", 0), "cn_301": info.get("cn_301", 0)})
-        if len(results) >= 8:
-            break
+    results = hts_search_db(query, dest, 8)
     return jsonify(results)
 
 
@@ -787,7 +785,7 @@ def hts_search():
 def dest_config_api():
     dest   = request.args.get("dest", "US").upper()
     config = DEST_CONFIG.get(dest, DEST_CONFIG["US"])
-    db     = _load_tariff_db(dest)
+    count  = hts_count(dest)
     return jsonify({
         "dest": dest, "name": config["name"],
         "valuation": config["valuation"],
@@ -796,23 +794,16 @@ def dest_config_api():
         "vat_rate": config.get("vat_rate", 0),
         "vat_name": config.get("vat_name"),
         "mpf": config.get("mpf", False),
-        "db_loaded": len(db) > 0,
-        "db_codes": len(db),
+        "db_loaded": count > 0,
+        "db_codes": count,
         "notes": config.get("notes", ""),
     })
 
 
 @app.route("/health")
 def health():
-    dbs = {}
-    for dest, cfg in DEST_CONFIG.items():
-        cached = _tariff_cache.get(dest)
-        if cached is None:
-            path = os.path.join(DATA_DIR, cfg["db_file"]) if cfg.get("db_file") else None
-            dbs[dest] = {"loaded": False, "file_exists": bool(path and os.path.exists(path)), "codes": 0}
-        else:
-            dbs[dest] = {"loaded": True, "codes": len(cached)}
-    return jsonify({"status": "ok", "databases": dbs, "us_codes": len(HTS_DB)})
+    us_count = hts_count("US")
+    return jsonify({"status": "ok", "us_codes": us_count, "db_connected": us_count > 0})
 
 
 if __name__ == "__main__":

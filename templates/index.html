@@ -1129,7 +1129,15 @@ function xrow(k,v) {
 // ── HTS search ────────────────────────────────────────────
 async function searchHTS(val) {
   const dd = document.getElementById('htsDropdown');
-  if (!val || val.length < 2) { dd.classList.remove('show'); return; }
+  if (!val || val.length < 2) {
+    dd.classList.remove('show');
+    if (!val) {
+      selectedHTS = {code:'',desc:'',rate:0,cn301:0};
+      document.getElementById('productDesc').value = '';
+      document.getElementById('ratePreview').classList.remove('show');
+    }
+    return;
+  }
   // Auto-detect valid HTS code as user types
   if (val.match(/^\d{4}\.\d{2}\.\d{2}/)) {
     handleManualHTS();
@@ -1177,11 +1185,9 @@ function selectHTS(code,desc,rate,cn301) {
   selectedHTS = {code,desc,rate,cn301};
   document.getElementById('htsInput').value = code;
   document.getElementById('htsDropdown').classList.remove('show');
-  // Auto-fill product description if empty or generic
+  // Always update product description from HTS (unless user typed something custom)
   const descField = document.getElementById('productDesc');
-  if (desc && desc !== 'Other') {
-    if (!descField.value.trim() || descField.value === 'Other') descField.value = desc;
-  }
+  if (desc && desc !== 'Other') descField.value = desc;
   updateRatePreview();
 }
 
@@ -1193,9 +1199,7 @@ function handleManualHTS() {
   const local = HTS_DB.find(r => r.code === val);
   if (local) {
     selectedHTS = { code:val, desc:local.desc, rate:local.rate, cn301:local.cn301 };
-    if (!descField.value.trim() || descField.value === 'Other' || descField.value === selectedHTS.desc) {
-      if (local.desc && local.desc !== 'Other') descField.value = local.desc;
-    }
+    if (local.desc && local.desc !== 'Other') descField.value = local.desc;
     updateRatePreview();
     return;
   }
@@ -1208,9 +1212,7 @@ function handleManualHTS() {
         const exact = results.find(r => r.code === val);
         if (exact) {
           selectedHTS = { code:val, desc:exact.desc, rate:exact.rate, cn301:exact.cn_301||0 };
-          if (!descField.value.trim() || descField.value === 'Other') {
-            if (exact.desc && exact.desc !== 'Other') descField.value = exact.desc;
-          }
+          if (exact.desc && exact.desc !== 'Other') descField.value = exact.desc;
           updateRatePreview();
           return;
         }
