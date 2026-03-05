@@ -53,8 +53,8 @@ body {
 /* ═══════ NAV ═══════ */
 .nav {
   position: sticky; top: 0; z-index: 100;
-  background: #0A0A0A;
-  padding: 0 clamp(16px, 4vw, 32px); height: 60px;
+  background: #0A0A0A; border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 0 clamp(16px, 4vw, 40px); height: 60px;
   display: flex; align-items: center; gap: 16px;
 }
 .nav-brand {
@@ -73,12 +73,12 @@ body {
 .nav-link:hover { color: white; background: rgba(255,255,255,0.06); }
 .nav-link.active { color: white; font-weight: 600; }
 .nav-auth-btn {
-  padding: 7px 16px; border-radius: 8px;
-  font-size: 0.78rem; font-weight: 600; color: #0A0A0A;
+  padding: 8px 18px; border-radius: 8px;
+  font-size: 0.8rem; font-weight: 600; color: #0A0A0A;
   background: white; border: none;
-  text-decoration: none; transition: all 0.15s; flex-shrink: 0;
+  text-decoration: none; transition: all 0.2s; flex-shrink: 0;
 }
-.nav-auth-btn:hover { background: rgba(255,255,255,0.9); }
+.nav-auth-btn:hover { background: rgba(255,255,255,0.9); transform: translateY(-1px); }
 .nav-avatar {
   width: 32px; height: 32px; border-radius: 50%;
   background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.2);
@@ -90,8 +90,7 @@ body {
 @media (max-width: 500px) {
   .nav { padding: 0 12px; gap: 8px; }
   .nav-link { font-size: 0.72rem; padding: 5px 8px; }
-  .nav-brand { font-size: 0.95rem; }
-  .nav-auth-btn { padding: 5px 10px; font-size: 0.7rem; }
+  .nav-auth-btn { padding: 7px 14px; font-size: 0.76rem; }
 }
 
 /* ═══════ WORKSPACE HEADER ═══════ */

@@ -709,13 +709,16 @@ def classify():
 Extract all fields and return ONLY valid JSON (no markdown):
 {{"product_description":"...","quantity":"...","unit_value":0,"total_value":0,"currency":"USD","country_of_origin":"CN","shipping_cost":0,"insurance":0,"incoterms":"FOB","seller_name":"...","hts_code":"...","hts_description":"...","classification_confidence":"high/medium/low","classification_notes":"..."}}
 Reference HTS codes:\n{hts_list}\nReturn ONLY the JSON object."""
-            response = model.generate_content([prompt, {"mime_type": image_mime, "data": image_b64}])
+            response = model.generate_content(
+                [prompt, {"mime_type": image_mime, "data": image_b64}],
+                request_options={"timeout": 20}
+            )
         else:
             prompt = f"""You are a customs classification expert. Classify this product.
 Return ONLY valid JSON (no markdown):
 {{"hts_code":"...","hts_description":"...","classification_confidence":"high/medium/low","classification_notes":"...","alternative_codes":[]}}
 Product: {description}\nReference HTS codes:\n{hts_list}\nReturn ONLY the JSON object."""
-            response = model.generate_content(prompt)
+            response = model.generate_content(prompt, request_options={"timeout": 20})
         raw = re.sub(r"```(?:json)?", "", response.text.strip()).strip().rstrip("`").strip()
         result = json.loads(raw)
         hts_code = result.get("hts_code", "")
