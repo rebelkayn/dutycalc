@@ -21,8 +21,8 @@
   --muted: #6B6B6B;
   --dim: #A0A0A0;
   --border: rgba(0,0,0,0.06);
-  --blue: #0055FF;
-  --blue-soft: rgba(0,85,255,0.06);
+  --blue: #3B82F6;
+  --blue-soft: rgba(59,130,246,0.06);
   --green: #0F7B3F;
   --green-bg: rgba(15,123,63,0.06);
   --amber: #9A6700;
@@ -89,8 +89,8 @@ body {
 .hero::before {
   content: ''; position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,85,255,0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(0,85,255,0.04) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(59,130,246,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(59,130,246,0.04) 0%, transparent 60%);
 }
 .hero-grid {
   position: absolute; inset: 0; opacity: 0.03;
@@ -116,7 +116,7 @@ body {
 }
 .hero h1 em {
   font-style: normal; color: var(--blue);
-  background: linear-gradient(135deg, #3B82F6, #0055FF);
+  background: linear-gradient(135deg, #93C5FD, #3B82F6);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .hero-sub {
@@ -193,7 +193,7 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
   border-radius: var(--radius); padding: 36px 32px;
   transition: all 0.3s; position: relative; overflow: hidden;
 }
-.pillar:hover { border-color: rgba(0,85,255,0.15); box-shadow: 0 8px 40px rgba(0,0,0,0.04); transform: translateY(-2px); }
+.pillar:hover { border-color: rgba(59,130,246,0.15); box-shadow: 0 8px 40px rgba(0,0,0,0.04); transform: translateY(-2px); }
 .pillar-icon {
   width: 48px; height: 48px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
@@ -254,9 +254,6 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
   overflow: hidden;
 }
 .diff-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.diff-table th:nth-child(1), .diff-table td:nth-child(1) { width: 26%; }
-.diff-table th:nth-child(2), .diff-table td:nth-child(2) { width: 37%; }
-.diff-table th:nth-child(3), .diff-table td:nth-child(3) { width: 37%; }
 .diff-table th {
   padding: 14px 20px; font-size: 0.68rem; font-weight: 700;
   letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);

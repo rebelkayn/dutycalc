@@ -24,9 +24,9 @@
   --ink2:      #3D3D3D;
   --muted:     #7A7A7A;
   --dim:       #ACACAC;
-  --blue:      #0055FF;
-  --blue-hover:#003FCC;
-  --blue-soft: rgba(0,85,255,0.06);
+  --blue:      #3B82F6;
+  --blue-hover:#2563EB;
+  --blue-soft: rgba(59,130,246,0.06);
   --green:     #0F7B3F;
   --green-bg:  rgba(15,123,63,0.06);
   --red:       #D62828;
@@ -1525,7 +1525,7 @@ function renderResults(d) {
   h += `<button class="btn btn-secondary" style="margin-top:10px" onclick="copyResults()">Copy Summary</button>`;
   h += IS_LOGGED_IN
     ? `<button class="btn btn-secondary" style="margin-top:6px;color:var(--green);border-color:rgba(15,123,63,0.2)" onclick="saveCalcResult()">Save to Dashboard</button>`
-    : `<a href="/signup" class="btn btn-secondary" style="margin-top:6px;color:var(--blue);border-color:rgba(0,85,255,0.15);text-decoration:none">Save to Dashboard — Create Free Account</a>`;
+    : `<a href="/signup" class="btn btn-secondary" style="margin-top:6px;color:var(--blue);border-color:rgba(59,130,246,0.15);text-decoration:none">Save to Dashboard — Create Free Account</a>`;
   h += '</div>';
   body.innerHTML = h;
   window._lastResult = d;
