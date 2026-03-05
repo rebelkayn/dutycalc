@@ -120,7 +120,11 @@ body {
   font-size: clamp(1rem, 2.2vw, 1.2rem); line-height: 1.6;
   color: rgba(255,255,255,0.45); max-width: 540px; margin: 0 auto 40px;
 }
-.hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: nowrap; }
+@media (max-width: 480px) {
+  .hero-ctas { gap: 8px; }
+  .btn-hero { padding: 12px 18px; font-size: 0.82rem; flex: 1; text-align: center; justify-content: center; }
+}
 .btn-hero {
   padding: 14px 32px; border-radius: 12px; font-size: 0.92rem; font-weight: 600;
   font-family: var(--font); text-decoration: none; transition: all 0.25s; cursor: pointer;
@@ -322,7 +326,7 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
   <div class="nav-links">
     <a class="nav-link" href="/calculator">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund Guide</a>
-    {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
+  
   </div>
   {% if user %}
     <a href="/dashboard" class="nav-cta">Dashboard</a>
@@ -335,7 +339,7 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span> Currently available for US importers · USITC 2026 Rev 4</div>
+    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span> Agentic compliance infrastructure for US importers</div>
     <h1>You're overpaying<br><em>10–15%</em> on every import.</h1>
     <p class="hero-sub">Misclassifications. Unused FTAs. Valuation errors. Your customs broker doesn't catch them — our AI does. Find the money you're gifting to the government.</p>
     <div class="hero-ctas">
