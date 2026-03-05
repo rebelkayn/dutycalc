@@ -44,12 +44,9 @@ body {
 
 /* ═══════ NAV ═══════ */
 .nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  position: sticky; top: 0; z-index: 100;
   padding: 0 clamp(16px, 4vw, 40px); height: 60px;
   display: flex; align-items: center; gap: 16px;
-  transition: background 0.4s, border-color 0.3s;
-}
-.nav.scrolled {
   background: #0A0A0A;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
@@ -87,7 +84,7 @@ body {
 .hero {
   position: relative; display: flex; align-items: center;
   justify-content: center; background: var(--hero-bg); overflow: hidden;
-  padding: 100px 24px 64px; text-align: center;
+  padding: 56px 24px 64px; text-align: center;
 }
 .hero::before {
   content: ''; position: absolute; inset: 0;
@@ -256,7 +253,10 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
   border: 1px solid var(--border); border-radius: var(--radius);
   overflow: hidden;
 }
-.diff-table { width: 100%; border-collapse: collapse; }
+.diff-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.diff-table th:nth-child(1), .diff-table td:nth-child(1) { width: 26%; }
+.diff-table th:nth-child(2), .diff-table td:nth-child(2) { width: 37%; }
+.diff-table th:nth-child(3), .diff-table td:nth-child(3) { width: 37%; }
 .diff-table th {
   padding: 14px 20px; font-size: 0.68rem; font-weight: 700;
   letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
@@ -506,7 +506,6 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
     <h2 class="cta-h">Find the 12% you're<br>gifting to customs.</h2>
     <p class="cta-sub">Start with a free duty calculation. See your real rates across all four tariff layers. No credit card, no commitment.</p>
     <a href="/calculator" class="btn-cta">Open the Calculator →</a>
-    <div class="cta-note">Free forever for individual calculations · USITC 2026 Rev 4 data · No login required</div>
   </div>
 </section>
 
@@ -521,12 +520,6 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
 </footer>
 
 <script>
-// Nav scroll effect
-const nav = document.getElementById('mainNav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 40);
-});
-
 // Scroll reveal
 const revealEls = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
