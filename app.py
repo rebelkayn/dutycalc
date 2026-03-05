@@ -271,18 +271,45 @@ def _get_chapter(htsno):
         return int(digits[:2])
     return 0
 
+# Section 301 chapter-level fallback rates (used when old table has no entry)
+# Source: USTR Section 301 Lists 1-4 (as of 2026)
+# 25% = Lists 1-3 + List 4B | 7.5% = List 4A (Phase 1 deal goods)
+S301_CHAPTER_RATES = {
+    28: 25.0, 29: 25.0,                          # Chemicals
+    38: 25.0, 39: 25.0, 40: 25.0,                # Plastics, rubber
+    44: 25.0, 48: 25.0,                          # Wood, paper
+    68: 25.0, 69: 25.0, 70: 25.0,                # Stone, ceramics, glass
+    72: 25.0, 73: 25.0,                          # Steel
+    74: 25.0, 75: 25.0, 76: 25.0, 79: 25.0,     # Base metals
+    82: 25.0, 83: 25.0,                          # Tools, misc metal
+    84: 25.0, 85: 25.0,                          # Machinery, electronics
+    86: 25.0, 87: 25.0, 88: 25.0, 89: 25.0,     # Transport
+    90: 25.0, 91: 25.0, 94: 25.0, 95: 25.0,     # Optical, furniture, toys
+    # List 4A — 7.5% (Phase 1 deal, lower rate)
+    61: 7.5,  62: 7.5,  63: 7.5,                # Apparel & textiles
+    64: 7.5,  65: 7.5,                           # Footwear, headgear
+}
+
 def _get_cn301_from_old_table(db, code_8digit):
-    """Look up Section 301 rate from old hts_codes table (temporary until Step 5)."""
+    """Look up Section 301 rate from old hts_codes table.
+    Falls back to chapter-level rate if not found."""
     try:
         cur = db.cursor()
         cur.execute("SELECT cn_301 FROM hts_codes WHERE code = %s LIMIT 1", (code_8digit,))
         row = cur.fetchone()
         cur.close()
-        if row:
+        if row and float(row["cn_301"]) > 0:
             return float(row["cn_301"])
     except Exception:
         pass  # Old table might not exist — that is fine
-    return 0.0
+
+    # Fallback: derive chapter from code and apply known S.301 rate
+    try:
+        digits = code_8digit.replace(".", "")
+        chapter = int(digits[:2])
+        return S301_CHAPTER_RATES.get(chapter, 0.0)
+    except Exception:
+        return 0.0
 
 def hts_lookup(code, dest="US"):
     """Look up a single HTS code from Rev 4 table.
