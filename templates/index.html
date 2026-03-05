@@ -410,6 +410,16 @@ body {
 
 /* ═══════ HTS SEARCH ═══════ */
 .hts-wrap { position: relative; }
+.hts-check {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--green); color: white;
+  font-size: 0.7rem; font-weight: 700;
+  display: none; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.hts-check.show { display: flex; }
+.hts-wrap input.hts-valid { padding-right: 40px; }
 .hts-dropdown {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
   background: var(--surface); border: 1px solid var(--border2);
@@ -448,9 +458,8 @@ body {
   border-radius: var(--radius-sm); overflow: hidden; margin-top: 8px; font-size: 0.74rem;
 }
 .rate-preview.show { display: flex; flex-wrap: wrap; }
-.rp-code { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; color: var(--blue); padding: 7px 10px; border-right: 1px solid var(--border); white-space: nowrap; background: var(--blue-soft); }
 .rp-desc { display: none; }
-.rp-rates { display: flex; align-items: center; flex-shrink: 0; }
+.rp-rates { display: flex; align-items: center; flex-grow: 1; }
 .rp-rate { padding: 7px 10px; border-right: 1px solid var(--border); white-space: nowrap; }
 .rp-rate:last-child { border: none; }
 .rp-rate .rl { color: var(--muted); font-size: 0.65rem; display: block; }
@@ -771,11 +780,10 @@ body.embed-refund #panelRefund { display: block !important; }
             <label>HTS Code</label>
             <div class="hts-wrap">
               <input type="text" id="htsInput" placeholder="Paste or search HTS code…" oninput="searchHTS(this.value)" onblur="handleManualHTS()" autocomplete="off">
+              <span class="hts-check" id="htsCheck">✓</span>
               <div class="hts-dropdown" id="htsDropdown"></div>
             </div>
             <div class="rate-preview" id="ratePreview">
-              <div class="rp-code" id="rp-code">—</div>
-              <div class="rp-desc" id="rp-desc">—</div>
               <div class="rp-rates">
                 <div class="rp-rate"><span class="rl">Base</span><span class="rv" id="rp-base">—</span></div>
                 <div class="rp-rate s301" id="rp-301-wrap"><span class="rl">S.301</span><span class="rv" id="rp-301">—</span></div>
@@ -1135,6 +1143,8 @@ async function searchHTS(val) {
       selectedHTS = {code:'',desc:'',rate:0,cn301:0};
       document.getElementById('productDesc').value = '';
       document.getElementById('ratePreview').classList.remove('show');
+      document.getElementById('htsCheck').classList.remove('show');
+      document.getElementById('htsInput').classList.remove('hts-valid');
     }
     return;
   }
@@ -1253,7 +1263,14 @@ function handleManualHTS() {
 
 function updateRatePreview() {
   const preview = document.getElementById('ratePreview');
-  if (!selectedHTS.code || selectedHTS.rate === null) { preview.classList.remove('show'); return; }
+  const check = document.getElementById('htsCheck');
+  const input = document.getElementById('htsInput');
+  if (!selectedHTS.code || selectedHTS.rate === null) {
+    preview.classList.remove('show');
+    check.classList.remove('show');
+    input.classList.remove('hts-valid');
+    return;
+  }
   const origin = document.getElementById('originCountry').value;
   const fta = document.getElementById('ftaSelect').value;
   const ftaApplied = (fta==='usmca'&&(origin==='MX'||origin==='CA')) || (fta==='singapore'&&origin==='SG');
@@ -1263,8 +1280,6 @@ function updateRatePreview() {
   const s122 = (ftaApplied || s232 > 0) ? 0 : 10;
   const base = ftaApplied ? 0 : (selectedHTS.rate || 0);
   const eff = base + s301 + s232 + s122;
-  document.getElementById('rp-code').textContent = selectedHTS.code;
-  document.getElementById('rp-desc').textContent = selectedHTS.desc || '—';
   document.getElementById('rp-base').textContent = base.toFixed(1) + '%';
   document.getElementById('rp-301').textContent = s301 > 0 ? '+' + s301.toFixed(1) + '%' : '0.0%';
   document.getElementById('rp-301-wrap').style.display = '';
@@ -1273,6 +1288,14 @@ function updateRatePreview() {
   document.getElementById('rp-122').textContent = s122 > 0 ? '+' + s122.toFixed(1) + '%' : '0.0%';
   document.getElementById('rp-122-wrap').style.display = '';
   document.getElementById('rp-eff').textContent = eff.toFixed(1) + '%';
+  // Show green check if code was validated (not manual fallback)
+  if (!selectedHTS.manual) {
+    check.classList.add('show');
+    input.classList.add('hts-valid');
+  } else {
+    check.classList.remove('show');
+    input.classList.remove('hts-valid');
+  }
   preview.classList.add('show');
 }
 document.addEventListener('click', e => { if (!e.target.closest('.hts-wrap')) document.getElementById('htsDropdown').classList.remove('show'); });
@@ -1578,6 +1601,8 @@ function resetAll() {
   document.getElementById('uploadDivider').style.display = '';
   ['productDesc','htsInput','productValue','dutyOverride','unitQty'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ratePreview').classList.remove('show');
+  document.getElementById('htsCheck').classList.remove('show');
+  document.getElementById('htsInput').classList.remove('hts-valid');
   document.getElementById('shippingCost').value='0';
   document.getElementById('insuranceCost').value='0';
   document.getElementById('originCountry').value='CN';
