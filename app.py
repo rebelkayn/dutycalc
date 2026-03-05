@@ -582,7 +582,10 @@ def classify():
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.0-flash")
-        hint_codes = list(HTS_DB.items())[:200]
+        # Sample hint codes across all chapters (not just first 200)
+        all_codes = list(HTS_DB.items())
+        step = max(1, len(all_codes) // 200)
+        hint_codes = all_codes[::step][:200]
         hts_list = "\n".join([f"{k}: {v['desc']}" for k, v in hint_codes])
         if image_b64:
             prompt = f"""You are a customs classification expert. Analyze this commercial invoice.
@@ -612,6 +615,8 @@ Product: {description}\nReference HTS codes:\n{hts_list}\nReturn ONLY the JSON o
                 result["cn_301_rate"] = HTS_DB[parent]["cn_301"]
             else:
                 result["db_match"] = False
+                result.setdefault("base_rate", 0)
+                result.setdefault("cn_301_rate", 0)
         return jsonify(result)
     except json.JSONDecodeError:
         return jsonify({"error": "Could not parse AI response"}), 500

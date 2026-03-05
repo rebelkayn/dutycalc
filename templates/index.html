@@ -1059,11 +1059,13 @@ async function extractInvoice() {
   if (!fileB64) return;
   const btn = document.getElementById('extractBtn');
   btn.classList.add('btn-loading'); btn.disabled = true;
+  if (btn.querySelector('.btn-text')) btn.querySelector('.btn-text').textContent = 'Extracting…';
   try {
     const res = await fetch('/api/classify', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ image_b64: fileB64, image_mime: fileMime })
     });
+    if (!res.ok) throw new Error('Server returned ' + res.status);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     if (data.product_description) document.getElementById('productDesc').value = data.product_description;
@@ -1071,8 +1073,22 @@ async function extractInvoice() {
     if (data.currency) { document.getElementById('currency').value = data.currency; updateRate(); }
     if (data.shipping_cost) document.getElementById('shippingCost').value = parseFloat(data.shipping_cost)||0;
     if (data.insurance) document.getElementById('insuranceCost').value = parseFloat(data.insurance)||0;
-    if (data.country_of_origin) document.getElementById('originCountry').value = data.country_of_origin;
-    if (data.hts_code) { document.getElementById('htsInput').value = data.hts_code; selectedHTS = { code:data.hts_code, desc:data.hts_description||'', rate:data.base_rate, cn301:data.cn_301_rate }; }
+    if (data.country_of_origin) {
+      const sel = document.getElementById('originCountry');
+      // Try exact match, then 2-letter code
+      const code = data.country_of_origin.length === 2 ? data.country_of_origin.toUpperCase() : data.country_of_origin;
+      if ([...sel.options].find(o => o.value === code)) sel.value = code;
+    }
+    if (data.hts_code) {
+      document.getElementById('htsInput').value = data.hts_code;
+      selectedHTS = {
+        code: data.hts_code,
+        desc: data.hts_description||'',
+        rate: parseFloat(data.base_rate)||0,
+        cn301: parseFloat(data.cn_301_rate)||0
+      };
+    }
+    updateRatePreview();
     const sec = document.getElementById('extractedSection');
     sec.style.display = 'block';
     const conf = data.classification_confidence||'medium';
@@ -1089,32 +1105,18 @@ async function extractInvoice() {
         ${xrow('Terms',data.incoterms||'—')}
       </div>`;
     checkDeMin();
+    btn.style.background = 'var(--green)';
+    if (btn.querySelector('.btn-text')) btn.querySelector('.btn-text').textContent = '✓ Extracted';
+    setTimeout(() => { btn.style.background = ''; if (btn.querySelector('.btn-text')) btn.querySelector('.btn-text').textContent = 'Extract with AI'; }, 3000);
   } catch(e) {
-    // Fallback: load demo
-    const demo = { product_description:"Men's 100% Cotton T-Shirts, short sleeve, assorted S–XL", total_value:15800, currency:'CNY', country_of_origin:'CN', hts_code:'6109.10.00', hts_description:'T-shirts, singlets and other vests, of cotton, knitted', incoterms:'FOB Shanghai', classification_confidence:'high' };
-    document.getElementById('productDesc').value = demo.product_description;
-    document.getElementById('productValue').value = demo.total_value;
-    document.getElementById('currency').value = demo.currency; updateRate();
-    document.getElementById('originCountry').value = demo.country_of_origin;
-    document.getElementById('htsInput').value = demo.hts_code;
-    selectedHTS = { code:'6109.10.00', desc:demo.hts_description, rate:16.5, cn301:7.5 };
     const sec = document.getElementById('extractedSection');
     sec.style.display = 'block';
     document.getElementById('extractedContent').innerHTML = `
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.78rem;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-weight:600">Demo Extraction</span>
-          <span class="confidence conf-high">high</span>
-        </div>
-        ${xrow('Product',demo.product_description)}
-        ${xrow('Value','CNY 15,800')}
-        ${xrow('Origin','CN')}
-        ${xrow('HTS',demo.hts_code)}
-        ${xrow('Terms',demo.incoterms)}
+      <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.78rem;color:#b91c1c">
+        <strong>Extraction failed:</strong> ${e.message || 'Could not connect to AI service.'}
+        <div style="margin-top:6px;color:var(--muted)">Try again, or enter product details manually below.</div>
       </div>`;
-    btn.style.background = 'var(--green)';
-    btn.querySelector('.btn-text').textContent = '✓ Demo data loaded';
-    checkDeMin();
+    if (btn.querySelector('.btn-text')) btn.querySelector('.btn-text').textContent = 'Extract with AI';
   }
   btn.classList.remove('btn-loading'); btn.disabled = false;
 }
