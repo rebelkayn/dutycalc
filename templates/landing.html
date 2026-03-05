@@ -45,7 +45,7 @@ body {
 /* ═══════ NAV ═══════ */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 0 clamp(16px, 4vw, 40px); height: 64px;
+  padding: 0 clamp(16px, 4vw, 40px); height: 60px;
   display: flex; align-items: center; gap: 16px;
   transition: background 0.4s, border-color 0.3s;
 }
@@ -57,8 +57,15 @@ body {
   font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: white;
   text-decoration: none; display: flex; align-items: center; gap: 8px;
 }
-.nav-brand svg { color: var(--blue); }
 .nav-dot { color: var(--blue); }
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.75); text-decoration: none; flex-shrink: 0;
+  transition: all 0.2s;
+}
+.nav-avatar:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.4); color: white; }
 .nav-spacer { flex: 1; }
 .nav-links { display: flex; gap: 2px; }
 .nav-link {
@@ -121,8 +128,8 @@ body {
 }
 .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: nowrap; }
 @media (max-width: 480px) {
-  .hero-ctas { gap: 8px; }
-  .btn-hero { padding: 12px 18px; font-size: 0.82rem; flex: 1; text-align: center; justify-content: center; }
+  .hero-ctas { gap: 6px; }
+  .btn-hero { padding: 10px 12px; font-size: 0.73rem; flex: 1; text-align: center; justify-content: center; white-space: nowrap; }
 }
 .btn-hero {
   padding: 14px 32px; border-radius: 12px; font-size: 0.92rem; font-weight: 600;
@@ -319,7 +326,7 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
 <!-- ═══════ NAV ═══════ -->
 <nav class="nav" id="mainNav">
   <a class="nav-brand" href="/">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>iDuties<span class="nav-dot">.ai</span></span>
+    <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
   <div class="nav-spacer"></div>
   <div class="nav-links">
@@ -328,7 +335,9 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
   
   </div>
   {% if user %}
-    <a href="/dashboard" class="nav-cta">Dashboard</a>
+    <a href="/dashboard" class="nav-avatar" title="{{ user.email }}" aria-label="Account">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </a>
   {% else %}
     <a href="/signin" class="nav-cta">Sign In</a>
   {% endif %}
@@ -338,7 +347,7 @@ section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span> Agentic compliance infrastructure for US importers</div>
+    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span> Agentic Compliance Infrastructure</div>
     <h1>You're overpaying<br><em>10–15%</em> on every import.</h1>
     <p class="hero-sub">Misclassifications. Unused FTAs. Valuation errors. Your customs broker doesn't catch them — our AI does. Find the money you're gifting to the government.</p>
     <div class="hero-ctas">

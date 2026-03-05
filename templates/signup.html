@@ -41,14 +41,13 @@ body {
   position: sticky; top: 0; z-index: 100;
   background: #0A0A0A;
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  padding: 0 clamp(16px, 4vw, 32px); height: 56px;
+  padding: 0 clamp(16px, 4vw, 32px); height: 60px;
   display: flex; align-items: center;
 }
 .nav-brand {
   font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: white;
   display: flex; align-items: center; gap: 8px; text-decoration: none;
 }
-.nav-brand svg { color: #3B82F6; }
 .nav-dot { color: #3B82F6; }
 
 /* ── LAYOUT ── */
@@ -159,7 +158,6 @@ body {
 
 <nav class="nav">
   <a class="nav-brand" href="/">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
     <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
 </nav>

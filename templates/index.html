@@ -54,14 +54,13 @@ body {
 .nav {
   position: sticky; top: 0; z-index: 100;
   background: #0A0A0A;
-  padding: 0 clamp(16px, 4vw, 32px); height: 56px;
+  padding: 0 clamp(16px, 4vw, 32px); height: 60px;
   display: flex; align-items: center; gap: 16px;
 }
 .nav-brand {
   font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: white;
   display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-decoration: none;
 }
-.nav-brand svg { color: var(--blue); }
 .nav-dot { color: var(--blue); }
 .nav-spacer { flex: 1; }
 .nav-links { display: flex; gap: 2px; }
@@ -78,15 +77,21 @@ body {
   font-size: 0.78rem; font-weight: 600; color: #0A0A0A;
   background: white; border: none;
   text-decoration: none; transition: all 0.15s; flex-shrink: 0;
-  white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis;
 }
 .nav-auth-btn:hover { background: rgba(255,255,255,0.9); }
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.75); text-decoration: none; flex-shrink: 0;
+  transition: all 0.2s;
+}
+.nav-avatar:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.4); color: white; }
 @media (max-width: 500px) {
-  .nav { padding: 0 12px; height: 52px; gap: 8px; }
+  .nav { padding: 0 12px; gap: 8px; }
   .nav-link { font-size: 0.72rem; padding: 5px 8px; }
-  .nav-brand { font-size: 0.95rem; gap: 5px; }
-  .nav-brand svg { width: 16px; height: 16px; }
-  .nav-auth-btn { padding: 5px 10px; font-size: 0.7rem; max-width: 110px; }
+  .nav-brand { font-size: 0.95rem; }
+  .nav-auth-btn { padding: 5px 10px; font-size: 0.7rem; }
 }
 
 /* ═══════ WORKSPACE HEADER ═══════ */
@@ -562,7 +567,7 @@ body.embed-refund #panelRefund { display: block !important; }
 <!-- ═══════ NAV ═══════ -->
 <nav class="nav">
   <a class="nav-brand" href="/">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>iDuties<span class="nav-dot">.ai</span></span>
+    <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
   <div class="nav-spacer"></div>
   <div class="nav-links">
@@ -570,7 +575,9 @@ body.embed-refund #panelRefund { display: block !important; }
     <a class="nav-link" href="/refund-guide.html">Refund Guide</a>
   </div>
   {% if user %}
-    <a href="/signout" class="nav-auth-btn" title="Sign out">{{ user.email[:20] }}</a>
+    <a href="/dashboard" class="nav-avatar" title="{{ user.email }}" aria-label="Account">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </a>
   {% else %}
     <a href="/signin" class="nav-auth-btn">Sign In</a>
   {% endif %}
