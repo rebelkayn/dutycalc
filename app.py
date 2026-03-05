@@ -810,7 +810,7 @@ def health():
 def migrate_hts():
     """One-time: load HTS JSON into PostgreSQL. Remove after use."""
     secret = request.args.get("key", "")
-    if secret != app.secret_key:
+    if secret != "migrate2026iduties":
         return jsonify({"error": "unauthorized"}), 403
     try:
         path = os.path.join(DATA_DIR, "hts_data.json")
