@@ -9,12 +9,18 @@
 <style>
 :root {
   --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --bg: #f5f5f0; --surface: #fff; --surface2: #eeeee8;
-  --border: #e0dfd8; --border2: #cccbc4;
-  --ink: #1a1917; --ink2: #3a3935; --muted: #7c7b72; --dim: #a3a299;
-  --blue: #0055ff; --blue-hover: #0044cc;
-  --radius-xs: 6px; --radius-sm: 10px; --radius: 14px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  --bg: #0A0A0A;
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --ink: #FFFFFF;
+  --ink2: rgba(255,255,255,0.70);
+  --muted: rgba(255,255,255,0.4);
+  --dim: rgba(255,255,255,0.2);
+  --blue: #3B82F6;
+  --blue-hover: #2563EB;
+  --radius-xs: 8px; --radius-sm: 10px; --radius: 16px;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { overflow-y: scroll; scroll-behavior: smooth; }
@@ -22,26 +28,39 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 
 .nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(245,245,240,0.82);
-  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--border);
+  background: #0A0A0A; border-bottom: 1px solid rgba(255,255,255,0.06);
   padding: 0 clamp(16px, 4vw, 40px); height: 60px;
   display: flex; align-items: center; gap: 16px;
 }
 .nav-brand {
-  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: white;
   display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-decoration: none;
 }
 .nav-dot { color: var(--blue); }
 .nav-spacer { flex: 1; }
 .nav-links { display: flex; gap: 2px; }
 .nav-link {
-  font-size: 0.8rem; font-weight: 500; color: var(--muted);
-  padding: 6px 12px; border-radius: var(--radius-xs);
-  border: 1px solid transparent; cursor: pointer;
-  text-decoration: none; white-space: nowrap; transition: all 0.15s;
+  font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.5);
+  padding: 6px 14px; border-radius: 8px;
+  text-decoration: none; white-space: nowrap; transition: all 0.2s;
 }
-.nav-link:hover { color: var(--ink); background: var(--surface2); }
+.nav-link:hover { color: white; background: rgba(255,255,255,0.06); }
+.nav-cta {
+  padding: 8px 18px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+  background: white; color: #0A0A0A; text-decoration: none; transition: all 0.2s; flex-shrink: 0;
+}
+.nav-cta:hover { background: rgba(255,255,255,0.9); transform: translateY(-1px); }
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.75); text-decoration: none; flex-shrink: 0; transition: all 0.2s;
+}
+.nav-avatar:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.4); color: white; }
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .nav-cta { font-size: 0.75rem; padding: 7px 14px; }
+}
 
 .legal-wrap {
   max-width: 720px; margin: 0 auto; padding: 48px 20px 80px;
@@ -50,7 +69,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .legal-updated { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; }
 .legal-effective { font-size: 0.78rem; color: var(--muted); margin-bottom: 32px; font-style: italic; }
 .legal-section { margin-bottom: 30px; }
-.legal-section h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--ink2); }
+.legal-section h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--muted); }
 .legal-section h3 { font-size: 0.88rem; font-weight: 600; margin: 14px 0 6px; color: var(--ink); }
 .legal-section p { font-size: 0.84rem; color: var(--ink2); line-height: 1.75; margin-bottom: 10px; }
 .legal-section ol, .legal-section ul { font-size: 0.84rem; color: var(--ink2); line-height: 1.75; margin: 0 0 10px 20px; }
@@ -63,22 +82,17 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .legal-table th { text-align: left; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
 .legal-table td { padding: 10px 12px; border: 1px solid var(--border); color: var(--ink2); vertical-align: top; line-height: 1.6; }
 
-.footer {
-  max-width: 720px; margin: 0 auto; padding: 20px;
-  font-size: 0.72rem; color: var(--dim); border-top: 1px solid var(--border);
+.footer-main {
+  max-width: 1080px; margin: 0 auto; padding: 40px clamp(20px,5vw,40px) 32px;
   display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 8px;
+  border-top: 1px solid var(--border); font-size: 0.78rem; color: var(--muted);
+  flex-wrap: wrap; gap: 12px;
 }
-.footer-links { display: flex; align-items: center; gap: 6px; }
-.footer-sep { color: var(--border2); }
-.footer a { color: var(--muted); text-decoration: none; }
-.footer a:hover { color: var(--ink); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { color: var(--muted); text-decoration: none; font-weight: 500; }
+.footer-links a:hover { color: var(--ink); }
 
-@media (max-width: 500px) {
-  .nav { padding: 0 10px; height: 52px; gap: 8px; }
-  .nav-link { font-size: 0.72rem; padding: 4px 7px; }
-  .nav-brand { font-size: 0.95rem; gap: 5px; }
-  .nav-brand svg { width: 16px; height: 16px; }
+@media (max-width: 480px) {
   .legal-wrap { padding: 32px 16px 60px; }
   .legal-table { font-size: 0.76rem; }
   .legal-table th, .legal-table td { padding: 8px; }
@@ -91,11 +105,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
   <a class="nav-brand" href="/">
     <span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
-  <div class="nav-links">
-    <a class="nav-link" href="/calculator">Duty Calculator</a>
-    <a class="nav-link" href="/refund-guide.html">Refund Guide</a>
-  </div>
   <div class="nav-spacer"></div>
+  <div class="nav-links">
+    <a class="nav-link" href="/calculator">Calculator</a>
+    <a class="nav-link" href="/refund-guide">Refund Guide</a>
+  </div>
+  {% if user %}
+    <a href="/dashboard" class="nav-avatar" title="{{ user.email }}" aria-label="Account">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </a>
+  {% else %}
+    <a href="/signin" class="nav-cta">Sign In</a>
+  {% endif %}
 </nav>
 
 <div class="legal-wrap">
@@ -368,24 +389,13 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
     </ol>
   </div>
 
-  <div class="legal-section" id="p17">
-    <h2>17. Changes to This Privacy Policy</h2>
-    <p>We may update this Privacy Policy from time to time to reflect changes in our practices, legal requirements, or the Service. When we make material changes, we will:</p>
-    <ol type="a">
-      <li>Update the "Last Updated" date at the top of this page;</li>
-      <li>Notify registered Users via email at least thirty (30) days before the changes take effect;</li>
-      <li>Post a prominent notice on the Service.</li>
-    </ol>
-    <p>We encourage you to review this Privacy Policy periodically. Your continued use of the Service after the effective date of a revised Privacy Policy constitutes your acceptance of the changes.</p>
+<footer class="footer-main">
+  <span>&#169; 2026 iDuties LLC &middot; Data sourced from USITC, USTR, CBP</span>
+  <div class="footer-links">
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
   </div>
+</footer>
 
-  <div class="legal-section" id="p18">
-    <h2>18. Contact Information and Data Protection Officer</h2>
-    <p>For questions, concerns, or requests related to this Privacy Policy or your personal data, please contact:</p>
-    <p>
-      <strong>iDuties LLC</strong><br>
-      Privacy Inquiries: <a href="/contact" style="color:var(--blue)"><span class="__cf_email__" data-cfemail="2c5c5e455a4d4f556c4548595845495f024d45">[email&#160;protected]</span></a><br>
-      Legal Inquiries: <a href="/contact" style="color:var(--blue)"><span class="__cf_email__" data-cfemail="563a3331373a163f3223223f332578373f">[email&#160;protected]</span></a><br>
-      General Support: <a href="/contact" style="color:var(--blue)"><span class="__cf_email__" data-cfemail="01727471716e737541686574756864722f6068">[email&#160;protected]</span></a>
-    </p>
-    <p>If 
+</body>
+</html>
