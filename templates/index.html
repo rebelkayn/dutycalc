@@ -98,8 +98,8 @@ body {
 }
 .ws-inner { max-width: 800px; margin: 0 auto; padding: 20px 20px 0; }
 .ws-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-.ws-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; letter-spacing: -0.03em; margin-bottom: 2px; }
-.ws-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.ws-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; letter-spacing: -0.03em; margin-bottom: 2px; text-align: left; }
+.ws-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.5; text-align: left; }
 .ws-status {
   display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0;
 }
@@ -127,10 +127,17 @@ body {
   color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent;
   cursor: pointer; transition: all 0.15s; white-space: nowrap;
   margin-bottom: -1px; letter-spacing: -0.01em;
+  position: relative;
+}
+.ws-tab::after {
+  content: ''; position: absolute; bottom: -1px; left: 20px; right: 20px;
+  height: 2px; background: transparent; transition: background 0.15s;
 }
 .ws-tab:first-child { padding-left: 0; }
+.ws-tab:first-child::after { left: 0; }
 .ws-tab:hover { color: var(--ink); }
-.ws-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.ws-tab.active { color: var(--blue); border-bottom-color: transparent; }
+.ws-tab.active::after { background: var(--blue); }
 .ws-tab-icon { display: none; }
 
 /* ═══════ WORKSPACE PANELS ═══════ */
