@@ -3,504 +3,524 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>iDuties.ai — Agentic Trade Intelligence for US Importers</title>
-<meta name="description" content="Stop guessing on duties. iDuties.ai uses AI to classify, calculate, and defend every import — with built-in IEEPA refund recovery, audit-ready rationale memos, and real-time tariff monitoring.">
-<meta name="keywords" content="import duty calculator, IEEPA refund, HTS classification, customs audit, Section 301, Section 122, landed cost, trade compliance">
+<title>iDuties — Stop Overpaying on Import Duties</title>
+<meta name="description" content="AI-powered trade compliance. Find the 10–15% you're gifting to customs every year. Classification automation, refund recovery, and real-time risk monitoring.">
+<meta property="og:title" content="iDuties — Stop Overpaying on Import Duties">
+<meta property="og:description" content="AI-powered trade compliance that finds the 10–15% you're overpaying on every import.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iduties.ai">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #F5F5F0; --surface: #FFFFFF; --surface2: #F0F0EB;
-  --border: rgba(0,0,0,0.06); --border2: rgba(0,0,0,0.10);
-  --ink: #1A1A1A; --ink2: #3D3D3D; --muted: #7A7A7A; --dim: #ACACAC;
-  --blue: #0055FF; --blue-hover: #003FCC; --blue-soft: rgba(0,85,255,0.06);
-  --green: #0F7B3F; --green-bg: rgba(15,123,63,0.06);
-  --amber: #9A6700; --amber-bg: rgba(154,103,0,0.06);
-  --radius: 14px; --radius-sm: 10px; --radius-xs: 7px;
-  --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.03);
-  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  --mono: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --ink: #0A0A0A;
+  --ink2: #2A2A2A;
+  --muted: #6B6B6B;
+  --dim: #A0A0A0;
+  --border: rgba(0,0,0,0.06);
+  --blue: #0055FF;
+  --blue-soft: rgba(0,85,255,0.06);
+  --green: #0F7B3F;
+  --green-bg: rgba(15,123,63,0.06);
+  --amber: #9A6700;
+  --amber-bg: rgba(154,103,0,0.06);
+  --red: #D62828;
+  --hero-bg: #0A0A0A;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'SF Mono', 'Fira Code', monospace;
 }
-html { scroll-behavior: smooth; overflow-y: scroll; }
+html { scroll-behavior: smooth; }
 body {
   font-family: var(--font); background: var(--bg); color: var(--ink);
-  min-height: 100vh; -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* ═══════ NAV ═══════ */
 .nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(245,245,240,0.82);
-  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 20px; height: 56px;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 0 clamp(16px, 4vw, 40px); height: 64px;
   display: flex; align-items: center; gap: 16px;
+  transition: background 0.4s, border-color 0.3s;
+}
+.nav.scrolled {
+  background: rgba(10,10,10,0.85);
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .nav-brand {
-  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
-  display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-decoration: none;
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: white;
+  text-decoration: none; display: flex; align-items: center; gap: 8px;
 }
 .nav-brand svg { color: var(--blue); }
 .nav-dot { color: var(--blue); }
 .nav-spacer { flex: 1; }
 .nav-links { display: flex; gap: 2px; }
 .nav-link {
-  font-size: 0.8rem; font-weight: 500; color: var(--muted);
-  padding: 6px 12px; border-radius: var(--radius-xs);
-  border: 1px solid transparent; cursor: pointer;
-  text-decoration: none; white-space: nowrap; transition: all 0.15s;
+  font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.5);
+  padding: 6px 14px; border-radius: 8px; text-decoration: none; transition: all 0.2s;
 }
-.nav-link:hover { color: var(--ink); background: var(--surface2); }
-.nav-link.active { color: var(--ink); background: var(--surface); border-color: var(--border2); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-.nav-ticker {
-  display: none; align-items: center;
-  border: 1px solid var(--border); border-radius: var(--radius-xs);
-  background: var(--surface); overflow: hidden;
+.nav-link:hover { color: white; background: rgba(255,255,255,0.06); }
+.nav-cta {
+  padding: 8px 18px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+  background: white; color: var(--ink); text-decoration: none; transition: all 0.2s;
 }
-.ticker-item {
-  display: flex; align-items: center; gap: 5px;
-  padding: 5px 10px; font-size: 0.72rem; font-weight: 500;
-  border-right: 1px solid var(--border); white-space: nowrap;
-}
-.ticker-item:last-child { border: none; }
-.ticker-label { color: var(--muted); }
-.ticker-value { color: var(--ink); font-variant-numeric: tabular-nums; }
-.ticker-dot { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
-.s301-active { color: var(--amber); }
-@media (min-width: 860px) { .nav-ticker { display: flex; } }
-.nav-auth-btn {
-  padding: 6px 14px; border-radius: var(--radius-xs);
-  font-size: 0.78rem; font-weight: 600; color: var(--blue);
-  border: 1.5px solid var(--blue); text-decoration: none;
-  transition: all 0.15s; flex-shrink: 0; white-space: nowrap;
-  max-width: 160px; overflow: hidden; text-overflow: ellipsis;
-}
-.nav-auth-btn:hover { background: var(--blue); color: white; }
-@media (max-width: 500px) {
-  .nav { padding: 0 10px; height: 52px; gap: 8px; }
-  .nav-link { font-size: 0.72rem; padding: 4px 7px; }
-  .nav-brand { font-size: 0.95rem; gap: 5px; }
-  .nav-brand svg { width: 16px; height: 16px; }
-  .nav-auth-btn { padding: 5px 10px; font-size: 0.7rem; max-width: 110px; }
-  .ieepa-btn { padding: 9px 14px; font-size: 0.76rem; }
+.nav-cta:hover { background: rgba(255,255,255,0.9); transform: translateY(-1px); }
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .nav-cta { font-size: 0.75rem; padding: 7px 14px; }
 }
 
-/* ═══════ IEEPA BANNER ═══════ */
-.ieepa-banner {
-  background: linear-gradient(135deg, #0C1D2E 0%, #162B44 50%, #1A3350 100%);
-  color: #fff; overflow: hidden; position: relative;
+/* ═══════ HERO ═══════ */
+.hero {
+  position: relative; display: flex; align-items: center;
+  justify-content: center; background: var(--hero-bg); overflow: hidden;
+  padding: 100px 24px 64px; text-align: center;
 }
-.ieepa-banner::before {
-  content: ''; position: absolute; top: -50%; right: -20%; width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(0,85,255,0.12) 0%, transparent 70%);
-  pointer-events: none;
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,85,255,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(0,85,255,0.04) 0%, transparent 60%);
 }
-.ieepa-inner {
-  max-width: 800px; margin: 0 auto; padding: 28px 20px;
-  position: relative; z-index: 1;
+.hero-grid {
+  position: absolute; inset: 0; opacity: 0.03;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+  background-size: 80px 80px;
 }
-.ieepa-eyebrow {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 20px; padding: 4px 12px 4px 8px;
-  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 14px;
-}
-.ieepa-eyebrow-dot { width: 6px; height: 6px; border-radius: 3px; background: #4ADE80; flex-shrink: 0; }
-.ieepa-h { font-size: clamp(1.3rem, 3.5vw, 1.75rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 10px; }
-.ieepa-h span { color: #60A5FA; }
-.ieepa-p { font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.55; margin-bottom: 18px; max-width: 560px; }
-.ieepa-stats { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
-.ieepa-stat-val { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: #fff; }
-.ieepa-stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
-.ieepa-actions { display: flex; gap: 10px; flex-wrap: nowrap; }
-.ieepa-btn {
-  padding: 10px 18px; border-radius: var(--radius-sm);
-  font-family: var(--font); font-size: 0.82rem; font-weight: 600;
-  cursor: pointer; transition: all 0.15s; border: none; letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-.ieepa-btn-primary { background: #fff; color: var(--ink); text-decoration: none; }
-.ieepa-btn-primary:hover { background: #F0F0F0; }
-.ieepa-btn-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.15); text-decoration: none; }
-.ieepa-btn-ghost:hover { background: rgba(255,255,255,0.14); }
-
-/* ═══════ HERO CTA ═══════ */
-.hero-cta {
-  text-align: center; padding: 56px 20px 48px;
-  max-width: 800px; margin: 0 auto;
-}
-.hero-tagline {
-  font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 700;
-  letter-spacing: -0.04em; line-height: 1.15; color: var(--ink);
-  max-width: 680px; margin: 0 auto 16px;
-}
-.hero-tagline em { font-style: normal; color: var(--blue); }
-.hero-sub {
-  font-size: 1rem; color: var(--muted); line-height: 1.6;
-  max-width: 520px; margin: 0 auto 28px;
-}
-.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.btn-hero {
+.hero-content { position: relative; max-width: 800px; }
+.hero-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 28px; border-radius: var(--radius-sm);
-  font-family: var(--font); font-size: 0.92rem; font-weight: 700;
-  text-decoration: none; transition: all 0.2s; letter-spacing: -0.01em;
+  padding: 6px 16px; border-radius: 100px; margin-bottom: 32px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: rgba(255,255,255,0.5);
 }
-.btn-hero-primary { background: var(--blue); color: #fff; }
-.btn-hero-primary:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,85,255,0.25); }
-.btn-hero-secondary { background: var(--surface); color: var(--ink); border: 1.5px solid var(--border2); }
-.btn-hero-secondary:hover { background: var(--surface2); border-color: var(--ink); }
+.hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s ease infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+.hero h1 {
+  font-family: var(--serif); font-size: clamp(2.8rem, 7vw, 5.2rem);
+  font-weight: 400; font-style: italic; line-height: 1.05;
+  letter-spacing: -0.03em; color: white; margin-bottom: 28px;
+}
+.hero h1 em {
+  font-style: normal; color: var(--blue);
+  background: linear-gradient(135deg, #3B82F6, #0055FF);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero-sub {
+  font-size: clamp(1rem, 2.2vw, 1.2rem); line-height: 1.6;
+  color: rgba(255,255,255,0.45); max-width: 540px; margin: 0 auto 40px;
+}
+.hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-hero {
+  padding: 14px 32px; border-radius: 12px; font-size: 0.92rem; font-weight: 600;
+  font-family: var(--font); text-decoration: none; transition: all 0.25s; cursor: pointer;
+  border: none; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-hero-fill {
+  background: white; color: var(--ink);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3);
+}
+.btn-hero-fill:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(255,255,255,0.2), 0 8px 30px rgba(0,0,0,0.4); }
+.btn-hero-ghost {
+  background: transparent; color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.btn-hero-ghost:hover { color: white; border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+.hero-stat-bar {
+  display: flex; justify-content: center; gap: 0; margin-top: 48px;
+  border: 1px solid rgba(255,255,255,0.06); border-radius: 14px;
+  overflow: hidden; background: rgba(255,255,255,0.02);
+}
+.hero-stat {
+  padding: 20px 32px; text-align: center; flex: 1;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.hero-stat:last-child { border: none; }
+.hero-stat-val {
+  font-family: var(--mono); font-size: 1.4rem; font-weight: 700;
+  color: white; letter-spacing: -0.02em; margin-bottom: 4px;
+}
+.hero-stat-label { font-size: 0.68rem; color: rgba(255,255,255,0.35); font-weight: 500; letter-spacing: 0.02em; }
+@media (max-width: 640px) {
+  .hero-stat-bar { flex-direction: column; margin: 48px 0 0; }
+  .hero-stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .hero-stat:last-child { border: none; }
+  .hero-stat-val { margin-bottom: 0; font-size: 1.2rem; }
+}
 
-/* ═══════ SOCIAL PROOF ═══════ */
-.proof {
-  padding: 0 20px 40px; text-align: center;
+/* ═══════ SECTION COMMON ═══════ */
+section { padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 40px); }
+.section-inner { max-width: 1080px; margin: 0 auto; }
+.section-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--blue); margin-bottom: 16px;
 }
-.proof-text {
-  font-size: 0.78rem; color: var(--dim); letter-spacing: 0.04em;
-  text-transform: uppercase; font-weight: 600;
+.section-label-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); }
+.section-h {
+  font-family: var(--serif); font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 400; line-height: 1.1; letter-spacing: -0.03em;
+  color: var(--ink); margin-bottom: 16px;
+}
+.section-sub {
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem); line-height: 1.6;
+  color: var(--muted); max-width: 540px; margin-bottom: 48px;
 }
 
-/* ═══════ FEATURES ═══════ */
-.features-section {
-  max-width: 860px; margin: 0 auto; padding: 40px 20px 60px;
-}
-.features-section-label {
-  font-size: 0.7rem; font-weight: 700; color: var(--blue);
-  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
-}
-.features-section-h {
-  font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 700;
-  letter-spacing: -0.03em; line-height: 1.25; margin-bottom: 8px;
-}
-.features-section-sub {
-  font-size: 0.9rem; color: var(--muted); line-height: 1.55; margin-bottom: 36px;
-  max-width: 540px;
-}
-.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 600px) { .feature-grid { grid-template-columns: 1fr; } }
-.feature-card {
+/* ═══════ PILLARS ═══════ */
+.pillars { background: var(--bg); }
+.pillar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media (max-width: 860px) { .pillar-grid { grid-template-columns: 1fr; gap: 16px; } }
+.pillar {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 24px; position: relative;
-  box-shadow: var(--shadow); transition: all 0.2s;
+  border-radius: var(--radius); padding: 36px 32px;
+  transition: all 0.3s; position: relative; overflow: hidden;
 }
-.feature-card:hover { border-color: var(--border2); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-.feature-icon {
-  width: 40px; height: 40px; border-radius: 10px;
+.pillar:hover { border-color: rgba(0,85,255,0.15); box-shadow: 0 8px 40px rgba(0,0,0,0.04); transform: translateY(-2px); }
+.pillar-icon {
+  width: 48px; height: 48px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; margin-bottom: 14px;
+  font-size: 1.3rem; margin-bottom: 20px;
 }
-.fi-blue { background: rgba(0,85,255,0.08); }
-.fi-green { background: rgba(15,123,63,0.08); }
-.fi-amber { background: rgba(154,103,0,0.08); }
-.fi-red { background: rgba(214,40,40,0.06); }
-.feature-card h3 {
-  font-size: 0.92rem; font-weight: 700; letter-spacing: -0.02em;
-  margin-bottom: 6px; line-height: 1.3;
+.pillar-icon-blue { background: var(--blue-soft); }
+.pillar-icon-green { background: var(--green-bg); }
+.pillar-icon-amber { background: var(--amber-bg); }
+.pillar h3 {
+  font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--ink); margin-bottom: 10px;
 }
-.feature-card p {
-  font-size: 0.82rem; color: var(--muted); line-height: 1.55;
+.pillar p { font-size: 0.88rem; line-height: 1.6; color: var(--muted); margin-bottom: 16px; }
+.pillar-features { list-style: none; }
+.pillar-features li {
+  font-size: 0.8rem; color: var(--ink2); padding: 6px 0;
+  border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
 }
-.feature-badge {
-  position: absolute; top: 14px; right: 14px;
-  font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px;
-}
-.fb-green { background: var(--green-bg); color: var(--green); }
-.fb-amber { background: var(--amber-bg); color: var(--amber); }
-.fb-blue { background: var(--blue-soft); color: var(--blue); }
+.pillar-features li:first-child { border: none; }
+.pf-check { color: var(--green); font-size: 0.75rem; flex-shrink: 0; }
+.pf-check-blue { color: var(--blue); }
+.pf-check-amber { color: var(--amber); }
 
-/* ═══════ COMPARISON TABLE ═══════ */
-.compare-section {
-  max-width: 860px; margin: 0 auto; padding: 20px 20px 60px;
+/* ═══════ LEAKS ═══════ */
+.leaks { background: var(--hero-bg); color: white; }
+.leaks .section-label { color: rgba(255,255,255,0.4); }
+.leaks .section-label-dot { background: rgba(255,255,255,0.3); }
+.leaks .section-h { color: white; }
+.leaks .section-sub { color: rgba(255,255,255,0.4); }
+.leak-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 860px) { .leak-cards { grid-template-columns: 1fr; } }
+.leak-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius); padding: 32px 28px; transition: all 0.3s;
 }
-.compare-table {
-  width: 100%; border-collapse: separate; border-spacing: 0;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
-  box-shadow: var(--shadow);
+.leak-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+.leak-num {
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 700;
+  color: rgba(255,255,255,0.2); letter-spacing: 0.06em; margin-bottom: 16px;
 }
-.compare-table th, .compare-table td {
-  padding: 14px 18px; text-align: left; font-size: 0.82rem;
-  border-bottom: 1px solid var(--border);
+.leak-card h4 {
+  font-size: 1.05rem; font-weight: 700; color: white;
+  letter-spacing: -0.02em; margin-bottom: 8px;
 }
-.compare-table th {
-  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.05em; color: var(--muted);
+.leak-card p { font-size: 0.84rem; line-height: 1.6; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+.leak-example {
+  padding: 14px 16px; border-radius: 10px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
 }
-.compare-table th:first-child { color: var(--ink); }
-.compare-table th:last-child { color: var(--blue); }
-.compare-table td { color: var(--ink2); }
-.compare-table td:first-child { font-weight: 600; color: var(--ink); }
-.compare-table td:nth-child(2) { color: var(--dim); }
-.compare-table td:last-child { color: var(--ink); font-weight: 500; }
-.compare-table tr:last-child td { border-bottom: none; }
-.compare-table .check { color: var(--green); font-weight: 700; }
-.compare-table .x { color: var(--dim); }
-@media (max-width: 600px) {
-  .compare-table th, .compare-table td { padding: 10px 12px; font-size: 0.75rem; }
+.leak-example-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 8px; }
+.leak-example p { font-size: 0.78rem; line-height: 1.5; color: rgba(255,255,255,0.55); margin: 0; }
+.leak-example strong { color: #ef4444; font-weight: 700; }
+
+/* ═══════ DIFFERENTIATOR ═══════ */
+.diff { background: var(--surface); }
+.diff-table-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden;
+}
+.diff-table { width: 100%; border-collapse: collapse; }
+.diff-table th {
+  padding: 14px 20px; font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.diff-table th:first-child { color: var(--ink); }
+.diff-table th:last-child { color: var(--blue); }
+.diff-table td {
+  padding: 16px 20px; font-size: 0.84rem; line-height: 1.5;
+  color: var(--ink2); border-bottom: 1px solid var(--border); vertical-align: top;
+}
+.diff-table tr:last-child td { border: none; }
+.diff-table td:last-child { color: var(--ink); font-weight: 500; }
+.diff-table tbody tr { transition: background 0.15s; }
+.diff-table tbody tr:hover { background: var(--blue-soft); }
+@media (max-width: 700px) {
+  .diff-table th, .diff-table td { padding: 12px 14px; font-size: 0.78rem; }
 }
 
-/* ═══════ LEGAL CALLOUT ═══════ */
-.legal-section {
-  max-width: 860px; margin: 0 auto; padding: 0 20px 60px;
+/* ═══════ CTA ═══════ */
+.cta-section {
+  background: var(--bg); text-align: center;
+  padding: clamp(64px, 10vw, 100px) 24px;
 }
-.legal-card {
-  background: linear-gradient(135deg, #0C1D2E 0%, #162B44 100%);
-  color: #fff; border-radius: var(--radius); padding: 36px 32px;
-  position: relative; overflow: hidden;
+.cta-inner { max-width: 600px; margin: 0 auto; }
+.cta-h {
+  font-family: var(--serif); font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400; line-height: 1.1; letter-spacing: -0.03em;
+  color: var(--ink); margin-bottom: 16px;
 }
-.legal-card::before {
-  content: ''; position: absolute; top: -30%; right: -10%;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(0,85,255,0.1) 0%, transparent 70%);
-  pointer-events: none;
+.cta-sub { font-size: 1rem; line-height: 1.6; color: var(--muted); margin-bottom: 32px; }
+.btn-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 36px; border-radius: 12px;
+  background: var(--ink); color: white;
+  font-family: var(--font); font-size: 0.95rem; font-weight: 600;
+  text-decoration: none; border: none; cursor: pointer; transition: all 0.25s;
 }
-.legal-eyebrow {
-  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.08em; color: rgba(255,255,255,0.5); margin-bottom: 12px;
-}
-.legal-h {
-  font-size: clamp(1.1rem, 2.5vw, 1.4rem); font-weight: 700;
-  letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 14px;
-  max-width: 500px;
-}
-.legal-p {
-  font-size: 0.85rem; color: rgba(255,255,255,0.6); line-height: 1.6;
-  max-width: 560px; margin-bottom: 22px;
-}
-.legal-facts { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 24px; }
-.legal-fact-val {
-  font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 2px;
-}
-.legal-fact-label {
-  font-size: 0.66rem; color: rgba(255,255,255,0.4); text-transform: uppercase;
-  letter-spacing: 0.04em; font-weight: 600;
-}
-.legal-cta {
-  display: inline-flex; padding: 10px 20px; border-radius: var(--radius-sm);
-  font-family: var(--font); font-size: 0.84rem; font-weight: 600;
-  background: #fff; color: var(--ink); text-decoration: none;
-  transition: all 0.15s;
-}
-.legal-cta:hover { background: #F0F0F0; }
-
-/* ═══════ BOTTOM CTA ═══════ */
-.bottom-cta {
-  text-align: center; padding: 40px 20px 80px;
-  max-width: 800px; margin: 0 auto;
-}
-.bottom-cta h2 {
-  font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 700;
-  letter-spacing: -0.03em; margin-bottom: 8px;
-}
-.bottom-cta p {
-  font-size: 0.9rem; color: var(--muted); margin-bottom: 24px;
-  max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.55;
-}
+.btn-cta:hover { background: #222; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+.cta-note { margin-top: 16px; font-size: 0.75rem; color: var(--dim); }
 
 /* ═══════ FOOTER ═══════ */
-.footer {
-  border-top: 1px solid var(--border);
-  max-width: 800px; margin: 0 auto; padding: 20px;
+.footer-main {
+  max-width: 1080px; margin: 0 auto; padding: 40px clamp(20px,5vw,40px) 32px;
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.72rem; color: var(--dim); flex-wrap: wrap; gap: 8px;
+  border-top: 1px solid var(--border); font-size: 0.78rem; color: var(--muted);
+  flex-wrap: wrap; gap: 12px;
 }
-.footer-links { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.footer-sep { color: var(--border2); }
-.footer a { color: var(--muted); text-decoration: none; }
-.footer a:hover { color: var(--ink); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { color: var(--muted); text-decoration: none; font-weight: 500; }
+.footer-links a:hover { color: var(--ink); }
+
+/* ═══════ ANIMATIONS ═══════ */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
 </style>
 </head>
 <body>
 
 <!-- ═══════ NAV ═══════ -->
-<nav class="nav">
+<nav class="nav" id="mainNav">
   <a class="nav-brand" href="/">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-    <span>iDuties<span class="nav-dot">.ai</span></span>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>iDuties<span class="nav-dot">.ai</span></span>
   </a>
+  <div class="nav-spacer"></div>
   <div class="nav-links">
-    <a class="nav-link" href="/calculator">Duty Calculator</a>
+    <a class="nav-link" href="/calculator">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund Guide</a>
     {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
   </div>
-  <div class="nav-spacer"></div>
-  <div class="nav-ticker">
-    <div class="ticker-item"><div class="ticker-dot"></div><span class="ticker-label">S.301</span><span class="ticker-value s301-active">Active</span></div>
-    <div class="ticker-item"><span class="ticker-label">De Min</span><span class="ticker-value">$800</span></div>
-  </div>
   {% if user %}
-    <a href="/signout" class="nav-auth-btn" title="Sign out">{{ user.email[:20] }}</a>
+    <a href="/dashboard" class="nav-cta">Dashboard</a>
   {% else %}
-    <a href="/signin" class="nav-auth-btn">Sign In</a>
+    <a href="/signin" class="nav-cta">Sign In</a>
   {% endif %}
 </nav>
 
-<!-- ═══════ IEEPA BANNER ═══════ -->
-<section class="ieepa-banner">
-  <div class="ieepa-inner">
-    <div class="ieepa-eyebrow"><span class="ieepa-eyebrow-dot"></span>Supreme Court Ruling · Feb 20, 2026</div>
-    <h2 class="ieepa-h">IEEPA tariffs ruled <span>unlawful.</span><br>You may be owed a refund.</h2>
-    <p class="ieepa-p">The Supreme Court held 6–3 that IEEPA does not authorize presidential tariffs. Over $175 billion in duties were collected under this authority. Importers of record have 180 days from liquidation to file a protest and claim a refund from CBP.</p>
-    <div class="ieepa-stats">
-      <div><div class="ieepa-stat-val">$175B</div><div class="ieepa-stat-label">IEEPA Duties Collected</div></div>
-      <div><div class="ieepa-stat-val">301K+</div><div class="ieepa-stat-label">Importers Affected</div></div>
-      <div><div class="ieepa-stat-val">180 days</div><div class="ieepa-stat-label">Protest Window</div></div>
+<!-- ═══════ HERO ═══════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span> 29,807 HTS codes · USITC 2026 Rev 4 · Updated daily</div>
+    <h1>You're overpaying<br><em>10–15%</em> on every import.</h1>
+    <p class="hero-sub">Misclassifications. Unused FTAs. Valuation errors. Your customs broker doesn't catch them — our AI does. Find the money you're gifting to the government.</p>
+    <div class="hero-ctas">
+      <a href="/calculator" class="btn-hero btn-hero-fill">Calculate Your Duties →</a>
+      <a href="/calculator#ieepa" class="btn-hero btn-hero-ghost">Check IEEPA Refund</a>
     </div>
-    <div class="ieepa-actions">
-      <a class="ieepa-btn ieepa-btn-primary" href="/refund-guide.html">How Refunds Work →</a>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════ HERO CTA ═══════ -->
-<section class="hero-cta">
-  <h1 class="hero-tagline">Your broker is guessing.<br><em>We're verifying.</em></h1>
-  <p class="hero-sub">Upload an invoice, get a classification, a landed cost, and a legal rationale — in 15 seconds. iDuties is agentic trade intelligence for the post-IEEPA era.</p>
-  <div class="hero-actions">
-    <a class="btn-hero btn-hero-primary" href="/calculator">Open Calculator →</a>
-  </div>
-</section>
-
-<!-- ═══════ FEATURES ═══════ -->
-<section class="features-section" id="features">
-  <div class="features-section-label">Capabilities</div>
-  <h2 class="features-section-h">Beyond calculation. Defense-grade trade intelligence.</h2>
-  <p class="features-section-sub">Legacy tools give you a number. iDuties gives you a legal rationale, a refund strategy, and real-time risk monitoring.</p>
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <span class="feature-badge fb-green">Immediate ROI</span>
-      <div class="feature-icon fi-green">💰</div>
-      <h3>Refund Hunter</h3>
-      <p>Retroactive audit of your ACE reports to identify every dollar paid under now-illegal IEEPA tariffs. You're not spending $500/mo — you're investing it to recover six or seven figures in refunds.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon fi-blue">🛡️</div>
-      <h3>Audit-Armor Engine</h3>
-      <p>For every HTS classification, the AI generates a Rationale Memo citing specific CBP CROSS rulings and General Rules of Interpretation. If Customs asks why — download the defense packet, no lawyer needed.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-badge fb-amber">Section 122</span>
-      <div class="feature-icon fi-amber">⏱️</div>
-      <h3>Section 122 Clock</h3>
-      <p>The 15% surcharge expires ~July 24. Our Inventory Duty Forecaster predicts total landed cost for July 20th (under S.122) vs July 28th — so your CFO knows exactly when to pull the trigger on inventory.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon fi-blue">📡</div>
-      <h3>Self-Correcting Supply Chain</h3>
-      <p>If a new Section 301 investigation launches on Tuesday, iDuties flags every affected SKU in your catalog by Wednesday morning. Proactive risk management, not border surprises.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon fi-green">📄</div>
-      <h3>Multimodal Classification</h3>
-      <p>Upload an invoice photo, a scanned PDF, even handwritten notes — our Vision AI reads the actual document and assigns a 10-digit HTS code. Time-to-entry drops from 15 minutes to 15 seconds.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-badge fb-blue">Coming Soon</span>
-      <div class="feature-icon fi-amber">🔍</div>
-      <h3>Exclusion Hunter</h3>
-      <p>Our AI scrapes the Federal Register daily. When your specific HTS code gets a Section 301 exclusion, we notify you: "Your last 3 shipments are now eligible for a 25% credit."</p>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════ COMPARISON TABLE ═══════ -->
-<section class="compare-section">
-  <div class="features-section-label">Why switch</div>
-  <h2 class="features-section-h" style="margin-bottom:24px">Legacy software records data. iDuties defends it.</h2>
-
-  <table class="compare-table">
-    <thead>
-      <tr>
-        <th>Capability</th>
-        <th>Legacy Trade Software</th>
-        <th>iDuties (Agentic)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>HTS Classification</td>
-        <td class="x">Manual search / keyword</td>
-        <td class="check">Contextual Vision — reads the invoice</td>
-      </tr>
-      <tr>
-        <td>Audit Defense</td>
-        <td class="x">Call an expensive consultant</td>
-        <td class="check">Automated rationale memos included</td>
-      </tr>
-      <tr>
-        <td>Data Ingestion</td>
-        <td class="x">Manual entry / clean CSVs only</td>
-        <td class="check">PDFs, scans, handwritten notes</td>
-      </tr>
-      <tr>
-        <td>Refund Recovery</td>
-        <td class="x">None</td>
-        <td class="check">Live IEEPA / Section 301 tracking</td>
-      </tr>
-      <tr>
-        <td>2026 Rules</td>
-        <td class="x">Requires manual update</td>
-        <td class="check">Live regulatory stream — real-time</td>
-      </tr>
-      <tr>
-        <td>Section 122 Forecasting</td>
-        <td class="x">Not available</td>
-        <td class="check">Inventory timing optimization</td>
-      </tr>
-    </tbody>
-  </table>
-</section>
-
-<!-- ═══════ LEGAL CALLOUT ═══════ -->
-<section class="legal-section">
-  <div class="legal-card">
-    <div class="legal-eyebrow">The Legal Reality</div>
-    <h2 class="legal-h">"My broker told me to pay that" is not a valid legal defense.</h2>
-    <p class="legal-p">Under the Customs Modernization Act, the Importer of Record — not the broker — is legally responsible for classification accuracy. CBP expects you to audit your own filings. "Reasonable care" is a specific legal standard.</p>
-    <div class="legal-facts">
-      <div>
-        <div class="legal-fact-val">Importer of Record</div>
-        <div class="legal-fact-label">Legally responsible</div>
+    <div class="hero-stat-bar">
+      <div class="hero-stat">
+        <div class="hero-stat-val">29,807</div>
+        <div class="hero-stat-label">HTS codes in database</div>
       </div>
-      <div>
-        <div class="legal-fact-val">Reasonable Care</div>
-        <div class="legal-fact-label">Legal standard required</div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">$175B</div>
+        <div class="hero-stat-label">IEEPA duties refundable</div>
       </div>
-      <div>
-        <div class="legal-fact-val">You Know Your Product</div>
-        <div class="legal-fact-label">CBP's position</div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">300K+</div>
+        <div class="hero-stat-label">Importers affected</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">4 layers</div>
+        <div class="hero-stat-label">MFN · S.301 · S.232 · S.122</div>
       </div>
     </div>
-    <a class="legal-cta" href="/calculator">Verify Your Classifications →</a>
   </div>
 </section>
 
-<!-- ═══════ BOTTOM CTA ═══════ -->
-<section class="bottom-cta">
-  <h2>You upload the file. We find the money.</h2>
-  <p>Customs is no longer a tax problem — it's a data problem. Turn your messy logistics paperwork into a bulletproof legal defense and a revenue recovery engine.</p>
-  <div class="hero-actions">
-    <a class="btn-hero btn-hero-primary" href="/signup">Create Account →</a>
-    <a class="btn-hero btn-hero-secondary" href="/refund-guide.html">Read IEEPA Guide</a>
+<!-- ═══════ THREE PILLARS ═══════ -->
+<section class="pillars" id="pillars">
+  <div class="section-inner">
+    <div class="section-label reveal"><span class="section-label-dot"></span> What we do</div>
+    <h2 class="section-h reveal">Three ways we protect<br>your margins.</h2>
+    <p class="section-sub reveal">Every shipment that clears customs is a chance to lose money — or save it. We automate the three things your broker doesn't have time for.</p>
+    <div class="pillar-grid">
+      <div class="pillar reveal reveal-d1">
+        <div class="pillar-icon pillar-icon-blue">🎯</div>
+        <h3>Compliance Automation</h3>
+        <p>AI classification that finds the lowest correct duty rate — not the "safest" one your broker defaults to.</p>
+        <ul class="pillar-features">
+          <li><span class="pf-check pf-check-blue">✓</span> 10-digit HTS classification from product descriptions, images, or invoices</li>
+          <li><span class="pf-check pf-check-blue">✓</span> Multi-modal AI reads technical drawings and PDFs to identify materials</li>
+          <li><span class="pf-check pf-check-blue">✓</span> Auto-flags FTA eligibility — USMCA, KORUS, and more</li>
+          <li><span class="pf-check pf-check-blue">✓</span> Strips non-dutiable charges (inland freight, assists) from your valuation</li>
+        </ul>
+      </div>
+      <div class="pillar reveal reveal-d2">
+        <div class="pillar-icon pillar-icon-green">💰</div>
+        <h3>Refund Recovery</h3>
+        <p>SCOTUS struck down IEEPA tariffs. If you imported anything in 2025, you're probably owed money. We find it.</p>
+        <ul class="pillar-features">
+          <li><span class="pf-check">✓</span> Scans your entry history for overpaid IEEPA, S.301, and S.232 duties</li>
+          <li><span class="pf-check">✓</span> Generates PSC and protest worksheets ready for your broker</li>
+          <li><span class="pf-check">✓</span> Tracks liquidation dates and protest deadlines automatically</li>
+          <li><span class="pf-check">✓</span> Identifies retroactive refund opportunities going back 5 years</li>
+        </ul>
+      </div>
+      <div class="pillar reveal reveal-d3">
+        <div class="pillar-icon pillar-icon-amber">📡</div>
+        <h3>Risk Monitoring</h3>
+        <p>Tariff policy changes weekly. S.122 expires in July. New S.301 investigations are underway. We track every change that affects your codes — so you don't get surprised.</p>
+        <ul class="pillar-features">
+          <li><span class="pf-check pf-check-amber">✓</span> Real-time tariff rate tracking across 4 layers (MFN, 301, 232, 122)</li>
+          <li><span class="pf-check pf-check-amber">✓</span> Alerts when policy changes affect your specific HTS codes</li>
+          <li><span class="pf-check pf-check-amber">✓</span> Landed cost modeling across 18 destination countries</li>
+          <li><span class="pf-check pf-check-amber">✓</span> FTA expiration tracking and compliance documentation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ THE SILENT LEAKS ═══════ -->
+<section class="leaks">
+  <div class="section-inner">
+    <div class="section-label reveal"><span class="section-label-dot"></span> The problem</div>
+    <h2 class="section-h reveal">The three silent leaks<br>draining your margin.</h2>
+    <p class="section-sub reveal">These aren't edge cases. They happen on virtually every shipment, in every industry, regardless of who's in office. Your broker doesn't catch them because they're incentivized for speed — not savings.</p>
+    <div class="leak-cards">
+      <div class="leak-card reveal reveal-d1">
+        <div class="leak-num">LEAK 01</div>
+        <h4>The "Safety" Tax</h4>
+        <p>When documentation is vague, brokers pick the higher-duty code because it's less likely to trigger a CBP audit. They're protecting themselves — not your margin.</p>
+        <div class="leak-example">
+          <div class="leak-example-label">Real scenario</div>
+          <p>An industrial sensor has two valid codes: "General Electronics" at 5% and "Scientific Instruments" at 0%. The broker picks 5% because it's <strong>"safer."</strong> Across 1,000 shipments, that's 5% of your total import value — gone.</p>
+        </div>
+      </div>
+      <div class="leak-card reveal reveal-d2">
+        <div class="leak-num">LEAK 02</div>
+        <h4>Unused Free Trade Agreements</h4>
+        <p>Research shows FTAs are utilized in only 40–60% of cases where they actually apply. Missing paperwork means you pay full MFN rates for no reason.</p>
+        <div class="leak-example">
+          <div class="leak-example-label">Real scenario</div>
+          <p>Your Mexican supplier forgot the USMCA origin statement. Your broker sees no statement, defaults to the MFN rate of <strong>4.5% instead of 0%.</strong> They don't call you — they just process and move on.</p>
+        </div>
+      </div>
+      <div class="leak-card reveal reveal-d3">
+        <div class="leak-num">LEAK 03</div>
+        <h4>Valuation Errors</h4>
+        <p>Most importers don't realize they can legally deduct inland freight, tooling assists, and other non-dutiable costs from their taxable value.</p>
+        <div class="leak-example">
+          <div class="leak-example-label">Real scenario</div>
+          <p>Your $100K invoice includes $5,000 of inland freight (factory to port). If your broker doesn't strip it out, you pay a 10% tariff on a <strong>truck ride through a foreign country. That's $500 per shipment.</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ DIFFERENTIATOR ═══════ -->
+<section class="diff">
+  <div class="section-inner">
+    <div class="section-label reveal"><span class="section-label-dot"></span> Why AI changes this</div>
+    <h2 class="section-h reveal">What your broker misses,<br>our AI catches.</h2>
+    <p class="section-sub reveal">Brokers optimize for speed and compliance. AI optimizes for accuracy and savings — at scale, on every invoice, retroactively across years of data.</p>
+    <div class="diff-table-wrap reveal">
+      <table class="diff-table">
+        <thead>
+          <tr>
+            <th>The silent leak</th>
+            <th>Why brokers miss it</th>
+            <th>How iDuties solves it</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Material-based misclassification</td>
+            <td>Rely on invoice text — often vague or generic</td>
+            <td>Multi-modal AI reads technical drawings and spec sheets to identify specific materials qualifying for lower rates</td>
+          </tr>
+          <tr>
+            <td>FTA under-utilization</td>
+            <td>Manual check; if origin papers are missing, it's skipped</td>
+            <td>Auto-flags missing USMCA, KORUS, and other FTA certificates before the ship docks</td>
+          </tr>
+          <tr>
+            <td>Valuation inflating</td>
+            <td>Too tedious to split out freight, insurance, and assists on every entry</td>
+            <td>OCR + LLM identifies and subtracts non-dutiable line items from every invoice automatically</td>
+          </tr>
+          <tr>
+            <td>Retroactive overpayments</td>
+            <td>Brokers rarely look back — it's unpaid labor for them</td>
+            <td>Scans up to 5 years of ACE entry data overnight to surface every refund-eligible overpayment</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ CTA ═══════ -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <div class="section-label" style="justify-content:center"><span class="section-label-dot"></span> Get started</div>
+    <h2 class="cta-h">Find the 12% you're<br>gifting to customs.</h2>
+    <p class="cta-sub">Start with a free duty calculation. See your real rates across all four tariff layers. No credit card, no commitment.</p>
+    <a href="/calculator" class="btn-cta">Open the Calculator →</a>
+    <div class="cta-note">Free forever for individual calculations · USITC 2026 Rev 4 data · No login required</div>
   </div>
 </section>
 
 <!-- ═══════ FOOTER ═══════ -->
-<footer class="footer">
-  <span>© 2026 iDuties LLC</span>
+<footer class="footer-main">
+  <span>© 2026 iDuties LLC · Data sourced from USITC, USTR, CBP</span>
   <div class="footer-links">
     <a href="/terms">Terms</a>
-    <span class="footer-sep">·</span>
     <a href="/privacy">Privacy</a>
-    <span class="footer-sep">·</span>
-    <a href="/contact">Contact Us</a>
+    <a href="/contact">Contact</a>
   </div>
 </footer>
 
+<script>
+// Nav scroll effect
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// Scroll reveal
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => observer.observe(el));
+</script>
 </body>
 </html>
