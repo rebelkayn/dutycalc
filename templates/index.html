@@ -449,7 +449,7 @@ body {
 }
 .rate-preview.show { display: flex; flex-wrap: wrap; }
 .rp-code { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; color: var(--blue); padding: 7px 10px; border-right: 1px solid var(--border); white-space: nowrap; background: var(--blue-soft); }
-.rp-desc { color: var(--muted); padding: 7px 10px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); }
+.rp-desc { display: none; }
 .rp-rates { display: flex; align-items: center; flex-shrink: 0; }
 .rp-rate { padding: 7px 10px; border-right: 1px solid var(--border); white-space: nowrap; }
 .rp-rate:last-child { border: none; }
@@ -457,7 +457,7 @@ body {
 .rp-rate .rv { font-weight: 700; color: var(--ink); font-size: 0.78rem; }
 .rp-rate.eff .rv { color: var(--blue); }
 .rp-rate.s301 .rv { color: var(--amber); }
-@media (max-width: 500px) { .rp-desc { display: none; } }
+
 
 /* ═══════ BUTTONS ═══════ */
 .btn {
@@ -786,7 +786,8 @@ body.embed-refund #panelRefund { display: block !important; }
             </div>
           </div>
           <div class="field">
-            <label>Product Description <span style="font-weight:400;color:var(--muted)">(auto-fills from HTS, or type to classify)</span></label>
+            <label>Product Description</label>
+            <div style="font-size:0.68rem;color:var(--muted);margin-bottom:6px">Auto-fills from HTS, or type to classify</div>
             <textarea id="productDesc" placeholder="e.g. Men's 100% cotton T-shirt, crew neck, short sleeve"></textarea>
           </div>
           <div class="field-row">
