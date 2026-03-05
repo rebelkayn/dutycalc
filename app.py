@@ -815,29 +815,55 @@ def migrate_hts():
     try:
         path = os.path.join(DATA_DIR, "hts_data.json")
         if not os.path.exists(path):
-            return jsonify({"error": "hts_data.json not found"}), 404
+            # Try alternate paths
+            for p in ["data/hts_data.json", "hts_data.json", os.path.join(os.path.dirname(__file__), "data", "hts_data.json")]:
+                if os.path.exists(p):
+                    path = p
+                    break
+            else:
+                return jsonify({"error": "hts_data.json not found", "data_dir": DATA_DIR, "tried": path}), 404
         with open(path) as f:
             raw = json.load(f)
-        db = get_db()
-        cur = db.cursor()
-        count = 0
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+        # Drop and recreate for clean load
+        cur.execute("DROP TABLE IF EXISTS hts_codes")
+        cur.execute("""
+            CREATE TABLE hts_codes (
+                code TEXT PRIMARY KEY,
+                description TEXT NOT NULL DEFAULT '',
+                rate NUMERIC NOT NULL DEFAULT 0,
+                cn_301 NUMERIC NOT NULL DEFAULT 0,
+                chapter INTEGER NOT NULL DEFAULT 0,
+                dest TEXT NOT NULL DEFAULT 'US'
+            )
+        """)
+        # Batch insert using execute_values for speed
+        from psycopg2.extras import execute_values
+        rows = []
         for code, v in raw.items():
-            desc = v.get("d", v.get("desc", ""))
-            rate = float(v.get("r", v.get("rate", 0)))
-            cn_301 = float(v.get("c", v.get("cn_301", 0)))
-            chapter = int(v.get("ch", v.get("chapter", 0)))
-            cur.execute("""
-                INSERT INTO hts_codes (code, description, rate, cn_301, chapter, dest)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                ON CONFLICT (code) DO UPDATE SET
-                    description = EXCLUDED.description, rate = EXCLUDED.rate,
-                    cn_301 = EXCLUDED.cn_301, chapter = EXCLUDED.chapter
-            """, (code, desc, rate, cn_301, chapter, "US"))
-            count += 1
-        db.commit()
+            rows.append((
+                code,
+                v.get("d", v.get("desc", "")),
+                float(v.get("r", v.get("rate", 0))),
+                float(v.get("c", v.get("cn_301", 0))),
+                int(v.get("ch", v.get("chapter", 0))),
+                "US"
+            ))
+        execute_values(cur, """
+            INSERT INTO hts_codes (code, description, rate, cn_301, chapter, dest)
+            VALUES %s
+        """, rows, page_size=2000)
+        conn.commit()
+        # Create indexes after bulk load
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_hts_codes_dest ON hts_codes(dest)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_hts_codes_chapter ON hts_codes(chapter)")
+        conn.commit()
         cur.close()
-        return jsonify({"ok": True, "loaded": count})
+        conn.close()
+        return jsonify({"ok": True, "loaded": len(rows)})
     except Exception as e:
+        logger.error(f"Migration error: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 
