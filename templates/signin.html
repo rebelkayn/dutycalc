@@ -5,86 +5,115 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Sign In — iDuties.ai</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #F5F5F0; --surface: #FFFFFF; --surface2: #F0F0EB;
-  --border: rgba(0,0,0,0.06); --border2: rgba(0,0,0,0.10);
-  --ink: #1A1A1A; --ink2: #3D3D3D; --muted: #7A7A7A; --dim: #ACACAC;
-  --blue: #0055FF; --blue-hover: #003FCC; --blue-soft: rgba(0,85,255,0.06);
-  --red: #D62828; --red-bg: rgba(214,40,40,0.05);
-  --radius: 14px; --radius-sm: 10px; --radius-xs: 7px;
-  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --bg:        #0A0A0A;
+  --surface:   rgba(255,255,255,0.04);
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.12);
+  --ink:       #FFFFFF;
+  --muted:     rgba(255,255,255,0.4);
+  --dim:       rgba(255,255,255,0.2);
+  --blue:      #3B82F6;
+  --blue-hover:#2563EB;
+  --blue-soft: rgba(59,130,246,0.12);
+  --red:       #f87171;
+  --red-bg:    rgba(239,68,68,0.08);
+  --red-border:rgba(239,68,68,0.2);
+  --green:     #4ade80;
+  --radius:    16px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+  --font:      'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --serif:     'Instrument Serif', Georgia, serif;
 }
-html { scroll-behavior: smooth; overflow-y: scroll; }
+html { scroll-behavior: smooth; }
 body {
   font-family: var(--font); background: var(--bg); color: var(--ink);
   min-height: 100vh; -webkit-font-smoothing: antialiased;
   display: flex; flex-direction: column;
 }
 
-/* Nav */
+/* ── NAV ── */
 .nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(245,245,240,0.82);
-  backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 20px; height: 56px;
-  display: flex; align-items: center; gap: 16px;
+  background: #0A0A0A;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 0 clamp(16px, 4vw, 32px); height: 56px;
+  display: flex; align-items: center;
 }
 .nav-brand {
-  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
-  display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0;
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: white;
+  display: flex; align-items: center; gap: 8px; text-decoration: none;
 }
-.nav-brand svg { color: var(--blue); }
-.nav-dot { color: var(--blue); }
+.nav-brand svg { color: #3B82F6; }
+.nav-dot { color: #3B82F6; }
 
-/* Auth container */
+/* ── LAYOUT ── */
 .auth-wrap {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 40px 20px;
+  padding: 48px 20px;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,85,255,0.06) 0%, transparent 70%);
 }
 .auth-card {
   width: 100%; max-width: 400px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 36px 32px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* ── HEADER ── */
+.auth-header { text-align: center; margin-bottom: 32px; }
+.auth-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 100px; margin-bottom: 20px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: rgba(255,255,255,0.4);
 }
 .auth-h {
-  font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em;
-  margin-bottom: 6px; text-align: center;
+  font-family: var(--serif); font-size: 2.2rem; font-weight: 400;
+  font-style: italic; letter-spacing: -0.03em; color: white;
+  line-height: 1.1; margin-bottom: 10px;
 }
-.auth-sub {
-  font-size: 0.88rem; color: var(--muted); text-align: center;
-  margin-bottom: 28px; line-height: 1.5;
+.auth-sub { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+
+/* ── FORM CARD ── */
+.auth-form-wrap {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius); padding: 32px 28px;
 }
 .auth-error {
-  padding: 10px 14px; background: var(--red-bg); border: 1px solid rgba(214,40,40,0.1);
+  padding: 10px 14px; background: var(--red-bg); border: 1px solid var(--red-border);
   border-radius: var(--radius-xs); color: var(--red); font-size: 0.82rem;
-  margin-bottom: 16px; line-height: 1.45;
+  margin-bottom: 20px; line-height: 1.45;
 }
-.auth-field { margin-bottom: 16px; }
+.auth-field { margin-bottom: 18px; }
 .auth-field label {
-  display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted);
-  margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase;
+  display: block; font-size: 0.68rem; font-weight: 700; color: var(--muted);
+  margin-bottom: 6px; letter-spacing: 0.06em; text-transform: uppercase;
 }
 .auth-field input {
-  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border2);
+  width: 100%; padding: 11px 14px;
+  border: 1px solid var(--border2);
   border-radius: var(--radius-sm); font-size: 0.92rem; font-family: var(--font);
-  color: var(--ink); background: var(--bg); outline: none; transition: all 0.15s;
+  color: white; background: rgba(255,255,255,0.05);
+  outline: none; transition: all 0.15s;
 }
+.auth-field input::placeholder { color: rgba(255,255,255,0.2); }
 .auth-field input:focus {
   border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft);
-  background: var(--surface);
+  background: rgba(255,255,255,0.07);
 }
 .auth-btn {
   width: 100%; padding: 13px; border: none; border-radius: var(--radius-sm);
-  background: var(--blue); color: white; font-family: var(--font);
-  font-size: 0.92rem; font-weight: 600; cursor: pointer;
-  transition: background 0.15s; margin-top: 4px; letter-spacing: -0.01em;
+  background: white; color: #0A0A0A; font-family: var(--font);
+  font-size: 0.92rem; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; margin-top: 4px; letter-spacing: -0.01em;
 }
-.auth-btn:hover { background: var(--blue-hover); }
+.auth-btn:hover { background: rgba(255,255,255,0.9); transform: translateY(-1px); }
+
+/* ── FOOTER ── */
 .auth-footer {
   text-align: center; margin-top: 20px; font-size: 0.84rem; color: var(--muted);
 }
@@ -92,20 +121,20 @@ body {
 .auth-footer a:hover { text-decoration: underline; }
 .auth-divider {
   display: flex; align-items: center; gap: 12px; margin: 20px 0;
-  font-size: 0.72rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.05em;
+  font-size: 0.68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.05em;
 }
 .auth-divider::before, .auth-divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border2);
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08);
 }
 .auth-skip {
   display: block; text-align: center; color: var(--muted); font-size: 0.82rem;
   text-decoration: none; transition: color 0.15s;
 }
-.auth-skip:hover { color: var(--ink); }
+.auth-skip:hover { color: white; }
 
-@media (max-width: 500px) {
-  .auth-card { padding: 28px 22px; }
-  .auth-h { font-size: 1.25rem; }
+@media (max-width: 480px) {
+  .auth-form-wrap { padding: 24px 20px; }
+  .auth-h { font-size: 1.8rem; }
 }
 </style>
 </head>
@@ -120,31 +149,36 @@ body {
 
 <div class="auth-wrap">
   <div class="auth-card">
-    <h1 class="auth-h">Welcome back</h1>
-    <p class="auth-sub">Sign in to your iDuties dashboard</p>
-
-    {% if error %}
-    <div class="auth-error">{{ error }}</div>
-    {% endif %}
-
-    <form method="POST" action="/signin{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}">
-      <div class="auth-field">
-        <label>Email Address</label>
-        <input type="email" name="email" value="{{ email|default('') }}" placeholder="you@company.com" required autofocus>
-      </div>
-      <div class="auth-field">
-        <label>Password</label>
-        <input type="password" name="password" placeholder="••••••••" required minlength="8">
-      </div>
-      <button class="auth-btn" type="submit">Sign In</button>
-    </form>
-
-    <div class="auth-footer">
-      Don't have an account? <a href="/signup">Create one</a>
+    <div class="auth-header">
+      <div class="auth-eyebrow">Secure access</div>
+      <h1 class="auth-h">Welcome back.</h1>
+      <p class="auth-sub">Sign in to your compliance dashboard</p>
     </div>
 
-    <div class="auth-divider">or</div>
-    <a class="auth-skip" href="/">← Continue without signing in</a>
+    <div class="auth-form-wrap">
+      {% if error %}
+      <div class="auth-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="/signin{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}">
+        <div class="auth-field">
+          <label>Email Address</label>
+          <input type="email" name="email" value="{{ email|default('') }}" placeholder="you@company.com" required autofocus>
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••" required minlength="8">
+        </div>
+        <button class="auth-btn" type="submit">Sign In →</button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="/signup">Create one</a>
+      </div>
+
+      <div class="auth-divider">or</div>
+      <a class="auth-skip" href="/">← Continue without signing in</a>
+    </div>
   </div>
 </div>
 
