@@ -806,6 +806,41 @@ def health():
     return jsonify({"status": "ok", "us_codes": us_count, "db_connected": us_count > 0})
 
 
+@app.route("/api/migrate-hts", methods=["POST"])
+def migrate_hts():
+    """One-time: load HTS JSON into PostgreSQL. Remove after use."""
+    secret = request.args.get("key", "")
+    if secret != app.secret_key:
+        return jsonify({"error": "unauthorized"}), 403
+    try:
+        path = os.path.join(DATA_DIR, "hts_data.json")
+        if not os.path.exists(path):
+            return jsonify({"error": "hts_data.json not found"}), 404
+        with open(path) as f:
+            raw = json.load(f)
+        db = get_db()
+        cur = db.cursor()
+        count = 0
+        for code, v in raw.items():
+            desc = v.get("d", v.get("desc", ""))
+            rate = float(v.get("r", v.get("rate", 0)))
+            cn_301 = float(v.get("c", v.get("cn_301", 0)))
+            chapter = int(v.get("ch", v.get("chapter", 0)))
+            cur.execute("""
+                INSERT INTO hts_codes (code, description, rate, cn_301, chapter, dest)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (code) DO UPDATE SET
+                    description = EXCLUDED.description, rate = EXCLUDED.rate,
+                    cn_301 = EXCLUDED.cn_301, chapter = EXCLUDED.chapter
+            """, (code, desc, rate, cn_301, chapter, "US"))
+            count += 1
+        db.commit()
+        cur.close()
+        return jsonify({"ok": True, "loaded": count})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
