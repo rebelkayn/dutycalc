@@ -11,33 +11,27 @@ from flask_cors import CORS
 import google.generativeai as genai
 import psycopg2
 import psycopg2.extras
-
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
 app.permanent_session_lifetime = timedelta(days=30)
 CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 # ── Global error handlers (prevent worker death) ─────────
 @app.errorhandler(500)
 def internal_error(e):
     logger.error(f"500 error: {e}")
     return "Internal server error", 500
-
 @app.errorhandler(Exception)
 def unhandled_exception(e):
     logger.error(f"Unhandled exception: {e}", exc_info=True)
     return "Internal server error", 500
-
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 # Render gives postgres:// but psycopg2 requires postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-
 # ── Database ──────────────────────────────────────────────
 def get_db():
     if not DATABASE_URL:
@@ -49,13 +43,11 @@ def get_db():
             logger.error(f"DB connection failed: {e}")
             return None
     return g.db
-
 @app.teardown_appcontext
 def close_db(exc):
     db = g.pop("db", None)
     if db is not None:
         db.close()
-
 def init_db():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
@@ -115,21 +107,10 @@ def init_db():
             status TEXT DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT NOW()
         );
-        CREATE TABLE IF NOT EXISTS hts_codes (
-            code TEXT PRIMARY KEY,
-            description TEXT NOT NULL DEFAULT '',
-            rate NUMERIC NOT NULL DEFAULT 0,
-            cn_301 NUMERIC NOT NULL DEFAULT 0,
-            chapter INTEGER NOT NULL DEFAULT 0,
-            dest TEXT NOT NULL DEFAULT 'US'
-        );
-        CREATE INDEX IF NOT EXISTS idx_hts_codes_dest ON hts_codes(dest);
-        CREATE INDEX IF NOT EXISTS idx_hts_codes_chapter ON hts_codes(chapter);
     """)
     conn.commit()
     cur.close()
     conn.close()
-
 try:
     if DATABASE_URL:
         init_db()
@@ -138,21 +119,16 @@ try:
         logger.warning("DATABASE_URL not set — running without database")
 except Exception as e:
     logger.warning(f"DB init skipped: {e}")
-
 logger.info(f"iDuties app starting, DB configured: {bool(DATABASE_URL)}")
-
-
 # ── Auth helpers ──────────────────────────────────────────
 def hash_password(password):
     salt = secrets.token_hex(16)
     h = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000)
     return salt + ":" + h.hex()
-
 def verify_password(password, stored):
     salt, h = stored.split(":", 1)
     check = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000)
     return check.hex() == h
-
 def get_current_user():
     uid = session.get("user_id")
     if not uid:
@@ -165,7 +141,6 @@ def get_current_user():
     user = cur.fetchone()
     cur.close()
     return user
-
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -173,7 +148,6 @@ def login_required(f):
             return redirect(url_for("signin"))
         return f(*args, **kwargs)
     return decorated
-
 # ── Per-destination config ─────────────────────────────────
 DEST_CONFIG = {
     "US": {
@@ -285,57 +259,173 @@ DEST_CONFIG = {
         "default_rate": 3.0, "notes": "CIF. MWST 8.1%. Estimate only.",
     },
 }
+# ── HTS Database (PostgreSQL — Rev 4) ─────────────────────
+# Reads from hts_codes_rev4 table (official USITC 2026 Rev 4 data)
+# Returns dicts with same keys the rest of the app expects:
+#   code, desc, rate, cn_301, chapter
 
-# ── HTS Database (PostgreSQL) ─────────────────────────────
+def _get_chapter(htsno):
+    """Extract chapter number (first 2 digits) from an HTS code."""
+    digits = htsno.replace(".", "")
+    if len(digits) >= 2 and digits[:2].isdigit():
+        return int(digits[:2])
+    return 0
+
+def _get_cn301_from_old_table(db, code_8digit):
+    """Look up Section 301 rate from old hts_codes table (temporary until Step 5)."""
+    try:
+        cur = db.cursor()
+        cur.execute("SELECT cn_301 FROM hts_codes WHERE code = %s LIMIT 1", (code_8digit,))
+        row = cur.fetchone()
+        cur.close()
+        if row:
+            return float(row["cn_301"])
+    except Exception:
+        pass  # Old table might not exist — that is fine
+    return 0.0
+
 def hts_lookup(code, dest="US"):
-    """Look up a single HTS code. Falls back to 8-digit parent."""
+    """Look up a single HTS code from Rev 4 table.
+    Tries exact match, then 10-digit with .00 suffix, then prefix search."""
+    if dest != "US":
+        # Non-US destinations still use old table if it exists
+        db = get_db()
+        if not db:
+            return None
+        cur = db.cursor()
+        try:
+            cur.execute("SELECT code, description AS desc, rate, cn_301, chapter FROM hts_codes WHERE code=%s AND dest=%s", (code, dest))
+            row = cur.fetchone()
+            cur.close()
+            return dict(row) if row else None
+        except Exception:
+            cur.close()
+            return None
+
     db = get_db()
     if not db:
         return None
     cur = db.cursor()
-    cur.execute("SELECT code, description AS desc, rate, cn_301, chapter FROM hts_codes WHERE code=%s AND dest=%s", (code, dest))
+
+    code = code.strip()
+
+    # Try exact match first
+    cur.execute("""SELECT htsno, description, general_pct, general_raw, general_specific, is_free
+                   FROM hts_codes_rev4 WHERE htsno = %s LIMIT 1""", (code,))
     row = cur.fetchone()
+
+    # If no match and code is 8 digits, try adding .00
     if not row:
-        parent = '.'.join(code.split('.')[:3])
-        if parent != code:
-            cur.execute("SELECT code, description AS desc, rate, cn_301, chapter FROM hts_codes WHERE code=%s AND dest=%s", (parent, dest))
+        digits = code.replace(".", "")
+        if len(digits) == 8:
+            code_10 = code + ".00"
+            cur.execute("""SELECT htsno, description, general_pct, general_raw, general_specific, is_free
+                           FROM hts_codes_rev4 WHERE htsno = %s LIMIT 1""", (code_10,))
             row = cur.fetchone()
+
+    # If still no match, try prefix search
+    if not row:
+        cur.execute("""SELECT htsno, description, general_pct, general_raw, general_specific, is_free
+                       FROM hts_codes_rev4 WHERE htsno LIKE %s ORDER BY htsno LIMIT 1""", (code + "%",))
+        row = cur.fetchone()
+
     cur.close()
-    return dict(row) if row else None
+    if not row:
+        return None
+
+    # Build 8-digit version for cn_301 lookup against old table
+    digits = row["htsno"].replace(".", "")
+    if len(digits) >= 8:
+        code_8 = digits[:4] + "." + digits[4:6] + "." + digits[6:8]
+    else:
+        code_8 = row["htsno"]
+    cn_301 = _get_cn301_from_old_table(db, code_8)
+
+    return {
+        "code": row["htsno"],
+        "desc": row["description"],
+        "rate": float(row["general_pct"]),
+        "rate_raw": row["general_raw"],
+        "rate_specific": row["general_specific"],
+        "is_free": row["is_free"],
+        "cn_301": cn_301,
+        "chapter": _get_chapter(row["htsno"]),
+    }
 
 def hts_search_db(query, dest="US", limit=8):
     """Search HTS codes by code prefix or description text."""
+    if dest != "US":
+        db = get_db()
+        if not db:
+            return []
+        cur = db.cursor()
+        q = f"%{query.lower()}%"
+        try:
+            cur.execute("""SELECT code, description AS desc, rate, cn_301
+                           FROM hts_codes WHERE dest=%s AND (LOWER(description) LIKE %s OR code LIKE %s)
+                           ORDER BY code LIMIT %s""", (dest, q, q, limit))
+            rows = cur.fetchall()
+            cur.close()
+            return [dict(r) for r in rows]
+        except Exception:
+            cur.close()
+            return []
+
     db = get_db()
     if not db:
         return []
     cur = db.cursor()
     q = f"%{query.lower()}%"
-    cur.execute("""
-        SELECT code, description AS desc, rate, cn_301
-        FROM hts_codes WHERE dest=%s AND (LOWER(description) LIKE %s OR code LIKE %s)
-        ORDER BY code LIMIT %s
-    """, (dest, q, q, limit))
+    cur.execute("""SELECT htsno AS code, description AS desc, general_pct AS rate, is_free
+                   FROM hts_codes_rev4
+                   WHERE (LOWER(description) LIKE %s OR htsno LIKE %s)
+                   AND digit_count IN (8, 10)
+                   ORDER BY htsno LIMIT %s""", (q, q, limit))
     rows = cur.fetchall()
     cur.close()
-    return [dict(r) for r in rows]
+    results = []
+    for r in rows:
+        results.append({
+            "code": r["code"],
+            "desc": r["desc"],
+            "rate": float(r["rate"]),
+            "cn_301": 0,
+        })
+    return results
 
 def hts_sample(dest="US", n=200):
     """Get evenly spaced sample of codes for AI hints."""
+    if dest != "US":
+        db = get_db()
+        if not db:
+            return []
+        cur = db.cursor()
+        try:
+            cur.execute("SELECT code, description AS desc FROM hts_codes WHERE dest=%s ORDER BY code", (dest,))
+            rows = cur.fetchall()
+            cur.close()
+            return [dict(r) for r in rows]
+        except Exception:
+            cur.close()
+            return []
+
     db = get_db()
     if not db:
         return []
     cur = db.cursor()
     total = hts_count(dest)
     if total <= n:
-        cur.execute("SELECT code, description AS desc FROM hts_codes WHERE dest=%s ORDER BY code", (dest,))
+        cur.execute("""SELECT htsno AS code, description AS desc
+                       FROM hts_codes_rev4
+                       WHERE digit_count IN (8, 10)
+                       ORDER BY htsno""")
     else:
         step = max(1, total // n)
-        cur.execute("""
-            SELECT code, description AS desc FROM (
-                SELECT code, description, ROW_NUMBER() OVER (ORDER BY code) AS rn
-                FROM hts_codes WHERE dest=%s
-            ) sub WHERE rn %% %s = 0 LIMIT %s
-        """, (dest, step, n))
+        cur.execute("""SELECT code, desc FROM (
+                           SELECT htsno AS code, description AS desc,
+                                  ROW_NUMBER() OVER (ORDER BY htsno) AS rn
+                           FROM hts_codes_rev4 WHERE digit_count IN (8, 10)
+                       ) sub WHERE rn %% %s = 0 LIMIT %s""", (step, n))
     rows = cur.fetchall()
     cur.close()
     return [dict(r) for r in rows]
@@ -346,7 +436,14 @@ def hts_count(dest="US"):
     if not db:
         return 0
     cur = db.cursor()
-    cur.execute("SELECT COUNT(*) AS cnt FROM hts_codes WHERE dest=%s", (dest,))
+    if dest == "US":
+        cur.execute("SELECT COUNT(*) AS cnt FROM hts_codes_rev4 WHERE digit_count IN (8, 10)")
+    else:
+        try:
+            cur.execute("SELECT COUNT(*) AS cnt FROM hts_codes WHERE dest=%s", (dest,))
+        except Exception:
+            cur.close()
+            return 0
     row = cur.fetchone()
     cur.close()
     return row["cnt"] if row else 0
@@ -356,7 +453,6 @@ FTA_RATES = {
     "korus":     {"name": "KORUS",            "countries": ["KR"],      "rate_modifier": 0.5},
     "singapore": {"name": "US-Singapore FTA", "countries": ["SG"],      "override": True},
 }
-
 # ── Routes ─────────────────────────────────────────────────
 @app.route("/")
 def landing():
@@ -366,7 +462,6 @@ def landing():
     except Exception as e:
         logger.error(f"Landing route error: {e}", exc_info=True)
         return f"Error: {e}", 500
-
 @app.route("/calculator")
 def calculator():
     try:
@@ -376,30 +471,24 @@ def calculator():
     except Exception as e:
         logger.error(f"Calculator route error: {e}", exc_info=True)
         return f"Error: {e}", 500
-
 @app.route("/refund-guide.html")
 def refund_guide():
     user = get_current_user()
     return render_template("refund-guide.html", user=user)
-
 @app.route("/terms")
 def terms():
     user = get_current_user()
     return render_template("terms.html", user=user)
-
 @app.route("/privacy")
 def privacy():
     user = get_current_user()
     return render_template("privacy.html", user=user)
-
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     user = get_current_user()
     if request.method == "POST":
         return render_template("contact.html", user=user, submitted=True)
     return render_template("contact.html", user=user, submitted=False)
-
-
 # ── Auth Routes ───────────────────────────────────────────
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -432,7 +521,6 @@ def signup():
     session["user_id"] = new_id
     session.permanent = True
     return redirect(url_for("dashboard"))
-
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
     if session.get("user_id"):
@@ -457,13 +545,10 @@ def signin():
     session.permanent = True
     next_url = request.args.get("next") or url_for("dashboard")
     return redirect(next_url)
-
 @app.route("/signout")
 def signout():
     session.clear()
     return redirect(url_for("landing"))
-
-
 # ── Dashboard ─────────────────────────────────────────────
 @app.route("/dashboard")
 @login_required
@@ -488,8 +573,6 @@ def dashboard():
     except Exception as e:
         logger.error(f"Dashboard error: {e}", exc_info=True)
         return f"Dashboard error: {e}", 500
-
-
 # ── API: Save Calculation ─────────────────────────────────
 @app.route("/api/save-calculation", methods=["POST"])
 def save_calculation():
@@ -511,8 +594,6 @@ def save_calculation():
     db.commit()
     cur.close()
     return jsonify({"ok": True})
-
-
 # ── API: Save Refund Entry ────────────────────────────────
 @app.route("/api/save-refund", methods=["POST"])
 def save_refund():
@@ -533,8 +614,6 @@ def save_refund():
     db.commit()
     cur.close()
     return jsonify({"ok": True})
-
-
 # ── API: Update Refund Status ─────────────────────────────
 @app.route("/api/update-refund/<int:entry_id>", methods=["POST"])
 @login_required
@@ -547,8 +626,6 @@ def update_refund(entry_id):
     db.commit()
     cur.close()
     return jsonify({"ok": True})
-
-
 # ── API: Delete Entries ───────────────────────────────────
 @app.route("/api/delete-calculation/<int:calc_id>", methods=["POST"])
 @login_required
@@ -559,7 +636,6 @@ def delete_calculation(calc_id):
     db.commit()
     cur.close()
     return jsonify({"ok": True})
-
 @app.route("/api/delete-refund/<int:entry_id>", methods=["POST"])
 @login_required
 def delete_refund(entry_id):
@@ -569,8 +645,6 @@ def delete_refund(entry_id):
     db.commit()
     cur.close()
     return jsonify({"ok": True})
-
-
 # ── API: Update Profile ──────────────────────────────────
 @app.route("/api/update-profile", methods=["POST"])
 @login_required
@@ -586,7 +660,6 @@ def update_profile():
     db.commit()
     cur.close()
     return jsonify({"ok": True})
-
 @app.route("/api/classify", methods=["POST"])
 def classify():
     data       = request.json or {}
@@ -634,8 +707,6 @@ Product: {description}\nReference HTS codes:\n{hts_list}\nReturn ONLY the JSON o
     except Exception as e:
         logger.error(f"Classify error: {e}")
         return jsonify({"error": str(e)}), 500
-
-
 @app.route("/api/calculate", methods=["POST"])
 def calculate():
     d = request.json or {}
@@ -650,22 +721,17 @@ def calculate():
         fta                = d.get("fta", "none")
         currency           = d.get("currency", "USD")
         exchange_rate      = float(d.get("exchange_rate", 1.0))
-
         if product_value <= 0:
             return jsonify({"error": "Product value must be greater than 0"}), 400
-
         config = DEST_CONFIG.get(dest_country, DEST_CONFIG["US"])
-
         value_usd     = product_value * exchange_rate
         shipping_usd  = shipping * exchange_rate
         insurance_usd = insurance * exchange_rate
-
         # Valuation basis
         if config["valuation"] == "CIF":
             taxable_base = value_usd + shipping_usd + insurance_usd
         else:
             taxable_base = value_usd  # FOB
-
         # De minimis (USD comparison only for now)
         de_minimis = config.get("de_minimis", 0)
         de_min_curr = config.get("de_minimis_currency", "USD")
@@ -677,16 +743,13 @@ def calculate():
                 "duty_amount": 0, "vat_amount": 0, "total_duties": 0,
                 "dest_country": dest_country, "dest_name": config["name"],
             })
-
         # Tariff lookup
         entry = hts_lookup(hts_code, dest_country)
         base_rate = float(entry["rate"]) if entry else config.get("default_rate", 12.0)
         cn_301    = float(entry["cn_301"]) if entry else 0.0
-
         if duty_rate_override is not None:
             base_rate = float(duty_rate_override)
             cn_301    = 0.0
-
         # FTA
         fta_applied = False
         fta_name    = ""
@@ -697,31 +760,28 @@ def calculate():
                     base_rate = 0.0; cn_301 = 0.0; fta_applied = True; fta_name = fi["name"]
                 else:
                     base_rate = base_rate * fi.get("rate_modifier", 1.0); fta_applied = True; fta_name = fi["name"]
-
-        # Section 301 (US→CN only)
+        # Section 301 (US from CN only)
         china_surcharge = 0.0
         if dest_country == "US" and origin_country == "CN" and not fta_applied and cn_301 > 0:
             china_surcharge = cn_301
-
         # Section 232 (US steel/aluminum ch 72,73,76 + auto parts ch 87)
         section_232 = 0.0
-        chapter = int(str(hts_code).replace(".", "")[:2]) if hts_code and str(hts_code).replace(".", "")[:2].isdigit() else 0
+        chapter = entry.get("chapter", 0) if entry else 0
+        if not chapter and hts_code:
+            chapter = _get_chapter(hts_code)
         if dest_country == "US" and not fta_applied and chapter in (72, 73, 76, 87):
             section_232 = 25.0
-
-        # Section 122 temporary surcharge (15%, effective Feb 20 2026, 150-day limit → ~July 20 2026)
+        # Section 122 temporary surcharge (10%, effective Feb 24 2026, 150 days)
+        # S.232 goods are exempt from S.122
         section_122 = 0.0
-        if dest_country == "US" and not fta_applied:
-            section_122 = 15.0
-
+        if dest_country == "US" and not fta_applied and section_232 == 0:
+            section_122 = 10.0
         effective_duty_rate = base_rate + china_surcharge + section_232 + section_122
         duty_amount = taxable_base * (effective_duty_rate / 100)
-
         # MPF (US only)
         mpf = 0.0
         if config.get("mpf"):
             mpf = min(614.35, max(32.71, taxable_base * 0.003464))
-
         # VAT/GST
         vat_rate   = config.get("vat_rate", 0.0)
         vat_amount = 0.0
@@ -731,10 +791,8 @@ def calculate():
                 vat_amount = (taxable_base + duty_amount) * (vat_rate / 100)
             elif vat_on == "cif_only":
                 vat_amount = taxable_base * (vat_rate / 100)
-
         total_duties = duty_amount + mpf + vat_amount
         total_landed = value_usd + shipping_usd + insurance_usd + duty_amount + mpf + vat_amount
-
         return jsonify({
             "de_minimis":          False,
             "dest_country":        dest_country,
@@ -765,12 +823,9 @@ def calculate():
             "db_match":            bool(entry),
             "notes":               config.get("notes", ""),
         })
-
     except Exception as e:
         logger.error(f"Calculation error: {e}")
         return jsonify({"error": str(e)}), 500
-
-
 @app.route("/api/hts-search", methods=["GET"])
 def hts_search():
     query = request.args.get("q", "").lower().strip()
@@ -779,8 +834,6 @@ def hts_search():
         return jsonify([])
     results = hts_search_db(query, dest, 8)
     return jsonify(results)
-
-
 @app.route("/api/dest-config", methods=["GET"])
 def dest_config_api():
     dest   = request.args.get("dest", "US").upper()
@@ -798,75 +851,10 @@ def dest_config_api():
         "db_codes": count,
         "notes": config.get("notes", ""),
     })
-
-
 @app.route("/health")
 def health():
     us_count = hts_count("US")
     return jsonify({"status": "ok", "us_codes": us_count, "db_connected": us_count > 0})
-
-
-@app.route("/api/migrate-hts", methods=["POST"])
-def migrate_hts():
-    """One-time: load HTS JSON into PostgreSQL. Remove after use."""
-    secret = request.args.get("key", "")
-    if secret != "migrate2026iduties":
-        return jsonify({"error": "unauthorized"}), 403
-    try:
-        path = os.path.join(DATA_DIR, "hts_data.json")
-        if not os.path.exists(path):
-            # Try alternate paths
-            for p in ["data/hts_data.json", "hts_data.json", os.path.join(os.path.dirname(__file__), "data", "hts_data.json")]:
-                if os.path.exists(p):
-                    path = p
-                    break
-            else:
-                return jsonify({"error": "hts_data.json not found", "data_dir": DATA_DIR, "tried": path}), 404
-        with open(path) as f:
-            raw = json.load(f)
-        conn = psycopg2.connect(DATABASE_URL)
-        cur = conn.cursor()
-        # Drop and recreate for clean load
-        cur.execute("DROP TABLE IF EXISTS hts_codes")
-        cur.execute("""
-            CREATE TABLE hts_codes (
-                code TEXT PRIMARY KEY,
-                description TEXT NOT NULL DEFAULT '',
-                rate NUMERIC NOT NULL DEFAULT 0,
-                cn_301 NUMERIC NOT NULL DEFAULT 0,
-                chapter INTEGER NOT NULL DEFAULT 0,
-                dest TEXT NOT NULL DEFAULT 'US'
-            )
-        """)
-        # Batch insert using execute_values for speed
-        from psycopg2.extras import execute_values
-        rows = []
-        for code, v in raw.items():
-            rows.append((
-                code,
-                v.get("d", v.get("desc", "")),
-                float(v.get("r", v.get("rate", 0))),
-                float(v.get("c", v.get("cn_301", 0))),
-                int(v.get("ch", v.get("chapter", 0))),
-                "US"
-            ))
-        execute_values(cur, """
-            INSERT INTO hts_codes (code, description, rate, cn_301, chapter, dest)
-            VALUES %s
-        """, rows, page_size=2000)
-        conn.commit()
-        # Create indexes after bulk load
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_hts_codes_dest ON hts_codes(dest)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_hts_codes_chapter ON hts_codes(chapter)")
-        conn.commit()
-        cur.close()
-        conn.close()
-        return jsonify({"ok": True, "loaded": len(rows)})
-    except Exception as e:
-        logger.error(f"Migration error: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
-
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
