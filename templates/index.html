@@ -53,14 +53,14 @@ body {
 /* ═══════ NAV ═══════ */
 .nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(250,250,248,0.82);
+  background: rgba(10,10,10,0.92);
   backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   padding: 0 clamp(16px, 4vw, 32px); height: 56px;
   display: flex; align-items: center; gap: 16px;
 }
 .nav-brand {
-  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: var(--ink);
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.04em; color: white;
   display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-decoration: none;
 }
 .nav-brand svg { color: var(--blue); }
@@ -68,22 +68,21 @@ body {
 .nav-spacer { flex: 1; }
 .nav-links { display: flex; gap: 2px; }
 .nav-link {
-  font-size: 0.8rem; font-weight: 500; color: var(--muted);
+  font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.5);
   padding: 6px 14px; border-radius: 8px;
   border: none; cursor: pointer;
   text-decoration: none; white-space: nowrap; transition: all 0.15s;
 }
-.nav-link:hover { color: var(--ink); background: rgba(0,0,0,0.03); }
-.nav-link.active { color: var(--ink); font-weight: 600; }
+.nav-link:hover { color: white; background: rgba(255,255,255,0.06); }
+.nav-link.active { color: white; font-weight: 600; }
 .nav-auth-btn {
   padding: 7px 16px; border-radius: 8px;
   font-size: 0.78rem; font-weight: 600; color: var(--ink);
-  background: var(--surface); border: 1px solid var(--border2);
+  background: white; border: none;
   text-decoration: none; transition: all 0.15s; flex-shrink: 0;
   white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-.nav-auth-btn:hover { background: var(--surface2); border-color: rgba(0,0,0,0.15); }
+.nav-auth-btn:hover { background: rgba(255,255,255,0.9); }
 @media (max-width: 500px) {
   .nav { padding: 0 12px; height: 52px; gap: 8px; }
   .nav-link { font-size: 0.72rem; padding: 5px 8px; }
@@ -94,50 +93,43 @@ body {
 
 /* ═══════ WORKSPACE HEADER ═══════ */
 .ws-header {
-  background: var(--surface); border-bottom: 1px solid var(--border);
+  background: #0A0A0A; border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .ws-inner { max-width: 800px; margin: 0 auto; padding: 20px 20px 0; }
 .ws-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-.ws-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; letter-spacing: -0.03em; margin-bottom: 2px; text-align: left; }
-.ws-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.5; text-align: left; }
+.ws-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; letter-spacing: -0.03em; margin-bottom: 2px; text-align: left; color: white; }
+.ws-sub { font-size: 0.82rem; color: rgba(255,255,255,0.4); line-height: 1.5; text-align: left; }
 .ws-status {
   display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0;
 }
 .ws-status-item {
   display: flex; align-items: center; gap: 5px;
   font-size: 0.65rem; font-weight: 600; letter-spacing: 0.03em;
-  color: var(--muted); padding: 3px 10px;
-  background: var(--bg); border: 1px solid var(--border);
+  color: rgba(255,255,255,0.4); padding: 3px 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
   border-radius: 100px; white-space: nowrap;
 }
-.ws-status-warn { color: var(--red); background: var(--red-bg); border-color: rgba(214,40,40,0.1); }
+.ws-status-warn { color: #ef4444; background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.15); }
 .ws-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 .ws-dot-red { background: #ef4444; }
 .ws-dot-amber { background: #f59e0b; }
 .ws-dot-green { background: #22c55e; }
 .ws-tabs {
-  display: flex; gap: 0; border-bottom: 1px solid var(--border);
+  display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.06);
   overflow-x: auto; -webkit-overflow-scrolling: touch;
   scrollbar-width: none; -ms-overflow-style: none;
 }
 .ws-tabs::-webkit-scrollbar { display: none; }
 .ws-tab {
-  display: flex; align-items: center; gap: 6px;
-  padding: 10px 20px; font-family: var(--font); font-size: 0.82rem; font-weight: 600;
-  color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent;
+  font-family: var(--font); font-size: 0.82rem; font-weight: 600;
+  color: rgba(255,255,255,0.4); background: none; border: none;
   cursor: pointer; transition: all 0.15s; white-space: nowrap;
-  margin-bottom: -1px; letter-spacing: -0.01em;
-  position: relative;
+  letter-spacing: -0.01em;
+  padding: 10px 0; margin-right: 28px; margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
 }
-.ws-tab::after {
-  content: ''; position: absolute; bottom: -1px; left: 20px; right: 20px;
-  height: 2px; background: transparent; transition: background 0.15s;
-}
-.ws-tab:first-child { padding-left: 0; }
-.ws-tab:first-child::after { left: 0; }
-.ws-tab:hover { color: var(--ink); }
-.ws-tab.active { color: var(--blue); border-bottom-color: transparent; }
-.ws-tab.active::after { background: var(--blue); }
+.ws-tab:hover { color: rgba(255,255,255,0.7); }
+.ws-tab.active { color: white; border-bottom-color: var(--blue); }
 .ws-tab-icon { display: none; }
 
 /* ═══════ WORKSPACE PANELS ═══════ */
@@ -145,9 +137,8 @@ body {
 .ws-panel.active { display: block; }
 
 @media (max-width: 600px) {
-  .ws-top { flex-direction: column; gap: 12px; }
-  .ws-tabs { /* scrollbar already hidden via base styles */ }
-  .ws-tab { padding: 10px 14px; font-size: 0.78rem; }
+  .ws-top { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .ws-tab { padding: 10px 0; margin-right: 20px; font-size: 0.78rem; }
   .ws-status { gap: 5px; }
   .ws-status-item { font-size: 0.62rem; padding: 3px 8px; }
 }
@@ -541,20 +532,21 @@ body {
 
 /* ═══════ FOOTER ═══════ */
 .footer {
-  max-width: 800px; margin: 0 auto; padding: 20px 20px 32px;
+  max-width: 100%; margin: 0; padding: 20px clamp(16px, 4vw, 32px) 32px;
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border);
+  font-size: 0.75rem; color: rgba(255,255,255,0.35);
+  background: #0A0A0A; border-top: 1px solid rgba(255,255,255,0.06);
   flex-wrap: wrap; gap: 8px;
 }
 .footer-links { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.footer-sep { color: var(--border2); }
-.footer a { color: var(--muted); text-decoration: none; font-weight: 500; }
-.footer a:hover { color: var(--ink); }
+.footer-sep { color: rgba(255,255,255,0.12); }
+.footer a { color: rgba(255,255,255,0.4); text-decoration: none; font-weight: 500; }
+.footer a:hover { color: white; }
 @media (max-width: 500px) { .footer { padding: 20px 16px 32px; } }
 
 /* ═══════ SCROLLBAR ═══════ */
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 ::placeholder { color: var(--dim); }
 /* ═══════ EMBED MODE (dashboard drawers) ═══════ */
 body.embed { background: #fff; }
@@ -579,7 +571,6 @@ body.embed-refund #panelRefund { display: block !important; }
   <div class="nav-links">
     <a class="nav-link active" href="/calculator">Calculator</a>
     <a class="nav-link" href="/refund-guide.html">Refund Guide</a>
-    {% if user %}<a class="nav-link" href="/dashboard">Dashboard</a>{% endif %}
   </div>
   {% if user %}
     <a href="/signout" class="nav-auth-btn" title="Sign out">{{ user.email[:20] }}</a>
